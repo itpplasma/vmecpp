@@ -9,6 +9,8 @@ This document describes how to run and add benchmark test cases in VMECPP for pe
 - **Optimized build configuration** with `-O3 -fno-math-errno`
 - **Functions designed for benchmarking** in core computation modules
 - **Performance examples** demonstrating scaling behavior
+- **CMake and Bazel build systems** with release mode optimization
+- **OpenMP parallelization** for multi-threaded force calculations
 
 ### ⚠️ Partially Implemented
 - Google Benchmark framework available but **not actively used**
@@ -66,22 +68,26 @@ mpirun -n 4 python examples/mpi_finite_difference.py
 ### Release Mode Optimization
 
 ```bash
-# CMake Release build with full optimization
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j$(nproc)
+# CMake Release build with full optimization (from AGENTS.md)
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
 
-# Bazel optimized build
+# Bazel optimized build (from src/vmecpp/cpp/)
+cd src/vmecpp/cpp/
 bazel build -c opt //...
+
+# Install as editable Python package (rebuilds C++ automatically)
+pip install -e .
 ```
 
 ### Enable OpenMP Parallelization
 
 ```bash
-# CMake with OpenMP
-cmake -DCMAKE_BUILD_TYPE=Release -DUSE_OPENMP=ON ..
-
-# Set OpenMP threads
+# Set OpenMP threads for multi-threaded force calculations
 export OMP_NUM_THREADS=8
+
+# VMECPP uses OpenMP parallelization (not MPI like Fortran VMEC)
+# Multi-threading optimized for force calculations and Fourier transforms
 ```
 
 ## How to Add Benchmark Test Cases
@@ -155,30 +161,37 @@ bazel run //vmecpp/[component]:component_benchmark -- \
 
 Based on code analysis, these functions are designed for benchmarking:
 
-1. **Fourier Transform Performance**
+1. **Fourier Transform Performance** (Critical for VMECPP performance)
    ```cpp
-   // File: src/vmecpp/cpp/vmecpp/vmec/ideal_mhd_model/ideal_mhd_model.h:34, 44
-   ForcesToFourier3DSymmFastPoloidal()
-   FourierToReal3DSymmFastPoloidal()
+   // Fast transforms for spectral decomposition (AGENTS.md architecture)
+   ForcesToFourier3DSymmFastPoloidal()   // Force calculations to Fourier space
+   FourierToReal3DSymmFastPoloidal()     // Fourier to real-space transforms
    ```
 
-2. **Fourier Basis Operations**
+2. **Fourier Basis Operations** (Product vs Combined basis conversions)
    ```cpp
-   // Files: src/vmecpp/cpp/vmecpp/common/fourier_basis_fast_*
-   CombinedToProduct()
-   ProductToCombined()
+   // Two different Fourier representations (see AGENTS.md)
+   CombinedToProduct()  // Traditional VMEC format → computational efficiency
+   ProductToCombined()  // Computational efficiency → researcher interface
    ```
 
-3. **Magnetic Field Calculations**
+3. **VMEC Solver** (Main iterative equilibrium solver)
    ```cpp
-   // File: src/vmecpp/cpp/vmecpp/common/magnetic_field_provider/
-   EvaluateMagneticField()
+   // Multigrid methods for equilibrium solving
+   IterateEquilibrium()  // Core VMEC algorithm iterations
    ```
 
-4. **Matrix Operations**
+4. **Ideal MHD Model** (Physics equations and force calculations)
    ```cpp
-   // VMEC solver iterations
-   IterateEquilibrium()
+   // Force balance calculations (computationally intensive)
+   ComputeForces()      // MHD force calculations
+   UpdateGeometry()     // Flux surface geometry updates
+   ```
+
+5. **Free Boundary Solver** (NESTOR/BIEST methods)
+   ```cpp
+   // Plasma-vacuum interface calculations
+   EvaluateMagneticField()  // External magnetic field evaluation
    ```
 
 ### Example Benchmark Implementation
@@ -317,10 +330,23 @@ benchmark::RegisterMemoryManager(benchmark::MemoryManager::Create());
 
 ## Performance Optimization Targets
 
-Based on VMEC++ computational structure:
+Based on VMEC++ computational architecture (from AGENTS.md):
 
-- **Fourier transforms**: Most time-critical operations
-- **Matrix assembly**: Memory-bound operations  
-- **Force calculations**: Computationally intensive loops
+### Core Performance Bottlenecks
+- **Fourier transforms**: Most time-critical operations (fast transforms for spectral decomposition)
+- **Force calculations**: Computationally intensive OpenMP-parallelized loops (Ideal MHD model)
+- **Multigrid methods**: Iterative equilibrium solver performance
+- **Geometry calculations**: Flux surface geometry and coordinate transformations
+- **Basis conversions**: Product ↔ Combined Fourier basis transformations
+
+### Memory and I/O Performance
+- **NumPy ↔ Eigen conversion**: Python-C++ bridge efficiency
+- **Matrix assembly**: Memory-bound operations with large sparse matrices
+- **Hot restart**: Memory-efficient data sharing for parameter scans
 - **Boundary condition evaluation**: I/O intensive operations
-- **Convergence iterations**: Overall algorithm efficiency
+
+### Architecture-Specific Optimizations
+- **SIMSOPT integration**: Optimization workflow performance
+- **Free boundary methods**: NESTOR/BIEST computational efficiency
+- **Multi-threading**: OpenMP scaling for force calculations
+- **Convergence iterations**: Overall algorithm efficiency and zero-crash policy

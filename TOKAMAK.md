@@ -2,6 +2,8 @@
 
 This document provides a comprehensive analysis of how to enable tokamak mode (non-stellarator-symmetric configurations) in VMECPP. The analysis identifies all locations in the codebase that assume stellarator symmetry and documents the changes needed to support general tokamak configurations.
 
+**Architecture Context**: VMECPP is a modern C++ reimplementation of the VMEC magnetohydrodynamic equilibrium solver with a Python interface (see AGENTS.md for complete architecture overview).
+
 ## Executive Summary
 
 VMECPP currently has **full support for axisymmetric tokamaks** (`nfp=1`, `ntor=0`, `lasym=false`) and **partial support for non-stellarator-symmetric configurations** (`lasym=true`). The main limitation is that the `lasym=true` implementation is incomplete, with several TODO items remaining.
@@ -205,23 +207,60 @@ The educational VMEC implementation shows that asymmetric handling requires:
 
 3. **Conditional Algorithm Paths**: Different code paths for stellarator vs tokamak cases
 
+## VMECPP Architecture Considerations for Tokamak Mode
+
+### Fourier Basis Implementation (AGENTS.md)
+VMECPP uses **two different Fourier representations** which impacts tokamak implementation:
+
+**Internal Product Basis** (computational efficiency):
+- Enables separable DFT operations using pre-computed basis arrays
+- Must support asymmetric modes for `lasym=true`
+
+**External Combined Basis** (researcher interface):
+- Traditional VMEC format compatible with research literature
+- Requires proper conversion routines for asymmetric cases
+
+### Core Components Affected
+- **VMEC Solver**: Main iterative equilibrium solver using multigrid methods
+- **Ideal MHD Model**: Physics equations and force calculations for asymmetric configurations
+- **Fourier Transforms**: Fast transforms for spectral decomposition with asymmetric terms
+- **Geometry Engine**: Flux surface geometry and coordinate transformations
+
 ## Recommendations for Enabling Full Tokamak Mode
 
-### Phase 1: Complete `lasym = true` Implementation
+### Phase 1: Complete `lasym = true` Implementation (Following AGENTS.md Standards)
 1. **Implement missing TODO items** in `vmec.cc` for asymmetric force calculations
+   - Follow Google C++ Style Guide with physics domain adaptations
+   - Preserve traditional physics variable names (e.g., `bsupu_`, `iotaf_`, `presf_`)
 2. **Complete output processing** for asymmetric configurations
 3. **Add comprehensive test cases** for `lasym = true` configurations
+   - Use Google Test framework for C++ components
+   - Use pytest for Python integration tests
 4. **Optimize memory allocation** for optional asymmetric coefficient arrays
 
-### Phase 2: Validation and Testing
+### Phase 2: Validation and Testing (AGENTS.md Testing Framework)
 1. **Validate against educational VMEC** results for asymmetric cases
 2. **Add tokamak-specific test cases** with `nfp = 1`, `lasym = true`
+   - Follow test data organization in `src/vmecpp/cpp/vmecpp/test_data/`
+   - Use existing examples structure (`examples/data/`)
 3. **Performance benchmarking** for asymmetric vs symmetric cases
+   - Implement Google Benchmark test cases
+   - Focus on Fourier transform performance with asymmetric modes
 
-### Phase 3: Documentation and Examples
-1. **Update user documentation** with tokamak mode usage examples
-2. **Add example input files** for different tokamak configurations
-3. **Performance optimization** for tokamak-specific cases
+### Phase 3: Development Workflow (AGENTS.md Guidelines)
+1. **Pre-commit validation**: All code must pass `clang-format` and naming checks
+2. **Incremental development**: Make small, focused changes that can be validated independently
+3. **Build and test cycle**:
+   ```bash
+   cd src/vmecpp/cpp
+   bazel build //...  # Ensure current code builds
+   bazel test //vmecpp/...  # Run tests after changes
+   pre-commit run --files <modified_files>  # Validate changes
+   ```
+4. **Testing requirements**:
+   - Zero-crash policy: All errors as Python exceptions
+   - Dual input format support: Both INDATA and JSON
+   - Hot restart functionality for parameter scans
 
 ## Current Tokamak Support Status
 
@@ -241,5 +280,31 @@ The educational VMEC implementation shows that asymmetric handling requires:
 - **Symmetric/antisymmetric output separation**
 - **Comprehensive test coverage** for asymmetric cases
 - **Performance optimization** for tokamak-specific algorithms
+
+## Development Standards for Tokamak Implementation
+
+### Coding Standards (AGENTS.md)
+**C++ Code Requirements**:
+- **Naming Conventions**: Classes (`CamelCase`), functions (`CamelCase`), constants (`kCamelCase`)
+- **Physics Variables**: Preserve traditional names (e.g., `bsupu_`, `iotaf_`, `presf_`)
+- **Function Parameters**: Use `m_` prefix for parameters that will be modified
+- **Modern C++**: Use `std::array<>` instead of C-style arrays
+- **ASCII Only**: Never use Unicode, special symbols, or non-ASCII characters
+
+**Python Code Requirements**:
+- **Style**: `ruff` linting and formatting with line length 88
+- **Type Checking**: Must pass `pyright` type validation
+- **Input Validation**: Use Pydantic models for type safety
+
+### Architecture Integration
+**Python-C++ Bridge**: 
+- Automatic NumPy ↔ Eigen conversion for asymmetric coefficient arrays
+- Exception translation from C++ to Python for tokamak-specific errors
+- Memory-efficient data sharing for hot restart functionality
+
+**SIMSOPT Compatibility**:
+- Drop-in replacement support for tokamak optimization workflows
+- Hot restart support for tokamak parameter scans
+- Seamless integration with existing tokamak design tools
 
 The codebase demonstrates excellent architectural design for handling both symmetric and asymmetric magnetic configurations, with clear separation of concerns and conditional compilation of the appropriate components based on symmetry flags.
