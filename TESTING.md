@@ -22,7 +22,7 @@ This document describes how to run existing unit tests and add new test cases in
 
 #### Run All Python Tests
 ```bash
-# From repository root
+# From repository root (standard pytest command from AGENTS.md)
 pytest
 
 # With verbose output
@@ -30,6 +30,9 @@ pytest -v
 
 # With test coverage
 pytest --cov=vmecpp
+
+# Specific test file (development workflow from AGENTS.md)
+pytest tests/test_simsopt_compat.py
 ```
 
 #### Run Specific Test Files
@@ -66,8 +69,12 @@ pytest tests/test_pydantic_numpy.py
 
 #### Run All C++ Tests
 ```bash
-# Run all tests in the project
+# Run all tests in the project (from AGENTS.md development commands)
 bazel test //...
+
+# Run all C++ tests from cpp directory
+cd src/vmecpp/cpp
+bazel test //vmecpp/...
 
 # Run all tests with verbose output
 bazel test //... --test_output=all
@@ -105,17 +112,25 @@ bazel test //vmecpp/free_boundary/surface_geometry:surface_geometry_test
 
 ### Running Tests During Development
 
-#### Install in Editable Mode and Test
+#### Install in Editable Mode and Test (AGENTS.md workflow)
 ```bash
-# Install package in development mode
+# Install package in development mode (automatically rebuilds C++ on changes)
 pip install -e .
 
 # Run tests after installation
 python -m pytest tests/
 ```
 
-#### Quick Development Cycle
+#### Quick Development Cycle (AGENTS.md recommendations)
 ```bash
+# Before making C++ changes, ensure current code builds
+cd src/vmecpp/cpp
+bazel build //...  # Ensure current code builds
+
+# After making changes
+bazel build //...
+bazel test //vmecpp/...
+
 # Build and test specific component
 bazel test //vmecpp/vmec/vmec:vmec_test --test_output=all
 
@@ -125,8 +140,13 @@ pytest tests/test_init.py -v -s
 
 ## Test Data Organization
 
-### C++ Test Data
+### C++ Test Data (AGENTS.md file structure)
 **Location**: `src/vmecpp/cpp/vmecpp/test_data/`
+
+**Sample Input Files**: Located in `examples/data/` (from AGENTS.md)
+- `examples/data/input.w7x` - Classic INDATA format
+- `examples/data/w7x.json` - Modern JSON format
+- `examples/data/solovev.json` - Axisymmetric configuration
 
 **Organized by Test Case**:
 ```
@@ -441,7 +461,24 @@ def test_numerical_accuracy():
     np.testing.assert_allclose(computed, expected, rtol=1e-12, atol=1e-15)
 ```
 
-## Integration with CI/CD
+## Code Quality and Testing (AGENTS.md standards)
+
+### Pre-commit Validation
+```bash
+# All code must pass pre-commit checks (AGENTS.md requirements)
+pre-commit run --all-files
+
+# Run pre-commit checks on specific files after making changes
+pre-commit run --files path/to/modified/files
+```
+
+### Quality Standards
+- **C++ Code**: Must pass `clang-format` (Google style)
+- **Python Code**: Must pass `ruff` linting and formatting (line length 88)
+- **Type Checking**: Must pass `pyright` type validation
+- **File Endings**: Must end with newline (`end-of-file-fixer`)
+
+### Integration with CI/CD
 
 ### GitHub Actions Integration
 Tests are automatically run in CI/CD. The workflow typically includes:
@@ -524,5 +561,31 @@ std::string LoadTestFile(const std::string& filename) {
   return LoadFileContent(test_data_dir + "/" + filename);
 }
 ```
+
+## Testing Architecture Overview (AGENTS.md insights)
+
+### Multi-Language Testing Strategy
+**Python Interface Layer**: `pytest` for high-level functionality
+- Input validation (Pydantic models)
+- SIMSOPT compatibility
+- Hot restart functionality
+- Output data structures
+
+**C++ Computational Engine**: Google Test for numerical algorithms
+- VMEC solver correctness
+- Fourier transform accuracy
+- Free boundary methods
+- Ideal MHD model validation
+
+**Python-C++ Bridge**: Integration tests for data exchange
+- NumPy ↔ Eigen conversion accuracy
+- Exception translation verification
+- Memory-efficient data sharing
+
+### Key Testing Principles (from AGENTS.md)
+- **Zero-crash policy**: All errors reported as Python exceptions
+- **Incremental development**: Small, testable changes
+- **Physics domain knowledge**: Preserve traditional variable names in tests
+- **Dual input formats**: Test both INDATA and JSON formats
 
 This comprehensive testing framework ensures code quality and helps prevent regressions as VMECPP continues to evolve.
