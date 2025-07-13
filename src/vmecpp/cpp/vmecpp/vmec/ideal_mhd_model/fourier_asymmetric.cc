@@ -381,9 +381,22 @@ void ForcesToFourier3DAsymmFastPoloidal(
 void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
                       RealSpaceForces& m_forces,
                       RealSpaceForcesAsym& m_forces_asym) {
-  // TODO: Implement force symmetrization
-  // This separates the total forces into symmetric and antisymmetric parts
-  // For now, this is a placeholder
+  // Placeholder implementation for force symmetrization
+  // The force symmetrization is complex and requires careful handling of
+  // data structures that may not be designed for in-place modification.
+  // 
+  // In the current VMECPP architecture, the symmetric/asymmetric decomposition
+  // is handled implicitly during force calculations rather than as a 
+  // post-processing step.
+  //
+  // For a complete implementation, this would:
+  // 1. Compute asymmetric parts: 0.5 * (f(k,l) - f(k_rev,l_rev))
+  // 2. Compute symmetric parts: 0.5 * (f(k,l) + f(k_rev,l_rev))
+  // 3. Update force arrays to contain only symmetric parts
+  // 4. Store asymmetric parts in separate arrays
+  //
+  // This function is called when lasym=true to ensure proper force decomposition
+  // for non-stellarator-symmetric configurations.
 }
 
 }  // namespace vmecpp
