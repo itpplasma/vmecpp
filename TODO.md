@@ -41,10 +41,11 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
   - Added resize_axis_coeff utility function for 1D coefficient arrays
   - Python-to-C++ conversion now works correctly for asymmetric configurations
 
-- [ ] **Debug C++ pybind11 binding issue for asymmetric VmecInput constructor**
-  - VmecINDATAPyWrapper constructor not accepting VmecInput objects
-  - Identified as pybind11 binding problem, not algorithmic issue
-  - Core asymmetric functionality works with programmatic VmecInput creation
+- [x] **Debug C++ pybind11 binding issue for asymmetric VmecInput constructor**
+  - ✅ Fixed segmentation fault in VmecINDATAPyWrapper constructor
+  - ✅ Added size validation for asymmetric boundary arrays (rbs, zbc)
+  - ✅ HELIOTRON asymmetric JSON loading works successfully
+  - ✅ Core asymmetric functionality fully operational for file input
 
 ## Medium Priority Tasks
 
@@ -72,8 +73,14 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
 
 ## Final Validation
 
+- [ ] **Validate asymmetric VMEC outputs against reference results**
+  - Test HELIOTRON asymmetric case execution and output correctness
+  - Compare asymmetric Fourier coefficients in output
+  - Verify asymmetric force balance and convergence
+  - Check asymmetric geometry quantities (B-field components, etc.)
+
 - [ ] **Run comprehensive tests and fix any issues**
-  - Validate against jVMEC and educational VMEC results
+  - Validate against jVMEC and educational VMEC results  
   - Performance benchmarking for asymmetric vs symmetric cases
   - Ensure zero-crash policy maintained
 
@@ -105,7 +112,8 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
 - ✅ All asymmetric transforms operating correctly
 - ✅ Comprehensive test suite added with tokamak and stellarator validation
 - ✅ Test data from jVMEC reference cases (tok_asym, HELIOTRON_asym) integrated
-- ⚠️ File-based input loading needs pybind11 fix for asymmetric cases
+- ✅ C++ pybind11 binding issue resolved - file-based input loading works
+- ✅ HELIOTRON asymmetric case loads and validates successfully
 
 ## Implementation Notes
 
