@@ -22,6 +22,7 @@
 #include "vmecpp/vmec/boundaries/boundaries.h"
 #include "vmecpp/vmec/fourier_forces/fourier_forces.h"
 #include "vmecpp/vmec/fourier_geometry/fourier_geometry.h"
+#include "vmecpp/vmec/ideal_mhd_model/fourier_asymmetric.h"
 #include "vmecpp/vmec/handover_storage/handover_storage.h"
 #include "vmecpp/vmec/ideal_mhd_model/dft_data.h"
 #include "vmecpp/vmec/radial_partitioning/radial_partitioning.h"
@@ -104,6 +105,15 @@ class IdealMhdModel {
   // Inverse-DFT for flux surface geometry and lambda, 2D axisymmetric (Tokamak)
   // case
   void dft_FourierToReal_2d_symm(const FourierGeometry& physical_x);
+
+  // Inverse-DFT for flux surface geometry and lambda, 3D asymmetric case
+  void dft_FourierToReal_3d_asymm(const FourierGeometry& physical_x);
+
+  // Inverse-DFT for flux surface geometry and lambda, 2D asymmetric case
+  void dft_FourierToReal_2d_asymm(const FourierGeometry& physical_x);
+
+  // Extend geometry from [0,pi] to [0,2pi] and combine symmetric/antisymmetric
+  void symrzl();
 
   // Extrapolates ingredients for the spectral condensation force
   // from the LCFS into the plasma volume.
@@ -279,6 +289,33 @@ class IdealMhdModel {
 
   // dRdZeta combined on full-grid
   std::vector<double> zuFull;
+
+  /**********************************************/
+  // Asymmetric arrays (for lasym=true)
+
+  // R asymmetric on full-grid
+  std::vector<double> r1_a;
+
+  // dRdTheta asymmetric on full-grid
+  std::vector<double> ru_a;
+
+  // dRdZeta asymmetric on full-grid
+  std::vector<double> rv_a;
+
+  // Z asymmetric on full-grid
+  std::vector<double> z1_a;
+
+  // dZdTheta asymmetric on full-grid
+  std::vector<double> zu_a;
+
+  // dZdZeta asymmetric on full-grid
+  std::vector<double> zv_a;
+
+  // d(lambda)dTheta asymmetric on full-grid
+  std::vector<double> lu_a;
+
+  // d(lambda)dZeta asymmetric on full-grid
+  std::vector<double> lv_a;
 
   /**********************************************/
 

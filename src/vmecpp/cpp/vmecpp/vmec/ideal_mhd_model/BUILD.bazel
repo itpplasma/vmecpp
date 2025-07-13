@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MIT
 cc_library(
     name = "ideal_mhd_model",
-    srcs = ["ideal_mhd_model.cc"],
-    hdrs = ["ideal_mhd_model.h", "dft_data.h"],
+    srcs = ["ideal_mhd_model.cc", "fourier_asymmetric.cc"],
+    hdrs = ["ideal_mhd_model.h", "dft_data.h", "fourier_asymmetric.h"],
     visibility = ["//visibility:public"],
     deps = [
         "//vmecpp/common/flow_control:flow_control",

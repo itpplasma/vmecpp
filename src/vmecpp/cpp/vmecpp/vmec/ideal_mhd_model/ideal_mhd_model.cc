@@ -534,6 +534,18 @@ IdealMhdModel::IdealMhdModel(
     lv_o.resize(nrzt1);
   }
 
+  // Allocate asymmetric arrays if needed
+  if (s_.lasym) {
+    r1_a.resize(nrzt1);
+    ru_a.resize(nrzt1);
+    rv_a.resize(nrzt1);
+    z1_a.resize(nrzt1);
+    zu_a.resize(nrzt1);
+    zv_a.resize(nrzt1);
+    lu_a.resize(nrzt1);
+    lv_a.resize(nrzt1);
+  }
+
   int nrztIncludingBoundary = s_.nZnT * (r_.nsMaxFIncludingLcfs - r_.nsMinF);
 
   ruFull.resize(nrztIncludingBoundary);
@@ -1209,17 +1221,15 @@ void IdealMhdModel::geometryFromFourier(const FourierGeometry& physical_x) {
   }
 
   if (s_.lasym) {
-    // FIXME(jons): implement non-symmetric DFT variants
-    std::cerr << "asymmetric inv-DFT not implemented yet\n";
+    // Compute antisymmetric contributions
+    if (s_.lthreed) {
+      dft_FourierToReal_3d_asymm(physical_x);
+    } else {
+      dft_FourierToReal_2d_asymm(physical_x);
+    }
 
-    // FIXME(jons): implement symrzl
-    std::cerr << "symrzl not implemented yet\n";
-
-#ifdef _OPENMP
-    abort();
-#else
-    exit(-1);
-#endif  // _OPENMP
+    // Extend geometry from [0,pi] to [0,2pi] and combine symmetric/antisymmetric parts
+    symrzl();
   }  // lasym
 
   // related post-processing:
@@ -3570,5 +3580,70 @@ double IdealMhdModel::get_delbsq() const {
 }
 
 int IdealMhdModel::get_ivacskip() const { return ivacskip; }
+
+// Inverse-DFT for flux surface geometry and lambda, 3D asymmetric case
+void IdealMhdModel::dft_FourierToReal_3d_asymm(
+    const FourierGeometry& physical_x) {
+  auto geometry_asym = RealSpaceGeometryAsym{.r1_a = r1_a,
+                                             .ru_a = ru_a,
+                                             .rv_a = rv_a,
+                                             .z1_a = z1_a,
+                                             .zu_a = zu_a,
+                                             .zv_a = zv_a,
+                                             .lu_a = lu_a,
+                                             .lv_a = lv_a};
+
+  FourierToReal3DAsymmFastPoloidal(physical_x, xmpq, r_, s_, m_p_, t_,
+                                   geometry_asym);
+}
+
+// Inverse-DFT for flux surface geometry and lambda, 2D asymmetric case
+void IdealMhdModel::dft_FourierToReal_2d_asymm(
+    const FourierGeometry& physical_x) {
+  auto geometry_asym = RealSpaceGeometryAsym{.r1_a = r1_a,
+                                             .ru_a = ru_a,
+                                             .rv_a = rv_a,
+                                             .z1_a = z1_a,
+                                             .zu_a = zu_a,
+                                             .zv_a = zv_a,
+                                             .lu_a = lu_a,
+                                             .lv_a = lv_a};
+
+  FourierToReal2DAsymmFastPoloidal(physical_x, xmpq, r_, s_, m_p_, t_,
+                                   geometry_asym);
+}
+
+// Extend geometry from [0,pi] to [0,2pi] and combine symmetric/antisymmetric
+void IdealMhdModel::symrzl() {
+  auto geometry = RealSpaceGeometry{.r1_e = r1_e,
+                                    .r1_o = r1_o,
+                                    .ru_e = ru_e,
+                                    .ru_o = ru_o,
+                                    .rv_e = rv_e,
+                                    .rv_o = rv_o,
+                                    .z1_e = z1_e,
+                                    .z1_o = z1_o,
+                                    .zu_e = zu_e,
+                                    .zu_o = zu_o,
+                                    .zv_e = zv_e,
+                                    .zv_o = zv_o,
+                                    .lu_e = lu_e,
+                                    .lu_o = lu_o,
+                                    .lv_e = lv_e,
+                                    .lv_o = lv_o,
+                                    .rCon = rCon,
+                                    .zCon = zCon};
+
+  auto geometry_asym = RealSpaceGeometryAsym{.r1_a = r1_a,
+                                             .ru_a = ru_a,
+                                             .rv_a = rv_a,
+                                             .z1_a = z1_a,
+                                             .zu_a = zu_a,
+                                             .zv_a = zv_a,
+                                             .lu_a = lu_a,
+                                             .lv_a = lv_a};
+
+  SymmetrizeRealSpaceGeometry(s_, r_, geometry, geometry_asym);
+}
 
 }  // namespace vmecpp
