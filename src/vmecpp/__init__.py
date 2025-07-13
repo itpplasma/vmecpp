@@ -462,7 +462,6 @@ class VmecInput(BaseModelWithNumpy):
         Args:
             coeff: A NumPy array of shape (ntor + 1,).
             ntor_new: The new number of toroidal modes.
-
         Returns:
             Resized array of shape (ntor_new + 1,).
         """
@@ -472,7 +471,6 @@ class VmecInput(BaseModelWithNumpy):
 
         resized_coeff = np.zeros(ntor_new + 1)
         smaller_ntor = min(ntor, ntor_new)
-
         if ntor_new < ntor:
             logger.warning(
                 f"Discarding axis coefficients because ntor={ntor} "
@@ -480,8 +478,7 @@ class VmecInput(BaseModelWithNumpy):
             )
 
         # Copy existing coefficients up to the smaller of the two sizes
-        resized_coeff[: smaller_ntor + 1] = coeff[: smaller_ntor + 1]
-
+        resized_coeff[:smaller_ntor + 1] = coeff[:smaller_ntor + 1]
         return resized_coeff
 
     @staticmethod

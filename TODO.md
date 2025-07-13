@@ -35,9 +35,11 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
   - Fixed VmecInput validation to initialize rbs/zbc arrays when lasym=True
   - Fixed assertion logic for asymmetric field handling
 
-- [ ] **Fix C++ array allocation for asymmetric fields**
-  - VmecINDATAPyWrapper needs proper asymmetric array allocation when lasym=True
-  - Current issue: TypeError when trying to assign to None arrays
+- [x] **Fix C++ array allocation for asymmetric fields**
+  - Fixed VmecInput validation to initialize raxis_s/zaxis_c arrays when lasym=True
+  - Added _validate_axis_coefficients_shapes method for proper axis array handling
+  - Added resize_axis_coeff utility function for 1D coefficient arrays
+  - Python-to-C++ conversion now works correctly for asymmetric configurations
 
 - [ ] **Debug C++ segmentation fault in indata2json for asymmetric input files**
   - Crash occurs when loading input.HELIOTRON_asym and input.tok_asym
@@ -79,14 +81,14 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
 - Python validation fixed for asymmetric fields
 
 **Remaining Work: Infrastructure Fixes**
-- C++ array allocation for asymmetric fields in VmecINDATAPyWrapper
 - C++ indata2json parser crash for asymmetric input files
 - Test infrastructure once C++ issues resolved
 
 **Manual Testing Status:**
 - ✅ Python asymmetric validation works
 - ✅ Asymmetric arrays properly initialized when lasym=True
-- ❌ C++ array allocation needs fixing for full workflow
+- ✅ Python-to-C++ conversion works for asymmetric configurations
+- ❌ C++ indata2json parser needs fixing for asymmetric input files
 
 ## Implementation Notes
 
