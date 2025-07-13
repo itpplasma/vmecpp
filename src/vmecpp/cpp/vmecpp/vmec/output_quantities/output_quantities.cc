@@ -4559,6 +4559,7 @@ vmecpp::WOutFileContents vmecpp::ComputeWOutFileContents(
     }  // mn
   }  // jH
 
+
   // COMPUTE |B| = SQRT(|B|**2) and store in bsq, bsqa
   std::vector<double> magnetic_pressure((fc.ns - 1) * s.nZnT, 0.0);
   for (int jH = 0; jH < fc.ns - 1; ++jH) {
@@ -4581,8 +4582,7 @@ vmecpp::WOutFileContents vmecpp::ComputeWOutFileContents(
     //    has not been fixed yet for educational_VMEC.
     tmult *= 2.0;
 
-    // Symoutput functionality is implemented inline in the Fourier transform
-    // loop below
+    // Symoutput functionality is implemented inline in the Fourier transform loop below
   }
 
   // -------------------
@@ -4666,35 +4666,28 @@ vmecpp::WOutFileContents vmecpp::ComputeWOutFileContents(
             const int idx_kl_rev = (jH * s.nZeta + k_rev) * s.nThetaEff + l_rev;
 
             // Asymmetric quantities for sin modes
-            const double gsqrt_asym =
-                0.5 * (m_vmec_internal_results.gsqrt(idx_kl) -
-                       m_vmec_internal_results.gsqrt(idx_kl_rev));
-            const double bmagn_asym = 0.5 * (magnetic_pressure[idx_kl] -
+            const double gsqrt_asym = 0.5 * (m_vmec_internal_results.gsqrt(idx_kl) - 
+                                             m_vmec_internal_results.gsqrt(idx_kl_rev));
+            const double bmagn_asym = 0.5 * (magnetic_pressure[idx_kl] - 
                                              magnetic_pressure[idx_kl_rev]);
-            const double bsubu_asym =
-                0.5 * (m_vmec_internal_results.bsubu(idx_kl) -
-                       m_vmec_internal_results.bsubu(idx_kl_rev));
-            const double bsubv_asym =
-                0.5 * (m_vmec_internal_results.bsubv(idx_kl) -
-                       m_vmec_internal_results.bsubv(idx_kl_rev));
-            const double bsupu_asym =
-                0.5 * (m_vmec_internal_results.bsupu(idx_kl) -
-                       m_vmec_internal_results.bsupu(idx_kl_rev));
-            const double bsupv_asym =
-                0.5 * (m_vmec_internal_results.bsupv(idx_kl) -
-                       m_vmec_internal_results.bsupv(idx_kl_rev));
+            const double bsubu_asym = 0.5 * (m_vmec_internal_results.bsubu(idx_kl) - 
+                                             m_vmec_internal_results.bsubu(idx_kl_rev));
+            const double bsubv_asym = 0.5 * (m_vmec_internal_results.bsubv(idx_kl) - 
+                                             m_vmec_internal_results.bsubv(idx_kl_rev));
+            const double bsupu_asym = 0.5 * (m_vmec_internal_results.bsupu(idx_kl) - 
+                                             m_vmec_internal_results.bsupu(idx_kl_rev));
+            const double bsupv_asym = 0.5 * (m_vmec_internal_results.bsupv(idx_kl) - 
+                                             m_vmec_internal_results.bsupv(idx_kl_rev));
 
             // Special case for bsubs: reversed symmetry (cos mode)
-            const double bsubs_asym = 0.5 * (bsubs_half.bsubs_half(idx_kl) +
+            const double bsubs_asym = 0.5 * (bsubs_half.bsubs_half(idx_kl) + 
                                              bsubs_half.bsubs_half(idx_kl_rev));
-
             // Add asymmetric contributions to sin arrays
             wout.gmns(idx_mn_nyq) += tsini * gsqrt_asym;
             wout.bmns(idx_mn_nyq) += tsini * bmagn_asym;
             wout.bsubumns(idx_mn_nyq) += tsini * bsubu_asym;
             wout.bsubvmns(idx_mn_nyq) += tsini * bsubv_asym;
-            wout.bsubsmnc(idx_mn_nyq1) +=
-                tcosi * bsubs_asym;  // cos mode for bsubs
+            wout.bsubsmnc(idx_mn_nyq1) += tcosi * bsubs_asym;  // cos mode for bsubs
             wout.bsupumns(idx_mn_nyq) += tsini * bsupu_asym;
             wout.bsupvmns(idx_mn_nyq) += tsini * bsupv_asym;
           }
