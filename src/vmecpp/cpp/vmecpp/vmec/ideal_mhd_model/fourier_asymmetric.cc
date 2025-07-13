@@ -291,9 +291,89 @@ void ForcesToFourier3DAsymmFastPoloidal(
     const RealSpaceForcesAsym& d_asym, const std::vector<double>& xmpq,
     const RadialPartitioning& rp, const Sizes& s,
     const FourierBasisFastPoloidal& fb, FourierForces& m_physical_forces) {
-  // TODO: Implement antisymmetric force transform
-  // This will be needed for completing the force calculations with lasym=true
-  // For now, this is a placeholder
+  // Transform antisymmetric real-space forces to Fourier coefficients
+  // This complements the symmetric version for lasym=true configurations
+  
+  const int jMinL = 1;  // axis lambda stays zero
+  
+  for (int jF = rp.nsMinF; jF < rp.nsMaxF; ++jF) {
+    const int mmax = jF == 0 ? 1 : s.mpol;
+    for (int m = 0; m < mmax; ++m) {
+      
+      for (int k = 0; k < s.nZeta; ++k) {
+        double rmksc = 0.0;
+        double rmksc_n = 0.0;
+        double rmkcs = 0.0;
+        double rmkcs_n = 0.0;
+        double zmkcc = 0.0;
+        double zmkcc_n = 0.0;
+        double zmkss = 0.0;
+        double zmkss_n = 0.0;
+        double lmkcc = 0.0;
+        double lmkcc_n = 0.0;
+        double lmkss = 0.0;
+        double lmkss_n = 0.0;
+
+        const int idx_kl_base = ((jF - rp.nsMinF) * s.nZeta + k) * s.nThetaEff;
+        const int idx_ml_base = m * s.nThetaReduced;
+
+        for (int l = 0; l < s.nThetaReduced; ++l) {
+          const int idx_kl = idx_kl_base + l;
+          const int idx_ml = idx_ml_base + l;
+
+          const double cosmui = fb.cosmui[idx_ml];
+          const double sinmui = fb.sinmui[idx_ml];
+          const double cosmumi = fb.cosmumi[idx_ml];
+          const double sinmumi = fb.sinmumi[idx_ml];
+
+          // Lambda force components for asymmetric modes
+          lmkcc += d_asym.blmn_a[idx_kl] * cosmumi;   // --> flcc
+          lmkss += d_asym.blmn_a[idx_kl] * sinmumi;   // --> flss
+          lmkss_n -= d_asym.clmn_a[idx_kl] * cosmui;  // --> flss
+          lmkcc_n -= d_asym.clmn_a[idx_kl] * sinmui;  // --> flcc
+
+          rmkcs_n -= d_asym.crmn_a[idx_kl] * cosmui;  // --> frcs
+          zmkss_n -= d_asym.czmn_a[idx_kl] * cosmui;  // --> fzss
+
+          rmksc_n -= d_asym.crmn_a[idx_kl] * sinmui;  // --> frsc
+          zmkcc_n -= d_asym.czmn_a[idx_kl] * sinmui;  // --> fzcc
+
+          // Assemble effective R and Z forces from asymmetric MHD contributions
+          const double tempR = d_asym.armn_a[idx_kl];
+          const double tempZ = d_asym.azmn_a[idx_kl];
+
+          // For asymmetric modes, we use different basis combinations:
+          // R: sin(m*theta)*cos(n*zeta) and cos(m*theta)*sin(n*zeta)
+          // Z: cos(m*theta)*cos(n*zeta) and sin(m*theta)*sin(n*zeta)
+          rmksc += tempR * sinmui + d_asym.brmn_a[idx_kl] * cosmumi;  // --> frsc
+          rmkcs += tempR * cosmui + d_asym.brmn_a[idx_kl] * sinmumi;  // --> frcs
+          zmkcc += tempZ * cosmui + d_asym.bzmn_a[idx_kl] * sinmumi;  // --> fzcc
+          zmkss += tempZ * sinmui + d_asym.bzmn_a[idx_kl] * cosmumi;  // --> fzss
+        }  // l
+
+        for (int n = 0; n < s.ntor + 1; ++n) {
+          const int idx_mn = ((jF - rp.nsMinF) * s.mpol + m) * (s.ntor + 1) + n;
+          const int idx_kn = k * (s.nnyq2 + 1) + n;
+
+          const double cosnv = fb.cosnv[idx_kn];
+          const double sinnv = fb.sinnv[idx_kn];
+          const double cosnvn = fb.cosnvn[idx_kn];
+          const double sinnvn = fb.sinnvn[idx_kn];
+
+          // Accumulate asymmetric force contributions
+          m_physical_forces.frsc[idx_mn] += rmksc * cosnv + rmksc_n * sinnvn;
+          m_physical_forces.frcs[idx_mn] += rmkcs * sinnv + rmkcs_n * cosnvn;
+          m_physical_forces.fzcc[idx_mn] += zmkcc * cosnv + zmkcc_n * sinnvn;
+          m_physical_forces.fzss[idx_mn] += zmkss * sinnv + zmkss_n * cosnvn;
+
+          if (jMinL <= jF) {
+            m_physical_forces.flcc[idx_mn] += lmkcc * cosnv + lmkcc_n * sinnvn;
+            m_physical_forces.flss[idx_mn] += lmkss * sinnv + lmkss_n * cosnvn;
+          }
+        }  // n
+      }  // k
+    }  // m
+  }  // jF
 }
 
 // Implementation of symforce: Symmetrize forces in (theta,zeta) space
