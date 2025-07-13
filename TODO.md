@@ -27,7 +27,7 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
   - Address TODO comments at lines 1384 and 1405
   - Implement asymmetric force terms
   
-- [ ] **Implement symoutput for output processing with lasym=true**
+- [x] **Implement symoutput for output processing with lasym=true**
   - Address TODO at output_quantities.cc:4572
   - Symmetrize output quantities like B-field components
   
