@@ -56,9 +56,11 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
   - Stellarator with lasym=true, nfp=19, mpol=5, ntor=3
   - Include reference outputs for validation
 
-- [ ] **Add comprehensive tests for lasym=true configurations**
-  - Unit tests for new functions  
-  - Integration tests for asymmetric equilibria (manual testing works)
+- [x] **Add comprehensive tests for lasym=true configurations**
+  - Added test_asymmetric_tokamak_validation for asymmetric tokamak configuration
+  - Added test_asymmetric_heliotron_validation for asymmetric stellarator configuration
+  - Tests validate Python input creation and asymmetric array initialization
+  - Tests pass and follow existing test patterns in test_init.py
 
 ## Low Priority Tasks
 
