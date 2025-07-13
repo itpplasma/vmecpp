@@ -12,7 +12,7 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
   - Use reflection operations to combine symmetric and antisymmetric pieces
   - Symmetrize/antisymmetrize real-space quantities on extended theta interval
   
-- [ ] **Implement symforce function to symmetrize forces in u-v space**
+- [x] **Implement symforce function to symmetrize forces in u-v space**
   - Separate forces into symmetric and antisymmetric components
   - Critical for non-stellarator-symmetric equilibria
   
@@ -23,7 +23,7 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
   - Implement Equation (8c) from Hirshman, Schwenn & Nührenberg (1990)
   - Scale odd-m modes by 1/sqrt(s) to regularize radial derivatives
   
-- [ ] **Complete force calculations for lasym=true in vmec.cc (TODO items)**
+- [x] **Complete force calculations for lasym=true in vmec.cc (TODO items)**
   - Address TODO comments at lines 1384 and 1405
   - Implement asymmetric force terms
   
