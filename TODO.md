@@ -16,7 +16,7 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
   - Separate forces into symmetric and antisymmetric components
   - Critical for non-stellarator-symmetric equilibria
   
-- [ ] **Implement tomnspa function for inverse transform of antisymmetric forces**
+- [x] **Implement tomnspa function for inverse transform of antisymmetric forces**
   - Fourier transform antisymmetric forces back to spectral space
   
 - [x] **Add mode scaling with sqrt(s) for odd-m modes in radial transformations**
