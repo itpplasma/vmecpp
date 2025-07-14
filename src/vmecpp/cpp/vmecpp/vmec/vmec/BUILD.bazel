@@ -49,6 +49,25 @@ cc_test(
 )
 
 cc_test(
+    name = "vmec_asymmetric_test",
+    srcs = ["vmec_asymmetric_test.cc"],
+    data = [
+        "//vmecpp/test_data:solovev",
+        "//vmecpp/test_data:tok_asym",
+        "//vmecpp/test_data:wout_tok_asym",
+        "//vmecpp/test_data:HELIOTRON_asym_2007871",
+        "//vmecpp/test_data:wout_HELIOTRON_asym",
+    ],
+    deps = [
+        "//vmecpp/vmec/vmec",
+        "@googletest//:gtest_main",
+        "//util/file_io:file_io",
+        "//util/testing:numerical_comparison_lib",
+    ],
+    size = "medium",
+)
+
+cc_test(
     name = "vmec_in_memory_mgrid_test",
     srcs = ["vmec_in_memory_mgrid_test.cc"],
     data = [

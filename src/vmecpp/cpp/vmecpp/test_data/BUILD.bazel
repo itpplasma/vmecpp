@@ -74,3 +74,36 @@ filegroup(
         "wout_cth_like_free_bdy.nc",
     ],
 )
+
+filegroup(
+    name = "tok_asym",
+    visibility = ["//visibility:public"],
+    srcs = [
+        "tok_asym.json",
+        "input.tok_asym",
+    ],
+)
+
+filegroup(
+    name = "wout_tok_asym",
+    visibility = ["//visibility:public"],
+    srcs = [
+        "wout_tok_asym.nc",
+    ],
+)
+
+filegroup(
+    name = "HELIOTRON_asym_2007871",
+    visibility = ["//visibility:public"],
+    srcs = [
+        "HELIOTRON_asym.2007871.json",
+    ],
+)
+
+filegroup(
+    name = "wout_HELIOTRON_asym",
+    visibility = ["//visibility:public"],
+    srcs = [
+        "wout_HELIOTRON_asym.nc",
+    ],
+)
