@@ -206,6 +206,7 @@ void SymmetrizeRealSpaceGeometry(const Sizes& s, const RadialPartitioning& r,
         int idx_full = (jF - r.nsMinF1) * s.nZnT + idx_kl;
         int idx_mirror = (jF - r.nsMinF1) * s.nZnT + idx_kl_mirror;
 
+
         // For symmetric quantities (even in theta):
         // R, Z are even in theta
         m_geometry.r1_e[idx_full] = m_geometry.r1_e[idx_mirror];
