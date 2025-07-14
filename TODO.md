@@ -80,12 +80,19 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
   - ✅ Fixed C++ validation logic for asymmetric boundary coefficients (rbs, zbc)
   - ✅ Fixed HELIOTRON asymmetric test case JSON to include empty rbs/zbc arrays
   - ✅ Asymmetric input loading verified working for both tokamak and stellarator cases
-  - [ ] Debug runtime segmentation fault in asymmetric execution
-  - [x] **Compare VMECPP asymmetric outputs against jVMEC reference wout files**
+  - [x] **Debug asymmetric convergence failure - CRITICAL BUG IDENTIFIED AND DOCUMENTED**
+    - ✅ Root cause identified: Doubling bug in SymmetrizeRealSpaceGeometry
+    - ✅ Asymmetric contributions incorrectly added to both even and odd components
+    - ✅ When combined as full = even + sqrt(s) * odd, asymmetric terms are doubled
+    - ✅ Architectural difference from jVMEC prevents simple fixes
+    - ✅ Comprehensive analysis documented in ASYMMETRIC_BUG_ANALYSIS.md
+    - ✅ All attempted fixes break initial equilibrium balance
+    - ✅ Proper solution requires m-parity separation like jVMEC
+  - [ ] **Compare VMECPP asymmetric outputs against jVMEC reference wout files**
     - ✅ Analyzed jVMEC reference outputs (tok_asym has non-zero asymmetric coefficients)
     - ✅ HELIOTRON_asym converges to symmetric solution (zero asymmetric coefficients)
     - ✅ Reference outputs show expected behavior with lasym=True flag
-    - ✅ Validation infrastructure created but runtime comparison blocked by segfault
+    - ❌ Runtime comparison blocked by convergence failure
   - [ ] Validate specific asymmetric Fourier coefficients and convergence
   - [ ] Run comparative analysis with reference outputs from ../jVMEC/test examples
 
