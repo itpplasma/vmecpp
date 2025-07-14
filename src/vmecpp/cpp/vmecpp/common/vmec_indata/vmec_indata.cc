@@ -892,11 +892,10 @@ absl::StatusOr<VmecINDATA> VmecINDATA::FromJson(
   }
 
   if (vmec_indata.lasym) {
-    // Always resize asymmetric arrays when lasym=true, regardless of JSON
-    // content
+    // Always resize asymmetric arrays when lasym=true, regardless of JSON content
     vmec_indata.rbs.resize(vmec_indata.mpol * (2 * vmec_indata.ntor + 1), 0.0);
     vmec_indata.zbc.resize(vmec_indata.mpol * (2 * vmec_indata.ntor + 1), 0.0);
-
+    
     auto maybe_rbs = BoundaryCoefficient::FromJson(j, "rbs");
     if (!maybe_rbs.ok()) {
       return maybe_rbs.status();

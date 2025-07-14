@@ -3634,14 +3634,20 @@ void IdealMhdModel::symrzl() {
                                     .rCon = rCon,
                                     .zCon = zCon};
 
-  auto geometry_asym = RealSpaceGeometryAsym{.r1_a = r1_a,
-                                             .ru_a = ru_a,
-                                             .rv_a = rv_a,
-                                             .z1_a = z1_a,
-                                             .zu_a = zu_a,
-                                             .zv_a = zv_a,
-                                             .lu_a = lu_a,
-                                             .lv_a = lv_a};
+  // For asymmetric case, pass the actual arrays
+  // For symmetric case, pass empty spans
+  RealSpaceGeometryAsym geometry_asym;
+  
+  if (s_.lasym) {
+    geometry_asym = RealSpaceGeometryAsym{.r1_a = r1_a,
+                                          .ru_a = ru_a,
+                                          .rv_a = rv_a,
+                                          .z1_a = z1_a,
+                                          .zu_a = zu_a,
+                                          .zv_a = zv_a,
+                                          .lu_a = lu_a,
+                                          .lv_a = lv_a};
+  }
 
   SymmetrizeRealSpaceGeometry(s_, r_, geometry, geometry_asym);
 }
