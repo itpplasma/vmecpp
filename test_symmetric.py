@@ -1,0 +1,42 @@
+import json
+
+# Test without asymmetric flag
+config = {
+    "lasym": False,  # Disable asymmetric mode
+    "nfp": 19,
+    "mpol": 5,
+    "ntor": 3,
+    "ns_array": [5],
+    "ftol_array": [1e-4],
+    "niter_array": [50],
+    "delt": 0.9,
+    "tcon0": 1.0,
+    "aphi": [1.0],
+    "phiedge": 1.0,
+    "pmass_type": "power_series",
+    "am": [1.0, -2.0, 1.0],
+    "pres_scale": 18000.0,
+    "gamma": 0.0,
+    "spres_ped": 1.0,
+    "ncurr": 0,
+    "piota_type": "power_series",
+    "ai": [1.0, 1.5],
+    "lfreeb": False,
+    "mgrid_file": "none",
+    "raxis_c": [10.0, 0.0, 0.0, 0.0],
+    "zaxis_s": [0.0, 0.0, 0.0, 0.0],
+    "rbc": [
+        {"n": 0, "m": 0, "value": 10.0},
+        {"n": -1, "m": 1, "value": -0.3},
+        {"n": 0, "m": 1, "value": -1.0}
+    ],
+    "zbs": [
+        {"n": -1, "m": 1, "value": -0.3},
+        {"n": 0, "m": 1, "value": 1.0}
+    ]
+}
+
+with open('test_symmetric.json', 'w') as f:
+    json.dump(config, f, indent=2)
+
+print("Testing symmetric case...")
