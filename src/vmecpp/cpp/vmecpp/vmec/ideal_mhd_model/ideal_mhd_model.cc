@@ -20,6 +20,7 @@
 #include "vmecpp/common/util/util.h"
 #include "vmecpp/vmec/fourier_geometry/fourier_geometry.h"
 #include "vmecpp/vmec/handover_storage/handover_storage.h"
+#include "vmecpp/vmec/ideal_mhd_model/fourier_asymmetric.h"
 #include "vmecpp/vmec/radial_partitioning/radial_partitioning.h"
 #include "vmecpp/vmec/radial_profiles/radial_profiles.h"
 #include "vmecpp/vmec/vmec_constants/vmec_algorithm_constants.h"
@@ -3055,6 +3056,37 @@ void IdealMhdModel::assembleTotalForces() {
       frcon_o[idx_kl] = frcon_e[idx_kl] * m_p_.sqrtSF[jF - r_.nsMinF1];
       fzcon_o[idx_kl] = fzcon_e[idx_kl] * m_p_.sqrtSF[jF - r_.nsMinF1];
     }
+  }
+
+  // Apply force symmetrization for asymmetric configurations
+  if (s_.lasym) {
+    auto force_data = RealSpaceForces{
+        .armn_e = armn_e,
+        .armn_o = armn_o,
+        .azmn_e = azmn_e,
+        .azmn_o = azmn_o,
+        .blmn_e = blmn_e,
+        .blmn_o = blmn_o,
+        .brmn_e = brmn_e,
+        .brmn_o = brmn_o,
+        .bzmn_e = bzmn_e,
+        .bzmn_o = bzmn_o,
+        .clmn_e = clmn_e,
+        .clmn_o = clmn_o,
+        .crmn_e = crmn_e,
+        .crmn_o = crmn_o,
+        .czmn_e = czmn_e,
+        .czmn_o = czmn_o,
+        .frcon_e = frcon_e,
+        .frcon_o = frcon_o,
+        .fzcon_e = fzcon_e,
+        .fzcon_o = fzcon_o
+    };
+    
+    // Create empty asymmetric force structure (currently not used for storage)
+    auto force_asym = RealSpaceForcesAsym{};
+    
+    SymmetrizeForces(s_, r_, force_data, force_asym);
   }
 }
 
