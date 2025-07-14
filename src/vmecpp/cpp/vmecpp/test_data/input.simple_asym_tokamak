@@ -1,0 +1,42 @@
+&INDATA
+! Simple asymmetric tokamak test case for VMEC++ validation
+! Based on circular tokamak with minimal asymmetric perturbation
+NFP=1,
+NCURR=0,
+DELT=0.5,
+LASYM=.true.,
+MPOL=6,
+NTOR=2,
+NTHETA=21,
+NZETA=9,
+NS_ARRAY    = 5,    9,   17
+FTOL_ARRAY  = 1e-3, 1e-6, 1e-9
+NITER_ARRAY = 100,  200,  300
+NSTEP=200,
+AM = 0.5, 1.0, 0.0,
+PRES_SCALE=5000.0,
+AI = 0.0,
+CURTOR=0.0,
+GAMMA=0.0,
+PHIEDGE=1.0,
+
+! Magnetic axis position (symmetric)
+RAXIS_CC = 4.0, 0.0, 0.0,
+ZAXIS_CS = 0.0, 0.0, 0.0,
+
+! Plasma boundary - circular tokamak base with small asymmetric perturbation
+! Symmetric components (stellarator-symmetric part)
+RBC(0,0) = 4.0,     ! R00 - major radius
+RBC(1,0) = 1.0,     ! R10 - minor radius
+
+ZBS(1,0) = 1.0,     ! Z10 - minor radius in Z
+
+! Small asymmetric perturbations (non-stellarator-symmetric part)
+RBS(1,0) = 0.01,    ! Small R sine perturbation
+ZBC(1,0) = 0.01,    ! Small Z cosine perturbation
+
+! Higher harmonics (keep small for convergence)
+RBC(2,0) = 0.005,
+ZBS(2,0) = 0.005,
+/
+&END
