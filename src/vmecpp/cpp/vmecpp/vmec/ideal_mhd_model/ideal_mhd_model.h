@@ -395,6 +395,16 @@ class IdealMhdModel {
   std::vector<double> clmn_e;
   std::vector<double> clmn_o;
 
+  // asymmetric force arrays (used when lasym=true)
+  std::vector<double> armn_a;
+  std::vector<double> azmn_a;
+  std::vector<double> brmn_a;
+  std::vector<double> bzmn_a;
+  std::vector<double> blmn_a;
+  std::vector<double> clmn_a;
+  std::vector<double> crmn_a;
+  std::vector<double> czmn_a;
+
   /**********************************************/
 
   // lambda preconditioner

@@ -605,6 +605,21 @@ IdealMhdModel::IdealMhdModel(
     clmn_o.resize(nrztIncludingBoundary);
   }
 
+  // Allocate asymmetric force arrays when lasym=true
+  if (s_.lasym) {
+    armn_a.resize(nrzt);
+    azmn_a.resize(nrzt);
+    brmn_a.resize(nrzt);
+    bzmn_a.resize(nrzt);
+    blmn_a.resize(nrztIncludingBoundary);
+    
+    if (s_.lthreed) {
+      clmn_a.resize(nrztIncludingBoundary);
+      crmn_a.resize(nrzt);
+      czmn_a.resize(nrzt);
+    }
+  }
+
   // TODO(jons): +1 only if at LCFS
   bLambda.resize(r_.nsMaxF1 - r_.nsMinF1 + 1);
   dLambda.resize(r_.nsMaxF1 - r_.nsMinF1 + 1);
@@ -3083,8 +3098,17 @@ void IdealMhdModel::assembleTotalForces() {
         .fzcon_o = fzcon_o
     };
     
-    // Create empty asymmetric force structure (currently not used for storage)
-    auto force_asym = RealSpaceForcesAsym{};
+    // Create asymmetric force structure with allocated arrays
+    auto force_asym = RealSpaceForcesAsym{
+        .armn_a = armn_a,
+        .azmn_a = azmn_a,
+        .blmn_a = blmn_a,
+        .brmn_a = brmn_a,
+        .bzmn_a = bzmn_a,
+        .clmn_a = clmn_a,
+        .crmn_a = crmn_a,
+        .czmn_a = czmn_a
+    };
     
     SymmetrizeForces(s_, r_, force_data, force_asym);
   }

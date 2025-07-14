@@ -67,6 +67,9 @@ void FourierToReal3DAsymmFastPoloidal(const FourierGeometry& physical_x,
             // rmnsc contribution: R ~ sin(m*theta)*cos(n*zeta)
             double rsc_term = physical_x.rmnsc[idx_fc] * fb.sinmu[idx_ml] *
                               fb.cosnv[idx_kn] * modeScale;
+            
+            // NOTE: Asymmetric contribution will be added to both even and odd components
+            
             m_geometry_asym.r1_a[idx_kl1] += rsc_term;
             m_geometry_asym.ru_a[idx_kl1] +=
                 rsc_term * m * xmpqF;  // derivative w.r.t. theta
@@ -153,6 +156,8 @@ void FourierToReal2DAsymmFastPoloidal(const FourierGeometry& physical_x,
         modeScale = 1.0 / sqrtS_min;
       }
 
+      // Process asymmetric modes
+      
       for (int l = 0; l < s.nThetaEff; ++l) {
         int idx_ml = m * s.nThetaReduced + l;
         int idx_l1 = (jF - r.nsMinF1) * s.nThetaEff + l;
@@ -262,31 +267,79 @@ void SymmetrizeRealSpaceGeometry(const Sizes& s, const RadialPartitioning& r,
   }      // jF
 
   // Now combine symmetric and antisymmetric parts if lasym=true
+  // Following jVMEC's symrzl approach for proper asymmetric combination
   if (s.lasym && !m_geometry_asym.r1_a.empty()) {
+    
 #pragma omp parallel for
     for (int jF = r.nsMinF1; jF < r.nsMaxF1; ++jF) {
-      for (int kl = 0; kl < s.nZnT; ++kl) {
-        int idx = (jF - r.nsMinF1) * s.nZnT + kl;
+      // For the primary interval θ ∈ [0, π]: direct addition
+      for (int k = 0; k < s.nZeta; ++k) {
+        for (int l = 0; l < s.nThetaReduced; ++l) {
+          int idx_kl = k * s.nThetaEven + l;
+          int idx = (jF - r.nsMinF1) * s.nZnT + idx_kl;
 
-        // Add asymmetric contributions to symmetric ones
-        m_geometry.r1_e[idx] += m_geometry_asym.r1_a[idx];
-        m_geometry.r1_o[idx] += m_geometry_asym.r1_a[idx];
-        m_geometry.ru_e[idx] += m_geometry_asym.ru_a[idx];
-        m_geometry.ru_o[idx] += m_geometry_asym.ru_a[idx];
-        m_geometry.rv_e[idx] += m_geometry_asym.rv_a[idx];
-        m_geometry.rv_o[idx] += m_geometry_asym.rv_a[idx];
+          // Direct addition for primary interval (jVMEC approach)
+          m_geometry.r1_e[idx] += m_geometry_asym.r1_a[idx];
+          m_geometry.ru_e[idx] += m_geometry_asym.ru_a[idx];
+          m_geometry.rv_e[idx] += m_geometry_asym.rv_a[idx];
 
-        m_geometry.z1_e[idx] += m_geometry_asym.z1_a[idx];
-        m_geometry.z1_o[idx] += m_geometry_asym.z1_a[idx];
-        m_geometry.zu_e[idx] += m_geometry_asym.zu_a[idx];
-        m_geometry.zu_o[idx] += m_geometry_asym.zu_a[idx];
-        m_geometry.zv_e[idx] += m_geometry_asym.zv_a[idx];
-        m_geometry.zv_o[idx] += m_geometry_asym.zv_a[idx];
+          m_geometry.z1_e[idx] += m_geometry_asym.z1_a[idx];
+          m_geometry.zu_e[idx] += m_geometry_asym.zu_a[idx];
+          m_geometry.zv_e[idx] += m_geometry_asym.zv_a[idx];
 
-        m_geometry.lu_e[idx] += m_geometry_asym.lu_a[idx];
-        m_geometry.lu_o[idx] += m_geometry_asym.lu_a[idx];
-        m_geometry.lv_e[idx] += m_geometry_asym.lv_a[idx];
-        m_geometry.lv_o[idx] += m_geometry_asym.lv_a[idx];
+          m_geometry.lu_e[idx] += m_geometry_asym.lu_a[idx];
+          m_geometry.lv_e[idx] += m_geometry_asym.lv_a[idx];
+          
+          // Don't add to odd components - this was causing the doubling issue
+          // The asymmetric contribution should only be added once, not twice
+        }
+      }
+      
+      // For the extended interval θ ∈ [π, 2π]: reflection with asymmetric combination
+      for (int k = 0; k < s.nZeta; ++k) {
+        for (int l = s.nThetaReduced; l < s.nThetaEven; ++l) {
+          int l_mirror = s.nThetaEven - l;  // Mirror index in [0,π]
+          int k_mirror = (s.nZeta - k) % s.nZeta;  // Mirror index for zeta
+          
+          int idx_kl = k * s.nThetaEven + l;
+          int idx_mirror = k_mirror * s.nThetaEven + l_mirror;
+          int idx_full = (jF - r.nsMinF1) * s.nZnT + idx_kl;
+          int idx_reflected = (jF - r.nsMinF1) * s.nZnT + idx_mirror;
+
+          // jVMEC's symrzl approach: R and Z have different sign patterns
+          // Apply reflection only to even components to avoid doubling
+          // R: R[extended] = R[reflected] - R_asym[reflected]
+          m_geometry.r1_e[idx_full] = m_geometry.r1_e[idx_reflected] - m_geometry_asym.r1_a[idx_reflected];
+          
+          // dR/dtheta has opposite sign: dR/dtheta[extended] = -dR/dtheta[reflected] + dR_asym/dtheta[reflected]
+          m_geometry.ru_e[idx_full] = -m_geometry.ru_e[idx_reflected] + m_geometry_asym.ru_a[idx_reflected];
+          
+          // dR/dzeta: dR/dzeta[extended] = -dR/dzeta[reflected] + dR_asym/dzeta[reflected]
+          m_geometry.rv_e[idx_full] = -m_geometry.rv_e[idx_reflected] + m_geometry_asym.rv_a[idx_reflected];
+
+          // Z: Z[extended] = -Z[reflected] + Z_asym[reflected]
+          m_geometry.z1_e[idx_full] = -m_geometry.z1_e[idx_reflected] + m_geometry_asym.z1_a[idx_reflected];
+          
+          // dZ/dtheta: dZ/dtheta[extended] = dZ/dtheta[reflected] - dZ_asym/dtheta[reflected]
+          m_geometry.zu_e[idx_full] = m_geometry.zu_e[idx_reflected] - m_geometry_asym.zu_a[idx_reflected];
+          
+          // dZ/dzeta: dZ/dzeta[extended] = dZ/dzeta[reflected] - dZ_asym/dzeta[reflected]
+          m_geometry.zv_e[idx_full] = m_geometry.zv_e[idx_reflected] - m_geometry_asym.zv_a[idx_reflected];
+
+          // Lambda derivatives follow Z pattern
+          m_geometry.lu_e[idx_full] = m_geometry.lu_e[idx_reflected] - m_geometry_asym.lu_a[idx_reflected];
+          m_geometry.lv_e[idx_full] = m_geometry.lv_e[idx_reflected] - m_geometry_asym.lv_a[idx_reflected];
+          
+          // For odd components, use simple reflection without asymmetric terms
+          m_geometry.r1_o[idx_full] = m_geometry.r1_o[idx_reflected];
+          m_geometry.ru_o[idx_full] = -m_geometry.ru_o[idx_reflected];
+          m_geometry.rv_o[idx_full] = -m_geometry.rv_o[idx_reflected];
+          m_geometry.z1_o[idx_full] = -m_geometry.z1_o[idx_reflected];
+          m_geometry.zu_o[idx_full] = m_geometry.zu_o[idx_reflected];
+          m_geometry.zv_o[idx_full] = m_geometry.zv_o[idx_reflected];
+          m_geometry.lu_o[idx_full] = m_geometry.lu_o[idx_reflected];
+          m_geometry.lv_o[idx_full] = m_geometry.lv_o[idx_reflected];
+        }
       }
     }
   }
@@ -389,15 +442,10 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
                       RealSpaceForces& m_forces,
                       RealSpaceForcesAsym& m_forces_asym) {
   // Force symmetrization based on stellarator symmetry decomposition
-  // This separates forces into symmetric and antisymmetric parts using:
+  // Following jVMEC implementation: decompose forces into symmetric and antisymmetric parts
   // f_sym = 0.5 * (f(k,l) + f(k_rev,l_rev))
   // f_asym = 0.5 * (f(k,l) - f(k_rev,l_rev))
   // where (k_rev,l_rev) represents the stellarator symmetric point (-zeta,-theta)
-  
-  // NOTE: Current implementation is a minimal version that applies symmetrization
-  // operations in-place on the force arrays to improve convergence for lasym=true
-  // configurations. Full asymmetric force storage would require additional 
-  // memory allocation in IdealMhdModel.
   
   if (!s.lasym) {
     return;  // No symmetrization needed for stellarator-symmetric case
@@ -407,51 +455,162 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
   const int nZeta = s.nZeta;
   const int nThetaEff = s.nThetaEff;
   const int nZnT = s.nZnT;
+  const int ntheta1 = s.nThetaEven;
+  const int ntheta2 = s.nThetaReduced;
   
-  // Apply symmetrization to force arrays using stellarator symmetry
-  // This is a simplified in-place version that improves asymmetric convergence
+  // Apply stellarator symmetry decomposition following jVMEC approach
   for (int jF = r.nsMinF; jF < r.nsMaxF; ++jF) {
     const int jOffset = (jF - r.nsMinF) * nZnT;
     
-    for (int k = 0; k < nZeta; ++k) {
-      const int kReversed = (nZeta - k) % nZeta;  // stellarator symmetric zeta
+    // Create temporary arrays for both symmetric and asymmetric forces
+    std::vector<double> armn_sym_e(nZnT), armn_sym_o(nZnT);
+    std::vector<double> azmn_sym_e(nZnT), azmn_sym_o(nZnT);
+    std::vector<double> brmn_sym_e(nZnT), brmn_sym_o(nZnT);
+    std::vector<double> bzmn_sym_e(nZnT), bzmn_sym_o(nZnT);
+    std::vector<double> blmn_sym_e(nZnT), blmn_sym_o(nZnT);
+    std::vector<double> clmn_sym_e(nZnT), clmn_sym_o(nZnT);
+    std::vector<double> crmn_sym_e(nZnT), crmn_sym_o(nZnT);
+    std::vector<double> czmn_sym_e(nZnT), czmn_sym_o(nZnT);
+    
+    std::vector<double> armn_asym_e(nZnT), armn_asym_o(nZnT);
+    std::vector<double> azmn_asym_e(nZnT), azmn_asym_o(nZnT);
+    std::vector<double> brmn_asym_e(nZnT), brmn_asym_o(nZnT);
+    std::vector<double> bzmn_asym_e(nZnT), bzmn_asym_o(nZnT);
+    std::vector<double> blmn_asym_e(nZnT), blmn_asym_o(nZnT);
+    std::vector<double> clmn_asym_e(nZnT), clmn_asym_o(nZnT);
+    std::vector<double> crmn_asym_e(nZnT), crmn_asym_o(nZnT);
+    std::vector<double> czmn_asym_e(nZnT), czmn_asym_o(nZnT);
+    
+    for (int l = 0; l < ntheta2; ++l) {
+      const int lReversed = (ntheta1 - l) % ntheta1;
       
-      for (int l = 0; l < nThetaEff; ++l) {
-        const int lReversed = (s.nThetaEven - l) % s.nThetaEven;  // stellarator symmetric theta
+      for (int k = 0; k < nZeta; ++k) {
+        const int kReversed = (nZeta - k) % nZeta;
         
-        const int idx_kl = jOffset + k * nThetaEff + l;
-        const int idx_rev = jOffset + kReversed * nThetaEff + lReversed;
+        const int idx_kl = k * nThetaEff + l;
+        const int idx_rev = kReversed * nThetaEff + lReversed;
         
-        // Skip if indices are out of bounds or self-symmetric
-        if (idx_rev >= jOffset + nZnT || idx_kl == idx_rev) continue;
+        // Apply jVMEC stellarator symmetry decomposition
+        // Following the exact pattern from jVMEC:
         
-        // Apply simplified symmetrization that extracts symmetric parts
-        // This follows the force symmetry patterns from jVMEC implementation
+        // armn: symmetric part retained, antisymmetric part goes to asym
+        armn_sym_e[idx_kl] = 0.5 * (m_forces.armn_e[jOffset + idx_kl] + m_forces.armn_e[jOffset + idx_rev]);
+        armn_sym_o[idx_kl] = 0.5 * (m_forces.armn_o[jOffset + idx_kl] + m_forces.armn_o[jOffset + idx_rev]);
+        armn_asym_e[idx_kl] = 0.5 * (m_forces.armn_e[jOffset + idx_kl] - m_forces.armn_e[jOffset + idx_rev]);
+        armn_asym_o[idx_kl] = 0.5 * (m_forces.armn_o[jOffset + idx_kl] - m_forces.armn_o[jOffset + idx_rev]);
         
-        // For R forces (armn): symmetric dominates in stellarator configurations
-        const double armn_e_sym = 0.5 * (m_forces.armn_e[idx_kl] + m_forces.armn_e[idx_rev]);
-        const double armn_o_sym = 0.5 * (m_forces.armn_o[idx_kl] + m_forces.armn_o[idx_rev]);
+        // brmn: antisymmetric part goes to symmetric, symmetric part goes to asym
+        brmn_sym_e[idx_kl] = 0.5 * (m_forces.brmn_e[jOffset + idx_kl] - m_forces.brmn_e[jOffset + idx_rev]);
+        brmn_sym_o[idx_kl] = 0.5 * (m_forces.brmn_o[jOffset + idx_kl] - m_forces.brmn_o[jOffset + idx_rev]);
+        brmn_asym_e[idx_kl] = 0.5 * (m_forces.brmn_e[jOffset + idx_kl] + m_forces.brmn_e[jOffset + idx_rev]);
+        brmn_asym_o[idx_kl] = 0.5 * (m_forces.brmn_o[jOffset + idx_kl] + m_forces.brmn_o[jOffset + idx_rev]);
         
-        // For Z forces (azmn): different symmetry pattern
-        const double azmn_e_sym = 0.5 * (m_forces.azmn_e[idx_kl] - m_forces.azmn_e[idx_rev]);
-        const double azmn_o_sym = 0.5 * (m_forces.azmn_o[idx_kl] - m_forces.azmn_o[idx_rev]);
+        // azmn: antisymmetric part goes to symmetric, symmetric part goes to asym
+        azmn_sym_e[idx_kl] = 0.5 * (m_forces.azmn_e[jOffset + idx_kl] - m_forces.azmn_e[jOffset + idx_rev]);
+        azmn_sym_o[idx_kl] = 0.5 * (m_forces.azmn_o[jOffset + idx_kl] - m_forces.azmn_o[jOffset + idx_rev]);
+        azmn_asym_e[idx_kl] = 0.5 * (m_forces.azmn_e[jOffset + idx_kl] + m_forces.azmn_e[jOffset + idx_rev]);
+        azmn_asym_o[idx_kl] = 0.5 * (m_forces.azmn_o[jOffset + idx_kl] + m_forces.azmn_o[jOffset + idx_rev]);
         
-        // Apply symmetrized values back to force arrays
-        // This enhances the symmetric component while suppressing asymmetric noise
-        // that can cause convergence issues in stellarator-symmetric configurations
-        // NOTE: This is a partial implementation - full decomposition would 
-        // require separate asymmetric force storage
+        // bzmn: symmetric part retained, antisymmetric part goes to asym
+        bzmn_sym_e[idx_kl] = 0.5 * (m_forces.bzmn_e[jOffset + idx_kl] + m_forces.bzmn_e[jOffset + idx_rev]);
+        bzmn_sym_o[idx_kl] = 0.5 * (m_forces.bzmn_o[jOffset + idx_kl] + m_forces.bzmn_o[jOffset + idx_rev]);
+        bzmn_asym_e[idx_kl] = 0.5 * (m_forces.bzmn_e[jOffset + idx_kl] - m_forces.bzmn_e[jOffset + idx_rev]);
+        bzmn_asym_o[idx_kl] = 0.5 * (m_forces.bzmn_o[jOffset + idx_kl] - m_forces.bzmn_o[jOffset + idx_rev]);
         
-        // Store symmetrized values (apply to both points)
-        const_cast<double*>(m_forces.armn_e.data())[idx_kl] = armn_e_sym;
-        const_cast<double*>(m_forces.armn_e.data())[idx_rev] = armn_e_sym;
-        const_cast<double*>(m_forces.armn_o.data())[idx_kl] = armn_o_sym;
-        const_cast<double*>(m_forces.armn_o.data())[idx_rev] = armn_o_sym;
+        // blmn: antisymmetric part goes to symmetric, symmetric part goes to asym
+        blmn_sym_e[idx_kl] = 0.5 * (m_forces.blmn_e[jOffset + idx_kl] - m_forces.blmn_e[jOffset + idx_rev]);
+        blmn_sym_o[idx_kl] = 0.5 * (m_forces.blmn_o[jOffset + idx_kl] - m_forces.blmn_o[jOffset + idx_rev]);
+        blmn_asym_e[idx_kl] = 0.5 * (m_forces.blmn_e[jOffset + idx_kl] + m_forces.blmn_e[jOffset + idx_rev]);
+        blmn_asym_o[idx_kl] = 0.5 * (m_forces.blmn_o[jOffset + idx_kl] + m_forces.blmn_o[jOffset + idx_rev]);
         
-        const_cast<double*>(m_forces.azmn_e.data())[idx_kl] = azmn_e_sym;
-        const_cast<double*>(m_forces.azmn_e.data())[idx_rev] = -azmn_e_sym;  // maintain antisymmetry
-        const_cast<double*>(m_forces.azmn_o.data())[idx_kl] = azmn_o_sym;
-        const_cast<double*>(m_forces.azmn_o.data())[idx_rev] = -azmn_o_sym;
+        // clmn: symmetric part retained, antisymmetric part goes to asym
+        clmn_sym_e[idx_kl] = 0.5 * (m_forces.clmn_e[jOffset + idx_kl] + m_forces.clmn_e[jOffset + idx_rev]);
+        clmn_sym_o[idx_kl] = 0.5 * (m_forces.clmn_o[jOffset + idx_kl] + m_forces.clmn_o[jOffset + idx_rev]);
+        clmn_asym_e[idx_kl] = 0.5 * (m_forces.clmn_e[jOffset + idx_kl] - m_forces.clmn_e[jOffset + idx_rev]);
+        clmn_asym_o[idx_kl] = 0.5 * (m_forces.clmn_o[jOffset + idx_kl] - m_forces.clmn_o[jOffset + idx_rev]);
+        
+        // crmn: antisymmetric part goes to symmetric, symmetric part goes to asym
+        crmn_sym_e[idx_kl] = 0.5 * (m_forces.crmn_e[jOffset + idx_kl] - m_forces.crmn_e[jOffset + idx_rev]);
+        crmn_sym_o[idx_kl] = 0.5 * (m_forces.crmn_o[jOffset + idx_kl] - m_forces.crmn_o[jOffset + idx_rev]);
+        crmn_asym_e[idx_kl] = 0.5 * (m_forces.crmn_e[jOffset + idx_kl] + m_forces.crmn_e[jOffset + idx_rev]);
+        crmn_asym_o[idx_kl] = 0.5 * (m_forces.crmn_o[jOffset + idx_kl] + m_forces.crmn_o[jOffset + idx_rev]);
+        
+        // czmn: symmetric part retained, antisymmetric part goes to asym
+        czmn_sym_e[idx_kl] = 0.5 * (m_forces.czmn_e[jOffset + idx_kl] + m_forces.czmn_e[jOffset + idx_rev]);
+        czmn_sym_o[idx_kl] = 0.5 * (m_forces.czmn_o[jOffset + idx_kl] + m_forces.czmn_o[jOffset + idx_rev]);
+        czmn_asym_e[idx_kl] = 0.5 * (m_forces.czmn_e[jOffset + idx_kl] - m_forces.czmn_e[jOffset + idx_rev]);
+        czmn_asym_o[idx_kl] = 0.5 * (m_forces.czmn_o[jOffset + idx_kl] - m_forces.czmn_o[jOffset + idx_rev]);
+      }
+    }
+    
+    // Copy symmetrized forces back to original arrays
+    for (int kl = 0; kl < nZnT; ++kl) {
+      const_cast<double*>(m_forces.armn_e.data())[jOffset + kl] = armn_sym_e[kl];
+      const_cast<double*>(m_forces.armn_o.data())[jOffset + kl] = armn_sym_o[kl];
+      const_cast<double*>(m_forces.azmn_e.data())[jOffset + kl] = azmn_sym_e[kl];
+      const_cast<double*>(m_forces.azmn_o.data())[jOffset + kl] = azmn_sym_o[kl];
+      const_cast<double*>(m_forces.brmn_e.data())[jOffset + kl] = brmn_sym_e[kl];
+      const_cast<double*>(m_forces.brmn_o.data())[jOffset + kl] = brmn_sym_o[kl];
+      const_cast<double*>(m_forces.bzmn_e.data())[jOffset + kl] = bzmn_sym_e[kl];
+      const_cast<double*>(m_forces.bzmn_o.data())[jOffset + kl] = bzmn_sym_o[kl];
+      const_cast<double*>(m_forces.blmn_e.data())[jOffset + kl] = blmn_sym_e[kl];
+      const_cast<double*>(m_forces.blmn_o.data())[jOffset + kl] = blmn_sym_o[kl];
+      const_cast<double*>(m_forces.clmn_e.data())[jOffset + kl] = clmn_sym_e[kl];
+      const_cast<double*>(m_forces.clmn_o.data())[jOffset + kl] = clmn_sym_o[kl];
+      const_cast<double*>(m_forces.crmn_e.data())[jOffset + kl] = crmn_sym_e[kl];
+      const_cast<double*>(m_forces.crmn_o.data())[jOffset + kl] = crmn_sym_o[kl];
+      const_cast<double*>(m_forces.czmn_e.data())[jOffset + kl] = czmn_sym_e[kl];
+      const_cast<double*>(m_forces.czmn_o.data())[jOffset + kl] = czmn_sym_o[kl];
+    }
+    
+    // Store asymmetric components in the asymmetric force arrays
+    // Only store the ones that are not empty
+    if (!m_forces_asym.armn_a.empty()) {
+      for (int kl = 0; kl < nZnT; ++kl) {
+        const_cast<double*>(m_forces_asym.armn_a.data())[jOffset + kl] = 
+            armn_asym_e[kl] + armn_asym_o[kl];  // Combine even and odd parts
+      }
+    }
+    if (!m_forces_asym.azmn_a.empty()) {
+      for (int kl = 0; kl < nZnT; ++kl) {
+        const_cast<double*>(m_forces_asym.azmn_a.data())[jOffset + kl] = 
+            azmn_asym_e[kl] + azmn_asym_o[kl];
+      }
+    }
+    if (!m_forces_asym.brmn_a.empty()) {
+      for (int kl = 0; kl < nZnT; ++kl) {
+        const_cast<double*>(m_forces_asym.brmn_a.data())[jOffset + kl] = 
+            brmn_asym_e[kl] + brmn_asym_o[kl];
+      }
+    }
+    if (!m_forces_asym.bzmn_a.empty()) {
+      for (int kl = 0; kl < nZnT; ++kl) {
+        const_cast<double*>(m_forces_asym.bzmn_a.data())[jOffset + kl] = 
+            bzmn_asym_e[kl] + bzmn_asym_o[kl];
+      }
+    }
+    if (!m_forces_asym.blmn_a.empty()) {
+      for (int kl = 0; kl < nZnT; ++kl) {
+        const_cast<double*>(m_forces_asym.blmn_a.data())[jOffset + kl] = 
+            blmn_asym_e[kl] + blmn_asym_o[kl];
+      }
+    }
+    if (!m_forces_asym.clmn_a.empty()) {
+      for (int kl = 0; kl < nZnT; ++kl) {
+        const_cast<double*>(m_forces_asym.clmn_a.data())[jOffset + kl] = 
+            clmn_asym_e[kl] + clmn_asym_o[kl];
+      }
+    }
+    if (!m_forces_asym.crmn_a.empty()) {
+      for (int kl = 0; kl < nZnT; ++kl) {
+        const_cast<double*>(m_forces_asym.crmn_a.data())[jOffset + kl] = 
+            crmn_asym_e[kl] + crmn_asym_o[kl];
+      }
+    }
+    if (!m_forces_asym.czmn_a.empty()) {
+      for (int kl = 0; kl < nZnT; ++kl) {
+        const_cast<double*>(m_forces_asym.czmn_a.data())[jOffset + kl] = 
+            czmn_asym_e[kl] + czmn_asym_o[kl];
       }
     }
   }
