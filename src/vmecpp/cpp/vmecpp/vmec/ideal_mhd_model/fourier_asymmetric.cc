@@ -452,6 +452,7 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
   }
   
   
+  
   // Grid sizes for symmetrization
   const int nZeta = s.nZeta;
   const int nThetaEff = s.nThetaEff;
@@ -572,50 +573,50 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
     }
     
     // Store asymmetric components in the asymmetric force arrays
-    // Only store the ones that are not empty
-    if (!m_forces_asym.armn_a.empty()) {
+    // Only store the ones that are not empty and have valid data pointers
+    if (!m_forces_asym.armn_a.empty() && m_forces_asym.armn_a.data() != nullptr) {
       for (int kl = 0; kl < nZnT; ++kl) {
         const_cast<double*>(m_forces_asym.armn_a.data())[jOffset + kl] = 
             armn_asym_e[kl] + armn_asym_o[kl];  // Combine even and odd parts
       }
     }
-    if (!m_forces_asym.azmn_a.empty()) {
+    if (!m_forces_asym.azmn_a.empty() && m_forces_asym.azmn_a.data() != nullptr) {
       for (int kl = 0; kl < nZnT; ++kl) {
         const_cast<double*>(m_forces_asym.azmn_a.data())[jOffset + kl] = 
             azmn_asym_e[kl] + azmn_asym_o[kl];
       }
     }
-    if (!m_forces_asym.brmn_a.empty()) {
+    if (!m_forces_asym.brmn_a.empty() && m_forces_asym.brmn_a.data() != nullptr) {
       for (int kl = 0; kl < nZnT; ++kl) {
         const_cast<double*>(m_forces_asym.brmn_a.data())[jOffset + kl] = 
             brmn_asym_e[kl] + brmn_asym_o[kl];
       }
     }
-    if (!m_forces_asym.bzmn_a.empty()) {
+    if (!m_forces_asym.bzmn_a.empty() && m_forces_asym.bzmn_a.data() != nullptr) {
       for (int kl = 0; kl < nZnT; ++kl) {
         const_cast<double*>(m_forces_asym.bzmn_a.data())[jOffset + kl] = 
             bzmn_asym_e[kl] + bzmn_asym_o[kl];
       }
     }
-    if (!m_forces_asym.blmn_a.empty()) {
+    if (!m_forces_asym.blmn_a.empty() && m_forces_asym.blmn_a.data() != nullptr) {
       for (int kl = 0; kl < nZnT; ++kl) {
         const_cast<double*>(m_forces_asym.blmn_a.data())[jOffset + kl] = 
             blmn_asym_e[kl] + blmn_asym_o[kl];
       }
     }
-    if (!m_forces_asym.clmn_a.empty()) {
+    if (!m_forces_asym.clmn_a.empty() && m_forces_asym.clmn_a.data() != nullptr) {
       for (int kl = 0; kl < nZnT; ++kl) {
         const_cast<double*>(m_forces_asym.clmn_a.data())[jOffset + kl] = 
             clmn_asym_e[kl] + clmn_asym_o[kl];
       }
     }
-    if (!m_forces_asym.crmn_a.empty()) {
+    if (!m_forces_asym.crmn_a.empty() && m_forces_asym.crmn_a.data() != nullptr) {
       for (int kl = 0; kl < nZnT; ++kl) {
         const_cast<double*>(m_forces_asym.crmn_a.data())[jOffset + kl] = 
             crmn_asym_e[kl] + crmn_asym_o[kl];
       }
     }
-    if (!m_forces_asym.czmn_a.empty()) {
+    if (!m_forces_asym.czmn_a.empty() && m_forces_asym.czmn_a.data() != nullptr) {
       for (int kl = 0; kl < nZnT; ++kl) {
         const_cast<double*>(m_forces_asym.czmn_a.data())[jOffset + kl] = 
             czmn_asym_e[kl] + czmn_asym_o[kl];

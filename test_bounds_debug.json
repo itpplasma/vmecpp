@@ -3,6 +3,8 @@
   "nfp": 1,
   "mpol": 3,
   "ntor": 0,
+  "ntheta": 16,
+  "nzeta": 8,
   "ns_array": [
     3
   ],
@@ -22,15 +24,46 @@
   "am": [
     1.0
   ],
+  "am_aux_s": [
+    0.0
+  ],
+  "am_aux_f": [
+    0.0
+  ],
   "pres_scale": 1000.0,
   "gamma": 0.0,
+  "spres_ped": 1.0,
   "ncurr": 0,
   "piota_type": "power_series",
   "ai": [
     1.0
   ],
+  "ai_aux_s": [
+    0.0
+  ],
+  "ai_aux_f": [
+    0.0
+  ],
+  "pcurr_type": "power_series",
+  "ac": [
+    0.0
+  ],
+  "ac_aux_s": [
+    0.0
+  ],
+  "ac_aux_f": [
+    0.0
+  ],
+  "curtor": 0.0,
   "lfreeb": false,
   "mgrid_file": "none",
+  "bloat": 1.0,
+  "extcur": [
+    0.0
+  ],
+  "nvacskip": 6,
+  "nstep": 200,
+  "lforbal": true,
   "raxis_c": [
     10.0
   ],
@@ -61,7 +94,5 @@
       "m": 1,
       "value": 1.0
     }
-  ],
-  "rbs": [],
-  "zbc": []
+  ]
 }
