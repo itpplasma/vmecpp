@@ -41,14 +41,15 @@ def test_asymmetric_minimal():
     input_data.lasym = True
     
     # Initialize asymmetric arrays with zeros
-    rbs_size = input_data.mpol * (2 * input_data.ntor + 1)
-    zbc_size = input_data.mpol * (2 * input_data.ntor + 1)
-    input_data.rbs = [0.0] * rbs_size
-    input_data.zbc = [0.0] * zbc_size
+    # Shape should be (mpol, 2*ntor+1)
+    shape = (input_data.mpol, 2 * input_data.ntor + 1)
+    input_data.rbs = np.zeros(shape)
+    input_data.zbc = np.zeros(shape)
     
     # Add tiny asymmetric perturbation to avoid pure symmetric case
-    input_data.rbs[1] = 1e-6  # Small perturbation
-    input_data.zbc[1] = 1e-6
+    # Place small perturbation at m=1, n=0 location
+    input_data.rbs[1, input_data.ntor] = 1e-6  # Small perturbation
+    input_data.zbc[1, input_data.ntor] = 1e-6
     
     # Simplify parameters
     input_data.ns_array = [3]
