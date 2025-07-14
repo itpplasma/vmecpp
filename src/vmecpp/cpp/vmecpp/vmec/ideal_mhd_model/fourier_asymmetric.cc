@@ -233,7 +233,7 @@ void SymmetrizeRealSpaceGeometry(const Sizes& s, const RadialPartitioning& r,
 
         // For asymmetric quantities (when lasym=true):
         // The asymmetric parts have opposite parity
-        if (s.lasym) {
+        if (s.lasym && !m_geometry_asym.r1_a.empty()) {
           // R_asym, Z_asym are odd in theta (sign flip)
           m_geometry_asym.r1_a[idx_full] = -m_geometry_asym.r1_a[idx_mirror];
           m_geometry_asym.z1_a[idx_full] = -m_geometry_asym.z1_a[idx_mirror];
@@ -255,7 +255,7 @@ void SymmetrizeRealSpaceGeometry(const Sizes& s, const RadialPartitioning& r,
   }      // jF
 
   // Now combine symmetric and antisymmetric parts if lasym=true
-  if (s.lasym) {
+  if (s.lasym && !m_geometry_asym.r1_a.empty()) {
 #pragma omp parallel for
     for (int jF = r.nsMinF1; jF < r.nsMaxF1; ++jF) {
       for (int kl = 0; kl < s.nZnT; ++kl) {
