@@ -1081,6 +1081,7 @@ absl::StatusOr<bool> Vmec::Evolve(VmecCheckpoint checkpoint,
                fc_.fsql <= fc_.ftolv) {
       // converged to desired tolerance
 
+      
       m_liter_flag = false;
       status_ = VmecStatus::SUCCESSFUL_TERMINATION;
     } else if (fc_.ijacob >= 75) {
