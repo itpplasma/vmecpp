@@ -77,6 +77,10 @@ This document tracks the implementation progress of non-stellarator-symmetric fi
   - ✅ Core asymmetric algorithm validated via test suite (all tests pass)
   - ✅ Asymmetric input validation and array initialization confirmed working
   - ✅ C++ pybind11 binding issues resolved and functional
+  - ✅ Fixed C++ validation logic for asymmetric boundary coefficients (rbs, zbc)
+  - ✅ Fixed HELIOTRON asymmetric test case JSON to include empty rbs/zbc arrays
+  - ✅ Asymmetric input loading verified working for both tokamak and stellarator cases
+  - [ ] Debug runtime segmentation fault in asymmetric execution
   - [ ] Compare VMECPP asymmetric outputs against jVMEC reference wout files
   - [ ] Validate specific asymmetric Fourier coefficients and convergence
   - [ ] Run comparative analysis with reference outputs from ../jVMEC/test examples
