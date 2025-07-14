@@ -40,7 +40,10 @@ void FourierToReal3DAsymmFastPoloidal(const FourierGeometry& physical_x,
       // This implements Equation (8c) from Hirshman, Schwenn & Nührenberg (1990)
       double modeScale = 1.0;
       if (m % 2 == 1) {  // odd-m modes
-        modeScale = 1.0 / std::max(sqrtSF, rp.sqrtSF[0]);
+        // Prevent division by zero at axis using minimum value from next point
+        const double sqrtS_min = (jF == r.nsMinF1 && r.nsMaxF1 - r.nsMinF1 > 1) 
+                                 ? rp.sqrtSF[1] : sqrtSF;
+        modeScale = 1.0 / sqrtS_min;
       }
 
       // Poloidal loop
@@ -144,7 +147,10 @@ void FourierToReal2DAsymmFastPoloidal(const FourierGeometry& physical_x,
       // Apply mode scaling with sqrt(s) for odd-m modes
       double modeScale = 1.0;
       if (m % 2 == 1) {  // odd-m modes
-        modeScale = 1.0 / std::max(sqrtSF, rp.sqrtSF[0]);
+        // Prevent division by zero at axis using minimum value from next point
+        const double sqrtS_min = (jF == r.nsMinF1 && r.nsMaxF1 - r.nsMinF1 > 1) 
+                                 ? rp.sqrtSF[1] : sqrtSF;
+        modeScale = 1.0 / sqrtS_min;
       }
 
       for (int l = 0; l < s.nThetaEff; ++l) {
