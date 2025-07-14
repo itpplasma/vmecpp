@@ -3099,16 +3099,34 @@ void IdealMhdModel::assembleTotalForces() {
     };
     
     // Create asymmetric force structure with allocated arrays
-    auto force_asym = RealSpaceForcesAsym{
-        .armn_a = armn_a,
-        .azmn_a = azmn_a,
-        .blmn_a = blmn_a,
-        .brmn_a = brmn_a,
-        .bzmn_a = bzmn_a,
-        .clmn_a = clmn_a,
-        .crmn_a = crmn_a,
-        .czmn_a = czmn_a
-    };
+    // For 2D case (lthreed=false), clmn_a, crmn_a, czmn_a are empty vectors
+    // and should not be passed to avoid undefined behavior with spans
+    RealSpaceForcesAsym force_asym;
+    if (s_.lthreed) {
+      force_asym = RealSpaceForcesAsym{
+          .armn_a = armn_a,
+          .azmn_a = azmn_a,
+          .blmn_a = blmn_a,
+          .brmn_a = brmn_a,
+          .bzmn_a = bzmn_a,
+          .clmn_a = clmn_a,
+          .crmn_a = crmn_a,
+          .czmn_a = czmn_a
+      };
+    } else {
+      // For 2D case, create empty spans for the 3D-only arrays
+      static const std::vector<double> empty_vector;
+      force_asym = RealSpaceForcesAsym{
+          .armn_a = armn_a,
+          .azmn_a = azmn_a,
+          .blmn_a = blmn_a,
+          .brmn_a = brmn_a,
+          .bzmn_a = bzmn_a,
+          .clmn_a = empty_vector,
+          .crmn_a = empty_vector,
+          .czmn_a = empty_vector
+      };
+    }
     
     SymmetrizeForces(s_, r_, force_data, force_asym);
   }
