@@ -451,6 +451,7 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
     return;  // No symmetrization needed for stellarator-symmetric case
   }
   
+  
   // Grid sizes for symmetrization
   const int nZeta = s.nZeta;
   const int nThetaEff = s.nThetaEff;
@@ -488,7 +489,14 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
         const int kReversed = (nZeta - k) % nZeta;
         
         const int idx_kl = k * nThetaEff + l;
-        const int idx_rev = kReversed * nThetaEff + lReversed;
+        // Ensure lReversed is within the valid range for nThetaEff
+        const int lRev_safe = std::min(lReversed, nThetaEff - 1);
+        const int idx_rev = kReversed * nThetaEff + lRev_safe;
+        
+        // Bounds checking
+        if (idx_kl >= nZnT || idx_rev >= nZnT || idx_kl < 0 || idx_rev < 0) {
+          continue;  // Skip invalid indices
+        }
         
         // Apply jVMEC stellarator symmetry decomposition
         // Following the exact pattern from jVMEC:
