@@ -70,6 +70,11 @@ void ForcesToFourier3DAsymmFastPoloidal(
     const RadialPartitioning& rp, const Sizes& s,
     const FourierBasisFastPoloidal& fb, FourierForces& m_physical_forces);
 
+void ForcesToFourier2DAsymmFastPoloidal(
+    const RealSpaceForcesAsym& d_asym, const std::vector<double>& xmpq,
+    const RadialPartitioning& rp, const Sizes& s,
+    const FourierBasisFastPoloidal& fb, FourierForces& m_physical_forces);
+
 // symforce: Symmetrize forces in (theta,zeta) space
 // Separates forces into symmetric and antisymmetric components
 void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,

@@ -3172,8 +3172,9 @@ void IdealMhdModel::forcesToFourier(FourierForces& m_physical_f) {
           .crmn_a = empty_vector,
           .czmn_a = empty_vector,
       };
-      // TODO: Implement 2D asymmetric force-to-Fourier transform
-      // For now, 2D asymmetric cases may not converge properly
+      // Call 2D asymmetric force-to-Fourier transform
+      ForcesToFourier2DAsymmFastPoloidal(force_asym, xmpq, 
+                                         r_, s_, t_, m_physical_f);
     }
   }  // lasym
 }
