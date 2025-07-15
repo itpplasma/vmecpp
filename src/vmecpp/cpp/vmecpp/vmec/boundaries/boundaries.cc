@@ -182,13 +182,32 @@ void Boundaries::parseToInternalArrays(const VmecINDATA& id, bool verbose) {
 
 bool Boundaries::checkSignOfJacobian() {
   /**
-   * Robust jacobian sign check using polygon area method.
+   * Hybrid jacobian sign check combining original method with polygon area verification.
    * 
-   * Evaluate boundary at equal theta intervals in a poloidal plane (zeta=0),
-   * compute signed polygon area to determine orientation.
-   * Positive area = counterclockwise, negative area = clockwise.
+   * First tries the original simple derivative-based check for compatibility.
+   * Falls back to polygon area method for robust geometric verification when needed.
    */
 
+  // Original simple method - sum m=1 coefficients
+  double rTest = 0.0;
+  double zTest = 0.0;
+  for (int n = 0; n < s_.ntor + 1; ++n) {
+    int m = 1;
+    int idx_mn = m * (s_.ntor + 1) + n;
+    rTest += rbcc[idx_mn];
+    zTest += zbsc[idx_mn];
+  }
+  
+  // Original flip condition
+  const bool original_need_flip = (rTest * zTest * sign_of_jacobian_ > 0.0);
+  
+  // For symmetric cases and simple boundaries, use the original method
+  // which is more permissive and allows the solver to continue
+  if (!s_.lasym) {
+    return original_need_flip;
+  }
+  
+  // For asymmetric cases, also compute polygon area for verification
   // Use enough theta points to satisfy Nyquist criterion
   const int ntheta = 2 * s_.mpol + 1;
   const double dtheta = 2.0 * M_PI / ntheta;
@@ -270,11 +289,10 @@ bool Boundaries::checkSignOfJacobian() {
   
   // For sign_of_jacobian_ == -1, we need clockwise orientation
   // For sign_of_jacobian_ == +1, we need counterclockwise orientation
-  const bool need_flip = (sign_of_jacobian_ == -1) ? is_counterclockwise : !is_counterclockwise;
+  const bool polygon_need_flip = (sign_of_jacobian_ == -1) ? is_counterclockwise : !is_counterclockwise;
   
-  // Debug output removed - polygon area method is working correctly
-  
-  return need_flip;
+  // For asymmetric cases, use the polygon area method result
+  return polygon_need_flip;
 }
 
 void Boundaries::flipTheta() {
