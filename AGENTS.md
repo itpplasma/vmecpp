@@ -202,34 +202,6 @@ VMEC++ uses **two different Fourier representations**:
 - **Hot restart**: Pass previous VmecOutput as `restart_from` parameter to run()
 - You must look in ../jVMEC and ../educational_VMEC for reference where to modify code to enable non-stellarator-symmetric fields. jVMEC fixed some issues regarding step size of optimizer in original VMEC so should be preferred. Also look for tokamak and non-stellarator symmetric test cases there.
 
-## Current Status: Asymmetric Implementation Investigation
-
-### Background
-The asymmetric VMEC implementation was 95% complete with all core infrastructure working correctly. The final issue was with asymmetric tokamak convergence.
-
-### Key Findings
-1. **Jacobian Sign Check**: Initially suspected missing asymmetric terms, but verified that the implementation correctly matches educational_VMEC and jVMEC exactly - only symmetric terms (rbcc, zbsc) are used.
-
-2. **Axis Recomputation**: The magnetic axis recomputation algorithm is correctly implemented with full toroidal grid search for asymmetric cases, but the grid search strategies are insufficient for the challenging boundary shape in input.tok_asym.
-
-3. **Root Cause**: The issue is a robustness problem in the axis recomputation algorithm, not a fundamental implementation error. The core asymmetric infrastructure is complete and working.
-
-### Progress Made
-- Enhanced axis recomputation with multiple search strategies (conservative fallback searches)
-- Verified boundary mathematics match educational_VMEC exactly  
-- Confirmed force-to-Fourier transforms work correctly
-- HELIOTRON_asym converges successfully, proving asymmetric infrastructure is correct
-
-### Next Steps
-The solution requires implementing more sophisticated axis search strategies:
-1. Polygon area method for jacobian sign check
-2. Boundary centroid method for initial axis guess
-3. Adaptive grid resolution in promising regions
-4. Direct educational_VMEC algorithm port with exact numerical precision
-
-### Impact
-This is the final piece needed for complete asymmetric tokamak support. The asymmetric implementation is functionally complete - only robustness improvements needed for challenging boundary shapes.
-
 ## Common Workflows
 
 **Fixed Boundary Run**:
