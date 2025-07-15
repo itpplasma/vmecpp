@@ -107,6 +107,31 @@ After systematic comparison with jVMEC codebase, VMEC++ has **complete and equiv
 2. ✅ **COMPLETED: Implemented 2D asymmetric force-to-Fourier transform**  
 3. ✅ **COMPLETED: Verified complete equivalence with jVMEC asymmetric implementation**
 4. ✅ **COMPLETED: All critical asymmetric TODOs fixed except free boundary**
+
+### **🔄 CURRENT ISSUE: Asymmetric Tokamak Convergence**
+
+#### **Status**: Asymmetric axis recomputation needs enhancement
+
+**Issue**: The tokamak asymmetric case (input.tok_asym) fails with "INITIAL JACOBIAN CHANGED SIGN!" error despite implemented axis recomputation algorithm.
+
+**Root Cause Analysis**:
+1. **Jacobian sign check is correct** - matches educational_VMEC and jVMEC implementations exactly
+2. **Axis recomputation algorithm is correct** - properly handles asymmetric cases with full toroidal grid search
+3. **Issue is robustness** - current grid search strategies are insufficient for this specific asymmetric boundary shape
+
+**Progress Made**:
+- ✅ Enhanced axis recomputation with multiple search strategies (lines 453-511 in guess_magnetic_axis.cc)
+- ✅ Added conservative fallback searches with smaller perturbations
+- ✅ Verified boundary mathematics match educational_VMEC exactly
+- ✅ Confirmed force-to-Fourier transforms are working correctly
+
+**Next Steps**:
+1. **Implement more sophisticated axis search** - Use polygon area method mentioned in TODO comment
+2. **Add axis interpolation fallback** - Use boundary centroid as more robust initial guess
+3. **Implement educational_VMEC axis search exactly** - Direct port of reference algorithm
+4. **Add comprehensive axis diagnostics** - Better understanding of why current search fails
+
+**Impact**: This is the final piece needed for complete asymmetric tokamak support. HELIOTRON_asym already converges successfully.
 5. ✅ **COMPLETED: Fixed critical 2D asymmetric force array bug (blmn_a, brmn_a, bzmn_a)**
 6. ✅ **COMPLETED: Quantitative validation framework against SIMSOPT VMEC** - Created comprehensive test suite
 7. [ ] **BLOCKED: Asymmetric convergence failure** - "INITIAL JACOBIAN CHANGED SIGN!" error prevents validation

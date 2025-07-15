@@ -454,15 +454,17 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
     // a positive minimum jacobian, fall back to a more conservative approach
     if (s.lasym && min_tau <= 0.0) {
       // For asymmetric cases, if the grid search fails, use a smaller
-      // perturbation from the initial guess
+      // perturbation from the initial guess and try multiple strategies
       double r_center = (max_r + min_r) / 2.0;
       double z_center = (max_z + min_z) / 2.0;
-      double perturbation = 0.1 * std::min(max_r - min_r, max_z - min_z);
+      double perturbation = 0.05 * std::min(max_r - min_r, max_z - min_z);
       
-      // Try a smaller search around the center
-      for (int trial = 0; trial < 5; ++trial) {
-        double r_test = r_center + perturbation * (trial - 2) / 2.0;
-        double z_test = z_center + perturbation * (trial - 2) / 2.0;
+      // Strategy 1: Small perturbations around center
+      for (int trial = 0; trial < 9; ++trial) {
+        int i = trial % 3;
+        int j = trial / 3;
+        double r_test = r_center + perturbation * (i - 1);
+        double z_test = z_center + perturbation * (j - 1);
         
         for (int l = 0; l < s.nThetaEven; ++l) {
           w.tau[k][l] = sign_of_jacobian *
@@ -477,6 +479,32 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
           min_tau = min_tau_test;
           w.new_r_axis[k] = r_test;
           w.new_z_axis[k] = z_test;
+        }
+      }
+      
+      // Strategy 2: If still not found, use even smaller perturbations
+      if (min_tau <= 0.0) {
+        perturbation *= 0.2;
+        for (int trial = 0; trial < 9; ++trial) {
+          int i = trial % 3;
+          int j = trial / 3;
+          double r_test = r_center + perturbation * (i - 1);
+          double z_test = z_center + perturbation * (j - 1);
+          
+          for (int l = 0; l < s.nThetaEven; ++l) {
+            w.tau[k][l] = sign_of_jacobian *
+                          (w.tau0[k][l] - w.d_r_d_theta_half[k][l] * z_test +
+                           w.d_z_d_theta_half[k][l] * r_test);
+          }
+          
+          double min_tau_test =
+              *std::min_element(w.tau[k].begin(), w.tau[k].end());
+          
+          if (min_tau_test > min_tau) {
+            min_tau = min_tau_test;
+            w.new_r_axis[k] = r_test;
+            w.new_z_axis[k] = z_test;
+          }
         }
       }
     }
