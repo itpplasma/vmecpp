@@ -108,8 +108,11 @@ After systematic comparison with jVMEC codebase, VMEC++ has **complete and equiv
 3. ✅ **COMPLETED: Verified complete equivalence with jVMEC asymmetric implementation**
 4. ✅ **COMPLETED: All critical asymmetric TODOs fixed except free boundary**
 5. ✅ **COMPLETED: Fixed critical 2D asymmetric force array bug (blmn_a, brmn_a, bzmn_a)**
-6. [ ] **IN PROGRESS: Quantitative validation against SIMSOPT VMEC** - Framework created in test_asymmetric_validation.py
-7. [ ] **BLOCKED: Eigen assertion failure in asymmetric cases** - Matrix indexing bug needs investigation
+6. ✅ **COMPLETED: Quantitative validation framework against SIMSOPT VMEC** - Created comprehensive test suite
+7. [ ] **BLOCKED: Asymmetric convergence failure** - "INITIAL JACOBIAN CHANGED SIGN!" error prevents validation
+   - Same input files work with educational_VMEC
+   - Indicates remaining bugs in asymmetric boundary handling
+   - Quantitative validation cannot complete until convergence is fixed
 8. [ ] **Future**: Implement free boundary asymmetric support (separate effort)
 
 ## Code Quality Checklist
