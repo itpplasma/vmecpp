@@ -5,8 +5,6 @@
 #include "vmecpp/vmec/boundaries/boundaries.h"
 
 #include <iostream>
-#include <vector>
-#include <cmath>
 
 #include "absl/algorithm/container.h"
 #include "vmecpp/vmec/boundaries/guess_magnetic_axis.h"
@@ -182,13 +180,13 @@ void Boundaries::parseToInternalArrays(const VmecINDATA& id, bool verbose) {
 
 bool Boundaries::checkSignOfJacobian() {
   /**
-   * Hybrid jacobian sign check combining original method with polygon area verification.
-   * 
-   * First tries the original simple derivative-based check for compatibility.
-   * Falls back to polygon area method for robust geometric verification when needed.
+   * current working hypothesis: rTest, zTest are related to the leading terms
+   * of d(R,Z)/dTheta at (theta, zeta)=(pi/2, 0) for R and at (theta, zeta)=(0,
+   * 0) for Z. If the leading derivatives have the same sign, the path is
+   * probably going counter-clockwise, with different signs it is likely going
+   * clockwise.
    */
 
-  // Original simple method - sum m=1 coefficients
   double rTest = 0.0;
   double zTest = 0.0;
   for (int n = 0; n < s_.ntor + 1; ++n) {
@@ -197,102 +195,16 @@ bool Boundaries::checkSignOfJacobian() {
     rTest += rbcc[idx_mn];
     zTest += zbsc[idx_mn];
   }
-  
-  // Original flip condition
-  const bool original_need_flip = (rTest * zTest * sign_of_jacobian_ > 0.0);
-  
-  // For symmetric cases and simple boundaries, use the original method
-  // which is more permissive and allows the solver to continue
-  if (!s_.lasym) {
-    return original_need_flip;
-  }
-  
-  // For asymmetric cases, also compute polygon area for verification
-  // Use enough theta points to satisfy Nyquist criterion
-  const int ntheta = 2 * s_.mpol + 1;
-  const double dtheta = 2.0 * M_PI / ntheta;
-  
-  // Evaluate boundary at theta points in zeta=0 plane
-  std::vector<double> r_points(ntheta);
-  std::vector<double> z_points(ntheta);
-  
-  for (int i = 0; i < ntheta; ++i) {
-    const double theta = i * dtheta;
-    const double zeta = 0.0;
-    
-    // Compute R(theta, zeta=0) and Z(theta, zeta=0)
-    double r_val = 0.0;
-    double z_val = 0.0;
-    
-    for (int m = 0; m < s_.mpol; ++m) {
-      for (int n = 0; n <= s_.ntor; ++n) {
-        const int idx_mn = m * (s_.ntor + 1) + n;
-        const double cos_mt = cos(m * theta);
-        const double sin_mt = sin(m * theta);
-        const double cos_nz = cos(n * zeta);  // = 1.0 for zeta=0
-        const double sin_nz = sin(n * zeta);  // = 0.0 for zeta=0
-        
-        // R = sum(rbcc * cos(m*theta) * cos(n*zeta))
-        r_val += rbcc[idx_mn] * cos_mt * cos_nz;
-        
-        // Z = sum(zbsc * sin(m*theta) * cos(n*zeta)) for m > 0
-        if (m > 0) {
-          z_val += zbsc[idx_mn] * sin_mt * cos_nz;
-        }
-        
-        // Add 3D terms if present
-        if (s_.lthreed) {
-          // R += rbss * sin(m*theta) * sin(n*zeta) for m > 0
-          if (m > 0) {
-            r_val += rbss[idx_mn] * sin_mt * sin_nz;
-          }
-          // Z += zbcs * cos(m*theta) * sin(n*zeta)
-          z_val += zbcs[idx_mn] * cos_mt * sin_nz;
-        }
-        
-        // Add asymmetric terms if present
-        if (s_.lasym) {
-          // R += rbsc * sin(m*theta) * cos(n*zeta) for m > 0
-          if (m > 0) {
-            r_val += rbsc[idx_mn] * sin_mt * cos_nz;
-          }
-          // Z += zbcc * cos(m*theta) * cos(n*zeta)
-          z_val += zbcc[idx_mn] * cos_mt * cos_nz;
-          
-          if (s_.lthreed) {
-            // R += rbcs * cos(m*theta) * sin(n*zeta)
-            r_val += rbcs[idx_mn] * cos_mt * sin_nz;
-            // Z += zbss * sin(m*theta) * sin(n*zeta) for m > 0
-            if (m > 0) {
-              z_val += zbss[idx_mn] * sin_mt * sin_nz;
-            }
-          }
-        }
-      }
-    }
-    
-    r_points[i] = r_val;
-    z_points[i] = z_val;
-  }
-  
-  // Compute signed polygon area using shoelace formula
-  double signed_area = 0.0;
-  for (int i = 0; i < ntheta; ++i) {
-    const int next_i = (i + 1) % ntheta;
-    signed_area += r_points[i] * z_points[next_i] - r_points[next_i] * z_points[i];
-  }
-  signed_area *= 0.5;
-  
-  // Determine orientation based on area sign
-  // Positive area = counterclockwise, negative area = clockwise
-  const bool is_counterclockwise = (signed_area > 0.0);
-  
-  // For sign_of_jacobian_ == -1, we need clockwise orientation
-  // For sign_of_jacobian_ == +1, we need counterclockwise orientation
-  const bool polygon_need_flip = (sign_of_jacobian_ == -1) ? is_counterclockwise : !is_counterclockwise;
-  
-  // For asymmetric cases, use the polygon area method result
-  return polygon_need_flip;
+
+  // TODO(jons): potentially more robust version of this
+  // - eval boundary in a given poloidal plane at equal theta intervals, enough
+  // to satisfy Nyquist requirement
+  // - compute signed polygon area
+  // --> handedness of polygon is given by sign of polygon area
+
+  // for signOfJacobian == -1, need to flip when rTest*zTest < 0
+  // ---> this is true when the total sign is positive
+  return (rTest * zTest * sign_of_jacobian_ > 0.0);
 }
 
 void Boundaries::flipTheta() {
