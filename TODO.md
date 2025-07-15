@@ -107,8 +107,10 @@ After systematic comparison with jVMEC codebase, VMEC++ has **complete and equiv
 2. ✅ **COMPLETED: Implemented 2D asymmetric force-to-Fourier transform**  
 3. ✅ **COMPLETED: Verified complete equivalence with jVMEC asymmetric implementation**
 4. ✅ **COMPLETED: All critical asymmetric TODOs fixed except free boundary**
-5. [ ] **Future**: Implement free boundary asymmetric support (separate effort)
-6. [ ] **Future**: Run comprehensive quantitative comparisons with reference data
+5. ✅ **COMPLETED: Fixed critical 2D asymmetric force array bug (blmn_a, brmn_a, bzmn_a)**
+6. [ ] **IN PROGRESS: Quantitative validation against SIMSOPT VMEC** - Framework created in test_asymmetric_validation.py
+7. [ ] **BLOCKED: Eigen assertion failure in asymmetric cases** - Matrix indexing bug needs investigation
+8. [ ] **Future**: Implement free boundary asymmetric support (separate effort)
 
 ## Code Quality Checklist
 - ✅ All arrays properly initialized

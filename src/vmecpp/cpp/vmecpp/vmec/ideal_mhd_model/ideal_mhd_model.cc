@@ -3160,14 +3160,15 @@ void IdealMhdModel::forcesToFourier(FourierForces& m_physical_f) {
       ForcesToFourier3DAsymmFastPoloidal(force_asym, xmpq, 
                                          r_, s_, t_, m_physical_f);
     } else {
-      // For 2D case, create empty spans for the 3D-only arrays
+      // For 2D case, only 3D toroidal force arrays (clmn_a, crmn_a, czmn_a) are empty
+      // blmn_a, brmn_a, bzmn_a are still needed for 2D asymmetric cases
       static const std::vector<double> empty_vector;
       force_asym = RealSpaceForcesAsym{
           .armn_a = armn_a,
           .azmn_a = azmn_a,
-          .blmn_a = empty_vector,
-          .brmn_a = empty_vector,
-          .bzmn_a = empty_vector,
+          .blmn_a = blmn_a,
+          .brmn_a = brmn_a,
+          .bzmn_a = bzmn_a,
           .clmn_a = empty_vector,
           .crmn_a = empty_vector,
           .czmn_a = empty_vector,
