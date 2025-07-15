@@ -16,7 +16,6 @@ bazel_dep(name = "pybind11_bazel", version = "2.13.6")
 python_configure = use_extension("@pybind11_bazel//:python_configure.bzl", "extension")
 use_repo(python_configure, "local_config_python", "pybind11")
 
-bazel_dep(name = "platforms", version = "0.0.10")
 bazel_dep(name = "rules_cc", version = "0.0.9")
 bazel_dep(name = "rules_foreign_cc", version = "0.12.0")
 

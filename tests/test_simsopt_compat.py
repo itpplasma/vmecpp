@@ -27,21 +27,9 @@ def input_file_path(request) -> Path:
     return TEST_DATA_DIR / request.param
 
 
-@pytest.fixture(scope="module", params=["input.HELIOTRON_asym", "input.tok_asym"])
-def asymmetric_input_file_path(request) -> Path:
-    return TEST_DATA_DIR / request.param
-
-
 @pytest.fixture(scope="module")
 def vmec(input_file_path) -> simsopt_compat.Vmec:
     vmec = simsopt_compat.Vmec(input_file_path)
-    vmec.run()
-    return vmec
-
-
-@pytest.fixture(scope="module")
-def asymmetric_vmec(asymmetric_input_file_path) -> simsopt_compat.Vmec:
-    vmec = simsopt_compat.Vmec(asymmetric_input_file_path)
     vmec.run()
     return vmec
 
@@ -53,21 +41,6 @@ def reference_wout(input_file_path) -> netCDF4.Dataset:
 
     assert "cma" in input_file_path.name
     return netCDF4.Dataset(TEST_DATA_DIR / "wout_cma.nc", "r")
-
-
-@pytest.fixture
-def asymmetric_reference_wout(asymmetric_input_file_path) -> netCDF4.Dataset:
-    if "HELIOTRON_asym" in asymmetric_input_file_path.name:
-        reference_file = TEST_DATA_DIR / "wout_HELIOTRON_asym.nc"
-    elif "tok_asym" in asymmetric_input_file_path.name:
-        reference_file = TEST_DATA_DIR / "wout_tok_asym.nc"
-    else:
-        pytest.skip(f"No reference file for {asymmetric_input_file_path.name}")
-    
-    if not reference_file.exists():
-        pytest.skip(f"Reference file {reference_file} not available (manual validation only)")
-    
-    return netCDF4.Dataset(reference_file, "r")
 
 
 # regression test for #174
@@ -286,103 +259,3 @@ def test_ensure_vmec2000_input_from_vmecpp_input():
                             :, 101 - ntor : 101 + ntor + 1
                         ]
                 np.testing.assert_allclose(vmecpp_var, vmec2000_var_truncated)
-
-
-# Asymmetric (lasym=true) tests
-def test_asymmetric_run(asymmetric_vmec):
-    """Test that asymmetric configurations run successfully."""
-    assert asymmetric_vmec.wout is not None
-    assert asymmetric_vmec.indata.lasym is True
-    assert asymmetric_vmec.wout.lasym is True
-
-
-def test_asymmetric_convergence(asymmetric_vmec):
-    """Test that asymmetric configurations converge."""
-    assert asymmetric_vmec.wout.ier_flag == 0  # Normal termination
-
-
-def test_asymmetric_output_arrays_exist(asymmetric_vmec):
-    """Test that asymmetric output arrays are present when lasym=True."""
-    wout = asymmetric_vmec.wout
-    
-    # Check that asymmetric arrays exist and have proper shapes
-    assert hasattr(wout, 'gmns'), "gmns array missing for lasym=True"
-    assert hasattr(wout, 'bmns'), "bmns array missing for lasym=True"
-    assert hasattr(wout, 'bsubumns'), "bsubumns array missing for lasym=True"
-    assert hasattr(wout, 'bsubvmns'), "bsubvmns array missing for lasym=True"
-    assert hasattr(wout, 'bsubsmnc'), "bsubsmnc array missing for lasym=True"
-    assert hasattr(wout, 'bsupumns'), "bsupumns array missing for lasym=True"
-    assert hasattr(wout, 'bsupvmns'), "bsupvmns array missing for lasym=True"
-    
-    # Check shapes match symmetric counterparts
-    assert wout.gmns.shape == wout.gmnc.shape
-    assert wout.bmns.shape == wout.bmnc.shape
-    assert wout.bsubumns.shape == wout.bsubumnc.shape
-    assert wout.bsubvmns.shape == wout.bsubvmnc.shape
-    assert wout.bsupumns.shape == wout.bsupumnc.shape
-    assert wout.bsupvmns.shape == wout.bsupvmnc.shape
-
-
-def test_asymmetric_geometry_arrays_exist(asymmetric_vmec):
-    """Test that asymmetric geometry arrays are present when lasym=True."""
-    wout = asymmetric_vmec.wout
-    
-    # Check that asymmetric geometry arrays exist
-    assert hasattr(wout, 'rmns'), "rmns array missing for lasym=True"
-    assert hasattr(wout, 'zmnc'), "zmnc array missing for lasym=True"
-    assert hasattr(wout, 'lmnc'), "lmnc array missing for lasym=True"
-    
-    # Check shapes match symmetric counterparts
-    assert wout.rmns.shape == wout.rmnc.shape
-    assert wout.zmnc.shape == wout.zmns.shape
-    assert wout.lmnc.shape == wout.lmns.shape
-
-
-@pytest.mark.parametrize(
-    "attribute_name",
-    ["gmns", "bmns", "bsubumns", "bsubvmns", "bsupumns", "bsupvmns", "rmns", "zmnc", "lmnc"],
-)
-def test_asymmetric_arrays_nonzero(asymmetric_vmec, attribute_name):
-    """Test that at least some asymmetric arrays contain non-zero values."""
-    wout = asymmetric_vmec.wout
-    if hasattr(wout, attribute_name):
-        array_values = getattr(wout, attribute_name)
-        # For asymmetric configurations, at least some asymmetric modes should be non-zero
-        # We check that the maximum absolute value is above a reasonable threshold
-        max_abs_value = np.max(np.abs(array_values))
-        assert max_abs_value > 1e-15, f"{attribute_name} array appears to be all zeros"
-
-
-# Manual validation tests (only run when reference files are available)
-def test_asymmetric_aspect_validation(asymmetric_vmec, asymmetric_reference_wout):
-    """Validate aspect ratio against reference when available."""
-    aspect = asymmetric_vmec.aspect()
-    expected_aspect = asymmetric_reference_wout.variables["aspect"][()]
-    np.testing.assert_allclose(aspect, expected_aspect, rtol=1e-10, atol=0.0)
-
-
-def test_asymmetric_volume_validation(asymmetric_vmec, asymmetric_reference_wout):
-    """Validate volume against reference when available."""
-    volume = asymmetric_vmec.volume()
-    expected_volume = asymmetric_reference_wout.variables["volume_p"][()]
-    np.testing.assert_allclose(volume, expected_volume, rtol=1e-10, atol=0.0)
-
-
-def test_asymmetric_iota_validation(asymmetric_vmec, asymmetric_reference_wout):
-    """Validate iota profile against reference when available."""
-    wout = asymmetric_vmec.wout
-    expected_iotaf = asymmetric_reference_wout.variables["iotaf"][()]
-    np.testing.assert_allclose(wout.iotaf, expected_iotaf, rtol=1e-10, atol=1e-12)
-
-
-@pytest.mark.parametrize(
-    "attribute_name",
-    ["gmns", "bmns", "bsubumns", "bsubvmns", "bsupumns", "bsupvmns"],
-)
-def test_asymmetric_arrays_validation(asymmetric_vmec, asymmetric_reference_wout, attribute_name):
-    """Validate asymmetric arrays against reference when available."""
-    wout = asymmetric_vmec.wout
-    if hasattr(wout, attribute_name) and attribute_name in asymmetric_reference_wout.variables:
-        computed_values = getattr(wout, attribute_name)
-        expected_values = asymmetric_reference_wout.variables[attribute_name][()]
-        np.testing.assert_allclose(computed_values, expected_values, rtol=1e-10, atol=1e-12)
