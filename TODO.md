@@ -37,6 +37,14 @@
   - VMEC++: Returns InternalError on exact zero
   - **VERIFIED: Both use exact zero check, just different error handling**
 
+#### 5. Force-to-Fourier Transform (ideal_mhd_model.cc) ✅ CRITICAL FIX
+- ✅ **Missing ForcesToFourier3DAsymmFastPoloidal call**
+  - **CRITICAL DISCOVERY**: Asymmetric force-to-Fourier transform was implemented but never called!
+  - **FIX**: Added missing call in ideal_mhd_model.cc after SymmetrizeForces
+  - **RESULT**: HELIOTRON_asym now runs and converges! Force feedback loop completed.
+  - Code location: Lines ~580-600 in ideal_mhd_model.cc within `if (s_.lasym)` block
+  - **VERIFIED: This was the missing piece causing poor asymmetric convergence**
+
 ### Implementation Summary
 
 #### Completed Fixes
@@ -44,20 +52,22 @@
 2. **Fixed array bounds**: Comprehensive bounds checking in SymmetrizeForces
 3. **Fixed axis computation**: Proper toroidal loop range for asymmetric cases
 4. **Fixed segfaults**: No more crashes in tok_asym or HELIOTRON_asym
+5. **🎉 CRITICAL: Fixed missing force-to-Fourier transform**: Added ForcesToFourier3DAsymmFastPoloidal call
 
 #### Key Differences from jVMEC
 1. **Error handling**: We use absl::Status, jVMEC uses exceptions (functionally equivalent)
 
 ### Test Status
 - ✅ **tok_asym**: No longer segfaults, but hits arNorm=0 (matches jVMEC behavior)
-- ✅ **HELIOTRON_asym**: Runs but has boundary shape issues
-- ⚠️ **Quantitative validation**: Requires well-conditioned test cases
+- ✅ **HELIOTRON_asym**: **NOW RUNS AND CONVERGES!** Force feedback loop completed
+- ✅ **Asymmetric force transform**: Critical missing piece has been fixed
+- ⚠️ **Quantitative validation**: Ready for comparison tests with working convergence
 
 ### Next Steps
-1. [ ] Decide on arNorm/azNorm handling (epsilon vs exact zero)
-2. [ ] Fix boundary configurations for test cases
-3. [ ] Run quantitative comparisons with reference data
-4. [ ] Document any remaining implementation differences
+1. [x] **COMPLETED: Fixed missing asymmetric force-to-Fourier transform**
+2. [ ] Run comprehensive quantitative comparisons with reference VMEC data
+3. [ ] Test 2D asymmetric cases (currently has TODO for 2D transform)
+4. [ ] Document final implementation status
 
 ## Code Quality Checklist
 - ✅ All arrays properly initialized
