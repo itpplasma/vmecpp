@@ -3141,14 +3141,40 @@ void IdealMhdModel::forcesToFourier(FourierForces& m_physical_f) {
   }
 
   if (s_.lasym) {
-    // For asymmetric configurations, we need to call the asymmetric DFT
-    // Currently using minimal implementation - the asymmetric force
-    // decomposition is handled implicitly during force calculations
-    // TODO: Implement proper force symmetrization when needed
+    // Transform antisymmetric forces to Fourier space
+    // This is the missing piece for asymmetric convergence!
     
-    // For now, we'll skip the asymmetric force-to-Fourier transform
-    // since the current architecture handles asymmetric forces implicitly
-    // This allows asymmetric execution to proceed without crashing
+    // Reconstruct the asymmetric force structure that was used in SymmetrizeForces
+    RealSpaceForcesAsym force_asym;
+    if (s_.lthreed) {
+      force_asym = RealSpaceForcesAsym{
+          .armn_a = armn_a,
+          .azmn_a = azmn_a,
+          .blmn_a = blmn_a,
+          .brmn_a = brmn_a,
+          .bzmn_a = bzmn_a,
+          .clmn_a = clmn_a,
+          .crmn_a = crmn_a,
+          .czmn_a = czmn_a,
+      };
+      ForcesToFourier3DAsymmFastPoloidal(force_asym, xmpq, 
+                                         r_, s_, t_, m_physical_f);
+    } else {
+      // For 2D case, create empty spans for the 3D-only arrays
+      static const std::vector<double> empty_vector;
+      force_asym = RealSpaceForcesAsym{
+          .armn_a = armn_a,
+          .azmn_a = azmn_a,
+          .blmn_a = empty_vector,
+          .brmn_a = empty_vector,
+          .bzmn_a = empty_vector,
+          .clmn_a = empty_vector,
+          .crmn_a = empty_vector,
+          .czmn_a = empty_vector,
+      };
+      // TODO: Implement 2D asymmetric force-to-Fourier transform
+      // For now, 2D asymmetric cases may not converge properly
+    }
   }  // lasym
 }
 
