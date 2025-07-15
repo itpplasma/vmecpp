@@ -134,7 +134,8 @@ void FourierToReal2DAsymmFastPoloidal(const FourierGeometry& physical_x,
                                       const FourierBasisFastPoloidal& fb,
                                       RealSpaceGeometryAsym& m_geometry_asym) {
   // Clear all arrays first
-  const int num_realsp = (r.nsMaxF1 - r.nsMinF1) * s.nThetaEff;
+  // For 2D case: use nThetaReduced for consistency with force arrays
+  const int num_realsp = (r.nsMaxF1 - r.nsMinF1) * s.nThetaReduced;
   for (auto* v : {&m_geometry_asym.r1_a, &m_geometry_asym.ru_a,
                   &m_geometry_asym.z1_a, &m_geometry_asym.zu_a,
                   &m_geometry_asym.lu_a}) {
@@ -158,9 +159,9 @@ void FourierToReal2DAsymmFastPoloidal(const FourierGeometry& physical_x,
 
       // Process asymmetric modes
       
-      for (int l = 0; l < s.nThetaEff; ++l) {
+      for (int l = 0; l < s.nThetaReduced; ++l) {
         int idx_ml = m * s.nThetaReduced + l;
-        int idx_l1 = (jF - r.nsMinF1) * s.nThetaEff + l;
+        int idx_l1 = (jF - r.nsMinF1) * s.nThetaReduced + l;
         int idx_fc = ((jF - r.nsMinF1) * s.mpol + m) * (s.ntor + 1) + 0;
 
         // For 2D asymmetric case (n=0 only)
@@ -452,19 +453,19 @@ void ForcesToFourier2DAsymmFastPoloidal(
       // For 2D case, only n=0 (no toroidal variation)
       const int n = 0;
       
-      double rmksc = 0.0;
-      double rmkcs = 0.0;  
-      double zmkcc = 0.0;
-      double zmkss = 0.0;
-      double lmkcc = 0.0;
-      double lmkss = 0.0;
+      // Only the components needed for 2D asymmetric (n=0 only)
+      double rmksc = 0.0;  // R sin(m*theta)*cos(0*zeta)
+      double zmkcc = 0.0;  // Z cos(m*theta)*cos(0*zeta)
+      double lmkcc = 0.0;  // lambda cos(m*theta)*cos(0*zeta)
 
-      const int idx_kl_base = (jF - rp.nsMinF) * s.nZnT;
+      // For 2D case: simplified indexing without toroidal complexity
+      // Force arrays are sized as (nsMaxF - nsMinF) * nThetaReduced
+      const int idx_kl_base = (jF - rp.nsMinF) * s.nThetaReduced;
       const int idx_ml_base = m * s.nThetaReduced;
 
-      for (int l = 0; l < s.nThetaEff; ++l) {
+      for (int l = 0; l < s.nThetaReduced; ++l) {
         const int idx_kl = idx_kl_base + l;
-        const int idx_ml = idx_ml_base + (l % s.nThetaReduced);
+        const int idx_ml = idx_ml_base + l;
 
         const double cosmui = fb.cosmui[idx_ml];
         const double sinmui = fb.sinmui[idx_ml];
@@ -479,28 +480,33 @@ void ForcesToFourier2DAsymmFastPoloidal(
         const double tempR = d_asym.armn_a[idx_kl];
         const double tempZ = d_asym.azmn_a[idx_kl];
 
-        // For 2D asymmetric modes:
-        // R: sin(m*theta) and cos(m*theta) components
-        // Z: cos(m*theta) and sin(m*theta) components  
+        // For 2D asymmetric: only process sin(m*theta) for R and cos(m*theta) for Z
+        // Based on jVMEC pattern for 2D asymmetric cases
         rmksc += tempR * sinmui;   // R sin(m*theta) component
-        rmkcs += tempR * cosmui;   // R cos(m*theta) component
         zmkcc += tempZ * cosmui;   // Z cos(m*theta) component
-        zmkss += tempZ * sinmui;   // Z sin(m*theta) component
+        
+        // Lambda force: access blmn_a if it exists and has valid data
+        if (!d_asym.blmn_a.empty() && idx_kl < static_cast<int>(d_asym.blmn_a.size())) {
+          const double tempL = d_asym.blmn_a[idx_kl];
+          lmkcc += tempL * cosmui;   // lambda cos(m*theta) component
+        }
       }  // l
 
       // For 2D case, only n=0 contribution
       const int idx_mn = ((jF - rp.nsMinF) * s.mpol + m) * (s.ntor + 1) + n;
 
-      // Accumulate asymmetric force contributions (no toroidal variation)
-      m_physical_forces.frsc[idx_mn] += rmksc;  // frsc: R sin(m*theta)*cos(0*zeta)
-      m_physical_forces.frcs[idx_mn] += rmkcs;  // frcs: R cos(m*theta)*sin(0*zeta) = 0
-      m_physical_forces.fzcc[idx_mn] += zmkcc;  // fzcc: Z cos(m*theta)*cos(0*zeta)  
-      m_physical_forces.fzss[idx_mn] += zmkss;  // fzss: Z sin(m*theta)*sin(0*zeta) = 0
+      // For 2D (n=0), only assign to components that don't involve sin(n*zeta)
+      // Based on jVMEC: 2D asymmetric only processes frsc and fzcc components
+      m_physical_forces.frsc[idx_mn] += rmksc;  // frsc: R sin(m*theta)*cos(0*zeta) = R sin(m*theta)
+      m_physical_forces.fzcc[idx_mn] += zmkcc;  // fzcc: Z cos(m*theta)*cos(0*zeta) = Z cos(m*theta)
+      
+      // Skip frcs and fzss as they involve sin(n*zeta) which is zero for n=0
+      // rmkcs and zmkss are not used in 2D asymmetric case
 
-      // Lambda components only for jF >= jMinL
+      // Lambda components only for jF >= jMinL  
+      // For 2D, only flcc is used (cos(m*theta)*cos(0*zeta))
       if (jMinL <= jF) {
         m_physical_forces.flcc[idx_mn] += lmkcc;
-        m_physical_forces.flss[idx_mn] += lmkss;
       }
     }  // m
   }  // jF
