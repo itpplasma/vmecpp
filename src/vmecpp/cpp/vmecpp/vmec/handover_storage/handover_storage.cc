@@ -75,7 +75,7 @@ void HandoverStorage::allocate(const RadialPartitioning& r, int ns) {
     zmncs_o.resize(num_threads_);
     lmnsc_o.resize(num_threads_);
     lmncs_o.resize(num_threads_);
-    
+
     // Allocate asymmetric arrays if needed
     if (s_.lasym) {
       rmnsc_i.resize(num_threads_);
