@@ -348,7 +348,7 @@ void SymmetrizeRealSpaceGeometry(const Sizes& s, const RadialPartitioning& r,
 // Implementation of tomnspa: Fourier transform antisymmetric forces back to
 // spectral space
 void ForcesToFourier3DAsymmFastPoloidal(
-    const RealSpaceForcesAsym& d_asym, const std::vector<double>& xmpq,
+    const RealSpaceForcesAsym& d_asym, const std::vector<double>& /* xmpq */,
     const RadialPartitioning& rp, const Sizes& s,
     const FourierBasisFastPoloidal& fb, FourierForces& m_physical_forces) {
   // Transform antisymmetric real-space forces to Fourier coefficients
@@ -432,6 +432,70 @@ void ForcesToFourier3DAsymmFastPoloidal(
           }
         }  // n
       }  // k
+    }  // m
+  }  // jF
+}
+
+void ForcesToFourier2DAsymmFastPoloidal(
+    const RealSpaceForcesAsym& d_asym, const std::vector<double>& /* xmpq */,
+    const RadialPartitioning& rp, const Sizes& s,
+    const FourierBasisFastPoloidal& fb, FourierForces& m_physical_forces) {
+  // Transform antisymmetric real-space forces to Fourier coefficients for 2D case
+  // This is the 2D version without toroidal dependence (ntor=0, n=0 only)
+  
+  const int jMinL = 1;  // axis lambda stays zero
+  
+  for (int jF = rp.nsMinF; jF < rp.nsMaxF; ++jF) {
+    const int mmax = jF == 0 ? 1 : s.mpol;
+    for (int m = 0; m < mmax; ++m) {
+      
+      // For 2D case, only n=0 (no toroidal variation)
+      const int n = 0;
+      
+      double rmksc = 0.0;
+      double rmkcs = 0.0;  
+      double zmkcc = 0.0;
+      double zmkss = 0.0;
+      double lmkcc = 0.0;
+      double lmkss = 0.0;
+
+      const int idx_kl_base = (jF - rp.nsMinF) * s.nThetaEff;
+      const int idx_ml_base = m * s.nThetaReduced;
+
+      for (int l = 0; l < s.nThetaReduced; ++l) {
+        const int idx_kl = idx_kl_base + l;
+        const int idx_ml = idx_ml_base + l;
+
+        const double cosmui = fb.cosmui[idx_ml];
+        const double sinmui = fb.sinmui[idx_ml];
+
+        // Assemble effective R and Z forces from asymmetric MHD contributions
+        const double tempR = d_asym.armn_a[idx_kl];
+        const double tempZ = d_asym.azmn_a[idx_kl];
+
+        // For 2D asymmetric modes:
+        // R: sin(m*theta) and cos(m*theta) components
+        // Z: cos(m*theta) and sin(m*theta) components  
+        rmksc += tempR * sinmui;   // R sin(m*theta) component
+        rmkcs += tempR * cosmui;   // R cos(m*theta) component
+        zmkcc += tempZ * cosmui;   // Z cos(m*theta) component
+        zmkss += tempZ * sinmui;   // Z sin(m*theta) component
+      }  // l
+
+      // For 2D case, only n=0 contribution
+      const int idx_mn = ((jF - rp.nsMinF) * s.mpol + m) * (s.ntor + 1) + n;
+
+      // Accumulate asymmetric force contributions (no toroidal variation)
+      m_physical_forces.frsc[idx_mn] += rmksc;  // frsc: R sin(m*theta)*cos(0*zeta)
+      m_physical_forces.frcs[idx_mn] += rmkcs;  // frcs: R cos(m*theta)*sin(0*zeta) = 0
+      m_physical_forces.fzcc[idx_mn] += zmkcc;  // fzcc: Z cos(m*theta)*cos(0*zeta)  
+      m_physical_forces.fzss[idx_mn] += zmkss;  // fzss: Z sin(m*theta)*sin(0*zeta) = 0
+
+      // Lambda components only for jF >= jMinL
+      if (jMinL <= jF) {
+        m_physical_forces.flcc[idx_mn] += lmkcc;
+        m_physical_forces.flss[idx_mn] += lmkss;
+      }
     }  // m
   }  // jF
 }
