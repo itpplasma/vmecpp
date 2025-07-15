@@ -449,6 +449,37 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
         }
       }  // index_r
     }  // index_z
+    
+    // Conservative fix for asymmetric cases: if the grid search fails to find
+    // a positive minimum jacobian, fall back to a more conservative approach
+    if (s.lasym && min_tau <= 0.0) {
+      // For asymmetric cases, if the grid search fails, use a smaller
+      // perturbation from the initial guess
+      double r_center = (max_r + min_r) / 2.0;
+      double z_center = (max_z + min_z) / 2.0;
+      double perturbation = 0.1 * std::min(max_r - min_r, max_z - min_z);
+      
+      // Try a smaller search around the center
+      for (int trial = 0; trial < 5; ++trial) {
+        double r_test = r_center + perturbation * (trial - 2) / 2.0;
+        double z_test = z_center + perturbation * (trial - 2) / 2.0;
+        
+        for (int l = 0; l < s.nThetaEven; ++l) {
+          w.tau[k][l] = sign_of_jacobian *
+                        (w.tau0[k][l] - w.d_r_d_theta_half[k][l] * z_test +
+                         w.d_z_d_theta_half[k][l] * r_test);
+        }
+        
+        double min_tau_test =
+            *std::min_element(w.tau[k].begin(), w.tau[k].end());
+        
+        if (min_tau_test > min_tau) {
+          min_tau = min_tau_test;
+          w.new_r_axis[k] = r_test;
+          w.new_z_axis[k] = z_test;
+        }
+      }
+    }
   }  // k
 
   // flip-mirror stellarator-symmetric half in case of symmetric run
