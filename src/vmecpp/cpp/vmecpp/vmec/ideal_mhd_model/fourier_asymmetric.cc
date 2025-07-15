@@ -517,6 +517,8 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
   
   
   
+  
+  
   // Grid sizes for symmetrization
   const int nZeta = s.nZeta;
   const int nThetaEff = s.nThetaEff;
@@ -564,10 +566,16 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
         }
         
         // Additional bounds checking for force array access
+        // Standard arrays (armn, azmn, brmn, bzmn, crmn, czmn)
         if (jOffset + idx_kl >= static_cast<int>(m_forces.armn_e.size()) || 
             jOffset + idx_rev >= static_cast<int>(m_forces.armn_e.size())) {
           continue;  // Skip if array access would be out of bounds
         }
+        
+        // Lambda arrays (blmn, clmn) may have different size - check separately
+        const bool lambda_arrays_valid = 
+            (jOffset + idx_kl < static_cast<int>(m_forces.blmn_e.size())) &&
+            (jOffset + idx_rev < static_cast<int>(m_forces.blmn_e.size()));
         
         // Apply jVMEC stellarator symmetry decomposition
         // Following the exact pattern from jVMEC:
@@ -597,16 +605,30 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
         bzmn_asym_o[idx_kl] = 0.5 * (m_forces.bzmn_o[jOffset + idx_kl] - m_forces.bzmn_o[jOffset + idx_rev]);
         
         // blmn: antisymmetric part goes to symmetric, symmetric part goes to asym
-        blmn_sym_e[idx_kl] = 0.5 * (m_forces.blmn_e[jOffset + idx_kl] - m_forces.blmn_e[jOffset + idx_rev]);
-        blmn_sym_o[idx_kl] = 0.5 * (m_forces.blmn_o[jOffset + idx_kl] - m_forces.blmn_o[jOffset + idx_rev]);
-        blmn_asym_e[idx_kl] = 0.5 * (m_forces.blmn_e[jOffset + idx_kl] + m_forces.blmn_e[jOffset + idx_rev]);
-        blmn_asym_o[idx_kl] = 0.5 * (m_forces.blmn_o[jOffset + idx_kl] + m_forces.blmn_o[jOffset + idx_rev]);
+        if (lambda_arrays_valid) {
+          blmn_sym_e[idx_kl] = 0.5 * (m_forces.blmn_e[jOffset + idx_kl] - m_forces.blmn_e[jOffset + idx_rev]);
+          blmn_sym_o[idx_kl] = 0.5 * (m_forces.blmn_o[jOffset + idx_kl] - m_forces.blmn_o[jOffset + idx_rev]);
+          blmn_asym_e[idx_kl] = 0.5 * (m_forces.blmn_e[jOffset + idx_kl] + m_forces.blmn_e[jOffset + idx_rev]);
+          blmn_asym_o[idx_kl] = 0.5 * (m_forces.blmn_o[jOffset + idx_kl] + m_forces.blmn_o[jOffset + idx_rev]);
+        } else {
+          blmn_sym_e[idx_kl] = 0.0;
+          blmn_sym_o[idx_kl] = 0.0;
+          blmn_asym_e[idx_kl] = 0.0;
+          blmn_asym_o[idx_kl] = 0.0;
+        }
         
         // clmn: symmetric part retained, antisymmetric part goes to asym
-        clmn_sym_e[idx_kl] = 0.5 * (m_forces.clmn_e[jOffset + idx_kl] + m_forces.clmn_e[jOffset + idx_rev]);
-        clmn_sym_o[idx_kl] = 0.5 * (m_forces.clmn_o[jOffset + idx_kl] + m_forces.clmn_o[jOffset + idx_rev]);
-        clmn_asym_e[idx_kl] = 0.5 * (m_forces.clmn_e[jOffset + idx_kl] - m_forces.clmn_e[jOffset + idx_rev]);
-        clmn_asym_o[idx_kl] = 0.5 * (m_forces.clmn_o[jOffset + idx_kl] - m_forces.clmn_o[jOffset + idx_rev]);
+        if (lambda_arrays_valid) {
+          clmn_sym_e[idx_kl] = 0.5 * (m_forces.clmn_e[jOffset + idx_kl] + m_forces.clmn_e[jOffset + idx_rev]);
+          clmn_sym_o[idx_kl] = 0.5 * (m_forces.clmn_o[jOffset + idx_kl] + m_forces.clmn_o[jOffset + idx_rev]);
+          clmn_asym_e[idx_kl] = 0.5 * (m_forces.clmn_e[jOffset + idx_kl] - m_forces.clmn_e[jOffset + idx_rev]);
+          clmn_asym_o[idx_kl] = 0.5 * (m_forces.clmn_o[jOffset + idx_kl] - m_forces.clmn_o[jOffset + idx_rev]);
+        } else {
+          clmn_sym_e[idx_kl] = 0.0;
+          clmn_sym_o[idx_kl] = 0.0;
+          clmn_asym_e[idx_kl] = 0.0;
+          clmn_asym_o[idx_kl] = 0.0;
+        }
         
         // crmn: antisymmetric part goes to symmetric, symmetric part goes to asym
         crmn_sym_e[idx_kl] = 0.5 * (m_forces.crmn_e[jOffset + idx_kl] - m_forces.crmn_e[jOffset + idx_rev]);
@@ -632,10 +654,13 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
       const_cast<double*>(m_forces.brmn_o.data())[jOffset + kl] = brmn_sym_o[kl];
       const_cast<double*>(m_forces.bzmn_e.data())[jOffset + kl] = bzmn_sym_e[kl];
       const_cast<double*>(m_forces.bzmn_o.data())[jOffset + kl] = bzmn_sym_o[kl];
-      const_cast<double*>(m_forces.blmn_e.data())[jOffset + kl] = blmn_sym_e[kl];
-      const_cast<double*>(m_forces.blmn_o.data())[jOffset + kl] = blmn_sym_o[kl];
-      const_cast<double*>(m_forces.clmn_e.data())[jOffset + kl] = clmn_sym_e[kl];
-      const_cast<double*>(m_forces.clmn_o.data())[jOffset + kl] = clmn_sym_o[kl];
+      // Lambda arrays may have different size, check bounds
+      if (jOffset + kl < static_cast<int>(m_forces.blmn_e.size())) {
+        const_cast<double*>(m_forces.blmn_e.data())[jOffset + kl] = blmn_sym_e[kl];
+        const_cast<double*>(m_forces.blmn_o.data())[jOffset + kl] = blmn_sym_o[kl];
+        const_cast<double*>(m_forces.clmn_e.data())[jOffset + kl] = clmn_sym_e[kl];
+        const_cast<double*>(m_forces.clmn_o.data())[jOffset + kl] = clmn_sym_o[kl];
+      }
       const_cast<double*>(m_forces.crmn_e.data())[jOffset + kl] = crmn_sym_e[kl];
       const_cast<double*>(m_forces.crmn_o.data())[jOffset + kl] = crmn_sym_o[kl];
       const_cast<double*>(m_forces.czmn_e.data())[jOffset + kl] = czmn_sym_e[kl];
@@ -670,14 +695,18 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
     }
     if (!m_forces_asym.blmn_a.empty() && m_forces_asym.blmn_a.data() != nullptr) {
       for (int kl = 0; kl < nZnT; ++kl) {
-        const_cast<double*>(m_forces_asym.blmn_a.data())[jOffset + kl] = 
-            blmn_asym_e[kl] + blmn_asym_o[kl];
+        if (jOffset + kl < static_cast<int>(m_forces_asym.blmn_a.size())) {
+          const_cast<double*>(m_forces_asym.blmn_a.data())[jOffset + kl] = 
+              blmn_asym_e[kl] + blmn_asym_o[kl];
+        }
       }
     }
     if (!m_forces_asym.clmn_a.empty() && m_forces_asym.clmn_a.data() != nullptr) {
       for (int kl = 0; kl < nZnT; ++kl) {
-        const_cast<double*>(m_forces_asym.clmn_a.data())[jOffset + kl] = 
-            clmn_asym_e[kl] + clmn_asym_o[kl];
+        if (jOffset + kl < static_cast<int>(m_forces_asym.clmn_a.size())) {
+          const_cast<double*>(m_forces_asym.clmn_a.data())[jOffset + kl] = 
+              clmn_asym_e[kl] + clmn_asym_o[kl];
+        }
       }
     }
     if (!m_forces_asym.crmn_a.empty() && m_forces_asym.crmn_a.data() != nullptr) {
