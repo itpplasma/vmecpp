@@ -12,7 +12,7 @@ cc_library(
         "//vmecpp/free_boundary/surface_geometry:surface_geometry",
         "//vmecpp/free_boundary/mgrid_provider:mgrid_provider",
         "//vmecpp/free_boundary/tangential_partitioning:tangential_partitioning",
-        "@abseil-cpp//absl/base",
+        "@abscab_cpp//abscab:abscab",
         "@abseil-cpp//absl/algorithm:container",
     ],
 )
