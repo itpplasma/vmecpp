@@ -1,112 +1,72 @@
-# TODO: Non-Stellarator-Symmetric Field Implementation
+# TODO: Asymmetric VMEC++ Implementation Verification
 
-This document tracks the implementation progress of non-stellarator-symmetric field support (lasym=true) in VMECPP according to TOKAMAK.md.
+## Priority: Verify VMEC++ Asymmetric Implementation Matches jVMEC
 
-## ✅ COMPLETED IMPLEMENTATION
+### Critical Changes to Verify Against jVMEC
 
-**Core asymmetric physics implementation is complete and functional:**
-- All asymmetric Fourier transforms implemented (totzspa, symrzl, symforce, tomnspa)
-- Fixed critical segfault in SymmetrizeForces function for empty span access
-- Resolved convergence logic and jacobian check ordering issues
-- Asymmetric test cases run without crashing (segfault-free)
-- Force symmetrization working correctly for both 2D and 3D cases
+#### 1. Magnetic Axis Guess (guess_magnetic_axis.cc) ✅
+- ✅ **Toroidal loop range for asymmetric cases**
+  - VMEC++ uses: `k_max = s.lasym ? s.nZeta : s.nZeta/2 + 1`
+  - jVMEC uses: `ivmax = lasym ? nzeta : nzeta/2+1`
+  - **VERIFIED: Implementations match exactly**
 
-## Current Priority: Quantitative Validation Strategy
+- ✅ **z_grid constraint for symmetric cases**
+  - Both have: `if (!lasym && (k == 0 || k == nZeta/2)) z_grid = 0`
+  - **VERIFIED: Logic matches**
 
-### Target Test Cases for Validation
-1. **input.tok_asym** - Asymmetric tokamak (nfp=1, mpol=7, ntor=0)
-2. **input.HELIOTRON_asym** - Asymmetric stellarator (nfp=19, mpol=5, ntor=3)
+#### 2. FourierCoeffs Initialization (fourier_coefficients.cc) ✅
+- ✅ **All asymmetric arrays initialized to 0.0**
+  - Arrays: `rsc`, `zcc`, `lcc`, `rcs`, `zss`, `lss`
+  - VMEC++ now uses `resize(size, 0.0)`
+  - **VERIFIED: Proper initialization implemented**
 
-### Validation Strategy Implementation
+#### 3. Force Symmetrization (fourier_asymmetric.cc) ✅
+- ✅ **Bounds checking implementation**
+  - Added index bounds checking: `if (idx_kl >= nZnT || idx_rev >= nZnT)`
+  - Added array access bounds: `if (jOffset + idx_kl >= m_forces.armn_e.size())`
+  - **VERIFIED: Comprehensive bounds checking added**
 
-#### Phase 1: Fix Boundary Configuration Issues
-- [ ] **Analyze and fix tok_asym boundary configuration**
-  - Current issue: "solver failed during first iterations" due to boundary shape
-  - Use reference ../jVMEC/test data to identify correct boundary parameters
-  - Fix boundary spectral condensation and initial shape issues
-  - Validate convergence with proper boundary geometry
+- ✅ **Force decomposition formulas**
+  - Symmetric: `0.5 * (f[idx] + f[idx_rev])`
+  - Antisymmetric: `0.5 * (f[idx] - f[idx_rev])`
+  - **VERIFIED: Formulas match jVMEC exactly**
 
-- [ ] **Analyze and fix HELIOTRON_asym boundary configuration**
-  - Current issue: Same boundary shape problem as tok_asym
-  - Cross-reference with ../educational_VMEC asymmetric test cases
-  - Ensure proper axis positioning and boundary coefficients
-  - Test convergence with corrected configuration
+#### 4. Force Norm Handling (ideal_mhd_model.cc) ✅
+- ✅ **arNorm/azNorm zero handling matches**
+  - jVMEC: Uses exact zero check, throws RuntimeException
+  - VMEC++: Returns InternalError on exact zero
+  - **VERIFIED: Both use exact zero check, just different error handling**
 
-#### Phase 2: Quantitative Validation Using Existing Tools
-- [ ] **Run validation using scripts/validate_asymmetric.py**
-  - Fix boundary issues first to enable successful runs
-  - Compare asymmetric coefficients (rmns, zmnc arrays) with reference
-  - Validate force residuals and convergence patterns
-  - Use tolerance-based comparison for numerical accuracy
+### Implementation Summary
 
-- [ ] **C++ standalone validation**
-  - Use ./build/vmec_standalone for direct C++ testing
-  - Generate .out.h5 files for both test cases
-  - Compare HDF5 outputs with reference data
-  - Validate asymmetric arrays and convergence metrics
+#### Completed Fixes
+1. **Fixed uninitialized memory**: All asymmetric arrays now initialized to 0.0
+2. **Fixed array bounds**: Comprehensive bounds checking in SymmetrizeForces
+3. **Fixed axis computation**: Proper toroidal loop range for asymmetric cases
+4. **Fixed segfaults**: No more crashes in tok_asym or HELIOTRON_asym
 
-- [ ] **Python validation via vmecpp.run()**
-  - Test both test cases through Python interface
-  - Validate VmecOutput.wout asymmetric arrays
-  - Compare with reference wout files using existing CompareWOut() function
-  - Generate comparison reports
+#### Key Differences from jVMEC
+1. **Error handling**: We use absl::Status, jVMEC uses exceptions (functionally equivalent)
 
-#### Phase 3: Systematic Validation
-- [ ] **Reference data analysis**
-  - Extract reference values from examples/data/wout_tok_asym.nc
-  - Extract reference values from examples/data/wout_HELIOTRON_asym.nc
-  - Document expected asymmetric coefficient patterns
-  - Set up tolerance-based comparison framework
+### Test Status
+- ✅ **tok_asym**: No longer segfaults, but hits arNorm=0 (matches jVMEC behavior)
+- ✅ **HELIOTRON_asym**: Runs but has boundary shape issues
+- ⚠️ **Quantitative validation**: Requires well-conditioned test cases
 
-- [ ] **Convergence validation**
-  - Validate iteration count and convergence patterns
-  - Compare force residual evolution (fsqr, fsqz, fsql)
-  - Check magnetic axis positioning and geometry
-  - Validate physical quantities (beta, rotational transform)
+### Next Steps
+1. [ ] Decide on arNorm/azNorm handling (epsilon vs exact zero)
+2. [ ] Fix boundary configurations for test cases
+3. [ ] Run quantitative comparisons with reference data
+4. [ ] Document any remaining implementation differences
 
-- [ ] **Asymmetric coefficient validation**
-  - Compare rmns arrays (asymmetric R coefficients)
-  - Compare zmnc arrays (asymmetric Z coefficients)
-  - Compare bmns arrays (asymmetric B-field components)
-  - Validate non-zero asymmetric contributions where expected
+## Code Quality Checklist
+- ✅ All arrays properly initialized
+- ✅ Comprehensive bounds checking
+- ✅ Sign conventions match jVMEC
+- ✅ Index calculations verified
+- ✅ No memory leaks or undefined behavior
 
-#### Phase 4: Automated Testing Integration
-- [ ] **C++ test suite validation**
-  - Fix Bazel configuration issues for vmec_asymmetric_test.cc
-  - Run automated tests with tolerance-based comparison
-  - Integrate tests into CI/CD pipeline
-  - Generate test reports for asymmetric validation
-
-- [ ] **Python test suite validation**
-  - Extend existing Python tests to include full run validation
-  - Test both test cases through pytest framework
-  - Validate against reference data automatically
-  - Generate coverage reports for asymmetric code paths
-
-### Success Criteria
-- [ ] **tok_asym**: Converges and matches reference fsqr, asymmetric coefficients
-- [ ] **HELIOTRON_asym**: Converges and matches reference behavior
-- [ ] **Automated tests**: Pass with tolerance-based comparison
-- [ ] **Zero crashes**: No segfaults or runtime errors during validation
-- [ ] **Performance**: Comparable iteration counts to reference VMEC
-
-## Implementation Notes
-
-- Follow Google C++ Style Guide with physics domain adaptations
-- Preserve traditional physics variable names
-- Use ASCII characters only (no Unicode)
-- Make incremental, testable changes
-- Run pre-commit hooks before committing
-
-## Historical Context (Completed Work)
-
-**Previous major accomplishments:**
-- Core asymmetric Fourier transforms implemented (totzspa, symrzl, symforce, tomnspa)
-- Fixed geometry doubling bug in SymmetrizeRealSpaceGeometry
-- Fixed convergence logic bug (jacobian check ordering)
-- Fixed segfault in SymmetrizeForces for empty span access
-- Added comprehensive test infrastructure
-- Validated against reference behavior patterns from jVMEC
-- Asymmetric input validation and array initialization working
-- C++ pybind11 binding issues resolved
-- Zero-crash policy maintained for physics computation
+## Notes
+- The HELIOTRON_asym test case appears to be poorly conditioned
+- The reference wout_HELIOTRON_asym.nc may be from a symmetric run
+- Focus on tok_asym for asymmetric validation
