@@ -272,9 +272,7 @@ bool Boundaries::checkSignOfJacobian() {
   // For sign_of_jacobian_ == +1, we need counterclockwise orientation
   const bool need_flip = (sign_of_jacobian_ == -1) ? is_counterclockwise : !is_counterclockwise;
   
-  std::cout << "Polygon area method: signed_area = " << signed_area 
-            << ", is_counterclockwise = " << is_counterclockwise 
-            << ", need_flip = " << need_flip << std::endl;
+  // Debug output removed - polygon area method is working correctly
   
   return need_flip;
 }
