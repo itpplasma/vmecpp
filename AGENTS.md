@@ -200,7 +200,6 @@ VMEC++ uses **two different Fourier representations**:
 - **Dependencies**: Eigen (linear algebra), abseil (utilities), pybind11 (Python binding)
 - **Input validation**: Pydantic ensures type safety and automatic validation
 - **Hot restart**: Pass previous VmecOutput as `restart_from` parameter to run()
-- You must look in ../jVMEC and ../educational_VMEC for reference where to modify code to enable non-stellarator-symmetric fields. jVMEC fixed some issues regarding step size of optimizer in original VMEC so should be preferred. Also look for tokamak and non-stellarator symmetric test cases there.
 
 ## Common Workflows
 
