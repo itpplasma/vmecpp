@@ -499,6 +499,12 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
           continue;  // Skip invalid indices
         }
         
+        // Additional bounds checking for force array access
+        if (jOffset + idx_kl >= static_cast<int>(m_forces.armn_e.size()) || 
+            jOffset + idx_rev >= static_cast<int>(m_forces.armn_e.size())) {
+          continue;  // Skip if array access would be out of bounds
+        }
+        
         // Apply jVMEC stellarator symmetry decomposition
         // Following the exact pattern from jVMEC:
         
