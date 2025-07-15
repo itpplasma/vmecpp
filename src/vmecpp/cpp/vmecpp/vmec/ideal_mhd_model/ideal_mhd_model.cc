@@ -612,7 +612,7 @@ IdealMhdModel::IdealMhdModel(
     brmn_a.resize(nrzt, 0.0);
     bzmn_a.resize(nrzt, 0.0);
     blmn_a.resize(nrztIncludingBoundary, 0.0);
-    
+
     // Always allocate asymmetric toroidal force arrays (like main arrays)
     // They will be zero for 2D cases but must exist for SymmetrizeForces
     clmn_a.resize(nrztIncludingBoundary, 0.0);
@@ -1244,7 +1244,8 @@ void IdealMhdModel::geometryFromFourier(const FourierGeometry& physical_x) {
       dft_FourierToReal_2d_asymm(physical_x);
     }
 
-    // Extend geometry from [0,pi] to [0,2pi] and combine symmetric/antisymmetric parts
+    // Extend geometry from [0,pi] to [0,2pi] and combine
+    // symmetric/antisymmetric parts
     symrzl();
   }  // lasym
 
@@ -3075,59 +3076,53 @@ void IdealMhdModel::assembleTotalForces() {
 
   // Apply force symmetrization for asymmetric configurations
   if (s_.lasym) {
-    auto force_data = RealSpaceForces{
-        .armn_e = armn_e,
-        .armn_o = armn_o,
-        .azmn_e = azmn_e,
-        .azmn_o = azmn_o,
-        .blmn_e = blmn_e,
-        .blmn_o = blmn_o,
-        .brmn_e = brmn_e,
-        .brmn_o = brmn_o,
-        .bzmn_e = bzmn_e,
-        .bzmn_o = bzmn_o,
-        .clmn_e = clmn_e,
-        .clmn_o = clmn_o,
-        .crmn_e = crmn_e,
-        .crmn_o = crmn_o,
-        .czmn_e = czmn_e,
-        .czmn_o = czmn_o,
-        .frcon_e = frcon_e,
-        .frcon_o = frcon_o,
-        .fzcon_e = fzcon_e,
-        .fzcon_o = fzcon_o
-    };
-    
+    auto force_data = RealSpaceForces{.armn_e = armn_e,
+                                      .armn_o = armn_o,
+                                      .azmn_e = azmn_e,
+                                      .azmn_o = azmn_o,
+                                      .blmn_e = blmn_e,
+                                      .blmn_o = blmn_o,
+                                      .brmn_e = brmn_e,
+                                      .brmn_o = brmn_o,
+                                      .bzmn_e = bzmn_e,
+                                      .bzmn_o = bzmn_o,
+                                      .clmn_e = clmn_e,
+                                      .clmn_o = clmn_o,
+                                      .crmn_e = crmn_e,
+                                      .crmn_o = crmn_o,
+                                      .czmn_e = czmn_e,
+                                      .czmn_o = czmn_o,
+                                      .frcon_e = frcon_e,
+                                      .frcon_o = frcon_o,
+                                      .fzcon_e = fzcon_e,
+                                      .fzcon_o = fzcon_o};
+
     // Create asymmetric force structure with allocated arrays
     // For 2D case (lthreed=false), clmn_a, crmn_a, czmn_a are empty vectors
     // and should not be passed to avoid undefined behavior with spans
     RealSpaceForcesAsym force_asym;
     if (s_.lthreed) {
-      force_asym = RealSpaceForcesAsym{
-          .armn_a = armn_a,
-          .azmn_a = azmn_a,
-          .blmn_a = blmn_a,
-          .brmn_a = brmn_a,
-          .bzmn_a = bzmn_a,
-          .clmn_a = clmn_a,
-          .crmn_a = crmn_a,
-          .czmn_a = czmn_a
-      };
+      force_asym = RealSpaceForcesAsym{.armn_a = armn_a,
+                                       .azmn_a = azmn_a,
+                                       .blmn_a = blmn_a,
+                                       .brmn_a = brmn_a,
+                                       .bzmn_a = bzmn_a,
+                                       .clmn_a = clmn_a,
+                                       .crmn_a = crmn_a,
+                                       .czmn_a = czmn_a};
     } else {
       // For 2D case, create empty spans for the 3D-only arrays
       static const std::vector<double> empty_vector;
-      force_asym = RealSpaceForcesAsym{
-          .armn_a = armn_a,
-          .azmn_a = azmn_a,
-          .blmn_a = blmn_a,
-          .brmn_a = brmn_a,
-          .bzmn_a = bzmn_a,
-          .clmn_a = empty_vector,
-          .crmn_a = empty_vector,
-          .czmn_a = empty_vector
-      };
+      force_asym = RealSpaceForcesAsym{.armn_a = armn_a,
+                                       .azmn_a = azmn_a,
+                                       .blmn_a = blmn_a,
+                                       .brmn_a = brmn_a,
+                                       .bzmn_a = bzmn_a,
+                                       .clmn_a = empty_vector,
+                                       .crmn_a = empty_vector,
+                                       .czmn_a = empty_vector};
     }
-    
+
     SymmetrizeForces(s_, r_, force_data, force_asym);
   }
 }
@@ -3143,8 +3138,9 @@ void IdealMhdModel::forcesToFourier(FourierForces& m_physical_f) {
   if (s_.lasym) {
     // Transform antisymmetric forces to Fourier space
     // This is the missing piece for asymmetric convergence!
-    
-    // Reconstruct the asymmetric force structure that was used in SymmetrizeForces
+
+    // Reconstruct the asymmetric force structure that was used in
+    // SymmetrizeForces
     RealSpaceForcesAsym force_asym;
     if (s_.lthreed) {
       force_asym = RealSpaceForcesAsym{
@@ -3157,11 +3153,11 @@ void IdealMhdModel::forcesToFourier(FourierForces& m_physical_f) {
           .crmn_a = crmn_a,
           .czmn_a = czmn_a,
       };
-      ForcesToFourier3DAsymmFastPoloidal(force_asym, xmpq, 
-                                         r_, s_, t_, m_physical_f);
+      ForcesToFourier3DAsymmFastPoloidal(force_asym, xmpq, r_, s_, t_,
+                                         m_physical_f);
     } else {
-      // For 2D case, only 3D toroidal force arrays (clmn_a, crmn_a, czmn_a) are empty
-      // blmn_a, brmn_a, bzmn_a are still needed for 2D asymmetric cases
+      // For 2D case, only 3D toroidal force arrays (clmn_a, crmn_a, czmn_a) are
+      // empty blmn_a, brmn_a, bzmn_a are still needed for 2D asymmetric cases
       static const std::vector<double> empty_vector;
       force_asym = RealSpaceForcesAsym{
           .armn_a = armn_a,
@@ -3174,8 +3170,8 @@ void IdealMhdModel::forcesToFourier(FourierForces& m_physical_f) {
           .czmn_a = empty_vector,
       };
       // Call 2D asymmetric force-to-Fourier transform
-      ForcesToFourier2DAsymmFastPoloidal(force_asym, xmpq, 
-                                         r_, s_, t_, m_physical_f);
+      ForcesToFourier2DAsymmFastPoloidal(force_asym, xmpq, r_, s_, t_,
+                                         m_physical_f);
     }
   }  // lasym
 }
@@ -3736,7 +3732,7 @@ void IdealMhdModel::symrzl() {
   // For asymmetric case, pass the actual arrays
   // For symmetric case, pass empty spans
   RealSpaceGeometryAsym geometry_asym;
-  
+
   if (s_.lasym) {
     geometry_asym = RealSpaceGeometryAsym{.r1_a = r1_a,
                                           .ru_a = ru_a,

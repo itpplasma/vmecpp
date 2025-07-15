@@ -561,115 +561,121 @@ def test_default_preset():
 
 def test_asymmetric_tokamak_validation():
     """Test asymmetric tokamak configuration validation and execution."""
-    
+
     # Create asymmetric tokamak input programmatically (similar to tok_asym.json)
     vmec_input = vmecpp.VmecInput.default()
-    
+
     # Set lasym=True and basic parameters
     vmec_input.lasym = True
     vmec_input.nfp = 1
     vmec_input.mpol = 7
     vmec_input.ntor = 0
-    vmec_input.ns_array = [5, 7]
-    vmec_input.ftol_array = [1.0e-12, 1.0e-12]
-    vmec_input.niter_array = [2000, 4000]
-    
+    vmec_input.ns_array = np.array([5, 7])
+    vmec_input.ftol_array = np.array([1.0e-12, 1.0e-12])
+    vmec_input.niter_array = np.array([2000, 4000])
+
     # Set boundary coefficients (symmetric parts)
-    vmec_input.rbc = np.array([
-        [5.91630, 1.91960, 0.33736, 0.04150, -0.00583, 0.01037, -0.00564]
-    ])
-    vmec_input.zbs = np.array([
-        [0.0, 3.62230, -0.18511, -0.00486, 0.05927, 0.00448, -0.01677]
-    ])
-    
-    # Set asymmetric boundary coefficients  
-    vmec_input.rbs = np.array([
-        [0.0, 0.02761, 0.10038, -0.07184, -0.01142, 0.00818, -0.00761]
-    ])
-    vmec_input.zbc = np.array([
-        [0.41050, 0.05730, 0.00467, -0.03916, -0.00878, 0.02117, 0.00244]
-    ])
-    
+    vmec_input.rbc = np.array(
+        [[5.91630, 1.91960, 0.33736, 0.04150, -0.00583, 0.01037, -0.00564]]
+    )
+    vmec_input.zbs = np.array(
+        [[0.0, 3.62230, -0.18511, -0.00486, 0.05927, 0.00448, -0.01677]]
+    )
+
+    # Set asymmetric boundary coefficients
+    vmec_input.rbs = np.array(
+        [[0.0, 0.02761, 0.10038, -0.07184, -0.01142, 0.00818, -0.00761]]
+    )
+    vmec_input.zbc = np.array(
+        [[0.41050, 0.05730, 0.00467, -0.03916, -0.00878, 0.02117, 0.00244]]
+    )
+
     # Set axis coefficients
-    vmec_input.raxis_c = [6.676]
-    vmec_input.zaxis_c = [0.47]
-    vmec_input.raxis_s = [0.0]
-    vmec_input.zaxis_s = [0.0]
-    
+    vmec_input.raxis_c = np.array([6.676])
+    vmec_input.zaxis_c = np.array([0.47])
+    vmec_input.raxis_s = np.array([0.0])
+    vmec_input.zaxis_s = np.array([0.0])
+
     # Pressure and current profiles
     vmec_input.pmass_type = "power_series"
-    vmec_input.am = [1.0, -2.0, 1.0]
+    vmec_input.am = np.array([1.0, -2.0, 1.0])
     vmec_input.pres_scale = 100000.0
     vmec_input.piota_type = "power_series"
-    vmec_input.ai = [0.6, -0.45]
+    vmec_input.ai = np.array([0.6, -0.45])
     vmec_input.phiedge = 119.15
-    
+
     # Test that validation passes
     assert vmec_input.lasym is True
     assert vmec_input.rbs is not None
     assert vmec_input.zbc is not None
     assert vmec_input.raxis_s is not None
     assert vmec_input.zaxis_c is not None
-    
+
     # Test array shapes are correct
     assert vmec_input.rbs.shape == (1, 7)
     assert vmec_input.zbc.shape == (1, 7)
-    
+
     # Note: This test validates asymmetric input creation but does not run VMEC
     # due to the known C++ binding issue. The core asymmetric algorithm is functional.
 
 
 def test_asymmetric_heliotron_validation():
     """Test asymmetric HELIOTRON stellarator configuration validation."""
-    
+
     # Create asymmetric HELIOTRON input programmatically
     vmec_input = vmecpp.VmecInput.default()
-    
+
     # Set lasym=True and HELIOTRON parameters
     vmec_input.lasym = True
     vmec_input.nfp = 19
     vmec_input.mpol = 5
     vmec_input.ntor = 3
-    vmec_input.ns_array = [5, 7]
-    vmec_input.ftol_array = [1.0e-16, 1.0e-14]
-    vmec_input.niter_array = [1000, 2000]
-    
+    vmec_input.ns_array = np.array([5, 7])
+    vmec_input.ftol_array = np.array([1.0e-16, 1.0e-14])
+    vmec_input.niter_array = np.array([1000, 2000])
+
     # Set boundary coefficients with toroidal modes
-    vmec_input.rbc = np.array([
-        [10.0, 0.0, 0.0, 0.0],  # n=0, m=0,1,2,3
-        [0.0, -0.3, 0.0, 0.0],  # n=-1, m=0,1,2,3  
-        [0.0, -1.0, 0.0, 0.0],  # n=1, m=0,1,2,3 (will be resized)
-    ])
-    
-    vmec_input.zbs = np.array([
-        [0.0, 1.0, 0.0, 0.0],   # n=0, m=0,1,2,3
-        [0.0, -0.3, 0.0, 0.0],  # n=-1, m=0,1,2,3
-        [0.0, 0.0, 0.0, 0.0],   # n=1, m=0,1,2,3 (will be resized)
-    ])
-    
+    vmec_input.rbc = np.array(
+        [
+            [10.0, 0.0, 0.0, 0.0],  # n=0, m=0,1,2,3
+            [0.0, -0.3, 0.0, 0.0],  # n=-1, m=0,1,2,3
+            [0.0, -1.0, 0.0, 0.0],  # n=1, m=0,1,2,3 (will be resized)
+        ]
+    )
+
+    vmec_input.zbs = np.array(
+        [
+            [0.0, 1.0, 0.0, 0.0],  # n=0, m=0,1,2,3
+            [0.0, -0.3, 0.0, 0.0],  # n=-1, m=0,1,2,3
+            [0.0, 0.0, 0.0, 0.0],  # n=1, m=0,1,2,3 (will be resized)
+        ]
+    )
+
     # Initialize asymmetric arrays (will be zero for this simple test)
-    vmec_input.rbs = np.zeros((2*3+1, 5+1))  # ntor=3 means -3 to +3, mpol=5 means 0 to 5
-    vmec_input.zbc = np.zeros((2*3+1, 5+1))
-    
+    vmec_input.rbs = np.zeros(
+        (2 * 3 + 1, 5 + 1)
+    )  # ntor=3 means -3 to +3, mpol=5 means 0 to 5
+    vmec_input.zbc = np.zeros((2 * 3 + 1, 5 + 1))
+
     # Set axis coefficients
-    vmec_input.raxis_c = [10.0, 0.0, 0.0, 0.0]
-    vmec_input.zaxis_s = [0.0, 0.0, 0.0, 0.0] 
-    vmec_input.raxis_s = [0.0, 0.0, 0.0, 0.0]
-    vmec_input.zaxis_c = [0.0, 0.0, 0.0, 0.0]
-    
+    vmec_input.raxis_c = np.array([10.0, 0.0, 0.0, 0.0])
+    vmec_input.zaxis_s = np.array([0.0, 0.0, 0.0, 0.0])
+    vmec_input.raxis_s = np.array([0.0, 0.0, 0.0, 0.0])
+    vmec_input.zaxis_c = np.array([0.0, 0.0, 0.0, 0.0])
+
     # Set physics parameters
     vmec_input.pmass_type = "power_series"
-    vmec_input.am = [1.0, -2.0, 1.0]
+    vmec_input.am = np.array([1.0, -2.0, 1.0])
     vmec_input.pres_scale = 18000.0
     vmec_input.piota_type = "power_series"
-    vmec_input.ai = [1.0, 1.5]
+    vmec_input.ai = np.array([1.0, 1.5])
     vmec_input.phiedge = 1.0
-    
+
     # Test that validation passes
     assert vmec_input.lasym is True
     assert vmec_input.nfp == 19
     assert vmec_input.rbs is not None
     assert vmec_input.zbc is not None
-    
+
     # Note: This test validates asymmetric stellarator input creation but does not run VMEC
     # due to the known C++ binding issue. The core asymmetric algorithm is functional.
