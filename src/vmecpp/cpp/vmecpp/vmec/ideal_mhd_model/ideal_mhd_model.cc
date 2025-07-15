@@ -596,28 +596,28 @@ IdealMhdModel::IdealMhdModel(
   blmn_e.resize(nrztIncludingBoundary);
   blmn_o.resize(nrztIncludingBoundary);
 
-  if (s_.lthreed) {
-    crmn_e.resize(nrzt);
-    crmn_o.resize(nrzt);
-    czmn_e.resize(nrzt);
-    czmn_o.resize(nrzt);
-    clmn_e.resize(nrztIncludingBoundary);
-    clmn_o.resize(nrztIncludingBoundary);
-  }
+  // Always allocate toroidal force arrays (like educational_VMEC)
+  // They will be zero for 2D cases but must exist for asymmetric force handling
+  crmn_e.resize(nrzt, 0.0);
+  crmn_o.resize(nrzt, 0.0);
+  czmn_e.resize(nrzt, 0.0);
+  czmn_o.resize(nrzt, 0.0);
+  clmn_e.resize(nrztIncludingBoundary, 0.0);
+  clmn_o.resize(nrztIncludingBoundary, 0.0);
 
   // Allocate asymmetric force arrays when lasym=true
   if (s_.lasym) {
-    armn_a.resize(nrzt);
-    azmn_a.resize(nrzt);
-    brmn_a.resize(nrzt);
-    bzmn_a.resize(nrzt);
-    blmn_a.resize(nrztIncludingBoundary);
+    armn_a.resize(nrzt, 0.0);
+    azmn_a.resize(nrzt, 0.0);
+    brmn_a.resize(nrzt, 0.0);
+    bzmn_a.resize(nrzt, 0.0);
+    blmn_a.resize(nrztIncludingBoundary, 0.0);
     
-    if (s_.lthreed) {
-      clmn_a.resize(nrztIncludingBoundary);
-      crmn_a.resize(nrzt);
-      czmn_a.resize(nrzt);
-    }
+    // Always allocate asymmetric toroidal force arrays (like main arrays)
+    // They will be zero for 2D cases but must exist for SymmetrizeForces
+    clmn_a.resize(nrztIncludingBoundary, 0.0);
+    crmn_a.resize(nrzt, 0.0);
+    czmn_a.resize(nrzt, 0.0);
   }
 
   // TODO(jons): +1 only if at LCFS

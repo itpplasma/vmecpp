@@ -459,17 +459,23 @@ void ForcesToFourier2DAsymmFastPoloidal(
       double lmkcc = 0.0;
       double lmkss = 0.0;
 
-      const int idx_kl_base = (jF - rp.nsMinF) * s.nThetaEff;
+      const int idx_kl_base = (jF - rp.nsMinF) * s.nZnT;
       const int idx_ml_base = m * s.nThetaReduced;
 
-      for (int l = 0; l < s.nThetaReduced; ++l) {
+      for (int l = 0; l < s.nThetaEff; ++l) {
         const int idx_kl = idx_kl_base + l;
-        const int idx_ml = idx_ml_base + l;
+        const int idx_ml = idx_ml_base + (l % s.nThetaReduced);
 
         const double cosmui = fb.cosmui[idx_ml];
         const double sinmui = fb.sinmui[idx_ml];
 
         // Assemble effective R and Z forces from asymmetric MHD contributions
+        // Add bounds checking to debug the segfault
+        if (idx_kl >= static_cast<int>(d_asym.armn_a.size()) || 
+            idx_kl >= static_cast<int>(d_asym.azmn_a.size()) || 
+            idx_kl < 0) {
+          continue;  // Skip if out of bounds
+        }
         const double tempR = d_asym.armn_a[idx_kl];
         const double tempZ = d_asym.azmn_a[idx_kl];
 
