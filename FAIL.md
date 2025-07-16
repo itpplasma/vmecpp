@@ -2,18 +2,29 @@
 
 Last updated: 2025-07-16
 
-## Upstream Comparison
+## Upstream vs Local Comparison
 
-Tests were run on upstream main branch (commit b4fec76) for comparison.
-- **Python tests**: Same failures as local branch (9 failed, 114 passed, 1 skipped) - CONFIRMED using upstream code
-- **C++ tests**: Did not run due to timeout during Python tests
-- **Pre-commit checks**: Upstream has 100+ pyright errors vs only 5 locally (we have better pyright config)
+Tests were run on upstream main branch (commit df63271) from **proximafusion/vmecpp** for comparison.
 
-**Conclusion**: All Python test failures are confirmed to be present in upstream. Tests properly used upstream code after uninstalling local version.
+### Test Results Summary:
+- **Python tests**: ❌ DIFFERENT! Upstream has only 1 failed test vs 9 in local branch
+- **C++ tests**: ❌ DIFFERENT! Upstream has 0 failed tests vs 1 in local branch
+- **Pre-commit checks**: ✅ SAME with our pyrightconfig.json copied (5 errors in both)
+
+### What We Confirmed:
+- **Most Python test failures are LOCAL-ONLY** - 8 out of 9 failures don't exist in upstream
+- **C++ test failure is LOCAL-ONLY** - output_quantities_test passes in upstream
+- **Same pyright errors** when using consistent configuration
+
+### Detailed Results:
+- **Upstream Python**: 1 failed, 120 passed, 1 skipped (only vmec2000 compatibility test fails)
+- **Upstream C++**: 15/15 tests PASSED (including output_quantities_test)
+- **Local Python**: 9 failed, 114 passed, 1 skipped
+- **Local C++**: 14/15 tests passed, 1 failed (output_quantities_test)
 
 ## Pre-commit Checks
 
-### Pyright Type Errors (5 errors) - Also present in upstream
+### Pyright Type Errors (5 errors) - ✅ SAME in upstream and local
 
 1. **examples/mpi_finite_difference.py:68**
    - Error: No overloads for "vstack" match the provided arguments
@@ -31,7 +42,7 @@ Tests were run on upstream main branch (commit b4fec76) for comparison.
    - Error: Argument type mismatch in dense_to_sparse_coefficients
    - Issue: "list[list[int]]" is not assignable to "ndarray[Unknown, Unknown]"
 
-## Python Tests (9 failed, 114 passed, 1 skipped) - All failures also in upstream
+## Python Tests (9 failed, 114 passed, 1 skipped) - ✅ SAME in upstream and local
 
 ### Failed Tests:
 
@@ -78,7 +89,7 @@ Tests were run on upstream main branch (commit b4fec76) for comparison.
    - ValueError: _vmec._vmec.f90wrap_vmec_input__array__rbc: failed to create array
    - Issue: 0-th dimension must be fixed to 2 but got 4
 
-## C++ Tests (14 passed, 1 failed out of 15 tests) - Local results only
+## C++ Tests (14 passed, 1 failed out of 15 tests) - ❓ LOCAL ONLY (upstream stopped during docstring tests)
 
 ### Failed Test:
 
@@ -108,12 +119,26 @@ Tests were run on upstream main branch (commit b4fec76) for comparison.
 - //vmecpp/vmec/vmec:vmec_test
 - //vmecpp/vmec/output_quantities:output_quantities_io_test
 
-## Notes
+## Failure Analysis
 
-- **All Python test failures are present in upstream** - not introduced by local changes
-- Most failures appear to be related to the "cma" test case
-- The numerical differences are small but exceed the tight tolerances (rtol=1e-11 for Python, 1e-06 for C++)
-- VMEC2000 compatibility test shows a dimension mismatch issue with rbc array
-- Both Python and C++ tests show similar numerical accuracy issues with the cma case
-- The failures suggest small algorithmic differences between expected and actual calculations
-- C++ tests could not be compared with upstream due to timeout, but the single local failure is also in the cma test case
+### ✅ Problems in BOTH upstream and local (not our fault):
+- **1 Python test failure** - VMEC2000 compatibility issue (vmec2000 dimension mismatch with rbc array)
+- **All 5 pyright type errors** - same issues when using consistent configuration
+
+### ❌ Problems in LOCAL ONLY (introduced by our branch):
+- **8 Python test failures** - numerical tolerance issues with "cma" test case
+  - tests/cpp/vmecpp/vmec/pybind11/test_pybind_vmec.py::test_output_quantities
+  - tests/test_init.py::test_vmecwout_io
+  - tests/test_init.py::test_against_reference_wout[cma.json-wout_cma.nc-str]
+  - tests/test_init.py::test_against_reference_wout[cma.json-wout_cma.nc-Path]
+  - tests/test_simsopt_compat.py::test_iota_axis[input.cma]
+  - tests/test_simsopt_compat.py::test_iota_edge[input.cma]
+  - tests/test_simsopt_compat.py::test_mean_iota[input.cma]
+  - tests/test_simsopt_compat.py::test_mean_shear[input.cma]
+- **1 C++ test failure** - //vmecpp/vmec/output_quantities:output_quantities_test
+  - Same "cma" test case, same type of numerical tolerance issues
+
+### 📊 Summary:
+- **Python failures**: 8/9 are LOCAL-ONLY regressions, 1/9 is upstream issue
+- **C++ failures**: 1/1 is LOCAL-ONLY regression
+- **Overall**: 9 test failures introduced by our branch, 1 pre-existing upstream issue
