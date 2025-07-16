@@ -567,6 +567,13 @@ class VmecInput(BaseModelWithNumpy):
                     raise ValueError(msg)
                 # Skip None values (don't try to assign them)
             else:
+                # Check if non-None asymmetric fields are being set when lasym=False
+                if attr in {"rbs", "zbc", "zaxis_c", "raxis_s"} and not cpp_indata.lasym:
+                    msg = (
+                        f"Cannot set asymmetric field '{attr}' when lasym=False. "
+                        "Either set lasym=True or remove the asymmetric field."
+                    )
+                    raise ValueError(msg)
                 getattr(cpp_indata, attr)[:] = value
 
         return cpp_indata
