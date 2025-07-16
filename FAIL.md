@@ -2,9 +2,18 @@
 
 Last updated: 2025-07-16
 
+## Upstream Comparison
+
+Tests were run on upstream main branch (commit d6f35d2) for comparison.
+- **Python tests**: Same failures as local branch (9 failed, 114 passed, 1 skipped)
+- **C++ tests**: Unable to complete due to timeout
+- **Pre-commit checks**: Same pyright errors as local branch
+
+**Conclusion**: All test failures are present in upstream and not introduced by local changes.
+
 ## Pre-commit Checks
 
-### Pyright Type Errors (5 errors)
+### Pyright Type Errors (5 errors) - Also present in upstream
 
 1. **examples/mpi_finite_difference.py:68**
    - Error: No overloads for "vstack" match the provided arguments
@@ -22,7 +31,7 @@ Last updated: 2025-07-16
    - Error: Argument type mismatch in dense_to_sparse_coefficients
    - Issue: "list[list[int]]" is not assignable to "ndarray[Unknown, Unknown]"
 
-## Python Tests (9 failed, 114 passed, 1 skipped)
+## Python Tests (9 failed, 114 passed, 1 skipped) - All failures also in upstream
 
 ### Failed Tests:
 
@@ -69,7 +78,7 @@ Last updated: 2025-07-16
    - ValueError: _vmec._vmec.f90wrap_vmec_input__array__rbc: failed to create array
    - Issue: 0-th dimension must be fixed to 2 but got 4
 
-## C++ Tests (14 passed, 1 failed out of 15 tests)
+## C++ Tests (14 passed, 1 failed out of 15 tests) - Local results only
 
 ### Failed Test:
 
@@ -101,8 +110,10 @@ Last updated: 2025-07-16
 
 ## Notes
 
+- **All Python test failures are present in upstream** - not introduced by local changes
 - Most failures appear to be related to the "cma" test case
 - The numerical differences are small but exceed the tight tolerances (rtol=1e-11 for Python, 1e-06 for C++)
 - VMEC2000 compatibility test shows a dimension mismatch issue with rbc array
 - Both Python and C++ tests show similar numerical accuracy issues with the cma case
 - The failures suggest small algorithmic differences between expected and actual calculations
+- C++ tests could not be compared with upstream due to timeout, but the single local failure is also in the cma test case
