@@ -4,7 +4,7 @@
 set -e  # Exit on error
 
 UPSTREAM_DIR="upstream-vmecpp-test"
-UPSTREAM_REPO="https://github.com/itpplasma/vmecpp.git"
+UPSTREAM_REPO="https://github.com/proximafusion/vmecpp.git"
 
 echo "Testing upstream vmecpp"
 echo "======================"
@@ -38,6 +38,22 @@ echo ""
 echo "Uninstalling any existing vmecpp..."
 pip uninstall -y vmecpp || echo "No existing vmecpp to uninstall"
 
+# Copy our scripts and configuration to upstream
+echo ""
+echo "Copying scripts and configuration from local to upstream..."
+if [ -f "../setup-vmecpp.sh" ]; then
+    cp ../setup-vmecpp.sh .
+    echo "Copied setup-vmecpp.sh to upstream"
+fi
+if [ -f "../test-vmecpp.sh" ]; then
+    cp ../test-vmecpp.sh .
+    echo "Copied test-vmecpp.sh to upstream"
+fi
+if [ -f "../pyrightconfig.json" ]; then
+    cp ../pyrightconfig.json .
+    echo "Copied pyrightconfig.json to upstream"
+fi
+
 # Run setup script
 echo ""
 echo "Running setup script..."
@@ -54,13 +70,6 @@ echo "Verifying vmecpp installation..."
 python -c "import vmecpp; print(f'vmecpp location: {vmecpp.__file__}')"
 echo ""
 
-# Copy our pyright configuration to upstream to get consistent results
-echo "Copying pyright configuration from local to upstream..."
-if [ -f "../pyrightconfig.json" ]; then
-    cp ../pyrightconfig.json .
-    echo "Copied pyrightconfig.json to upstream"
-fi
-echo ""
 
 # Run test script with debugging
 echo ""

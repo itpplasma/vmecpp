@@ -22,3 +22,4 @@ pyrightconfig.json
 
 # Upstream testing directory
 upstream-vmecpp-test/
+upstream-check/
