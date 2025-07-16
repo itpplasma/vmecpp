@@ -33,6 +33,11 @@ echo ""
 echo "Current upstream commit:"
 git log --oneline -1
 
+# Uninstall any existing vmecpp to ensure we test upstream
+echo ""
+echo "Uninstalling any existing vmecpp..."
+pip uninstall -y vmecpp || echo "No existing vmecpp to uninstall"
+
 # Run setup script
 echo ""
 echo "Running setup script..."
@@ -42,6 +47,12 @@ else
     echo "ERROR: setup-vmecpp.sh not found in upstream!"
     exit 1
 fi
+
+# Verify we're using the upstream version
+echo ""
+echo "Verifying vmecpp installation..."
+python -c "import vmecpp; print(f'vmecpp location: {vmecpp.__file__}')"
+echo ""
 
 # Run test script
 echo ""

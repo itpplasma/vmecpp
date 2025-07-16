@@ -4,12 +4,12 @@ Last updated: 2025-07-16
 
 ## Upstream Comparison
 
-Tests were run on upstream main branch (commit d6f35d2) for comparison.
-- **Python tests**: Same failures as local branch (9 failed, 114 passed, 1 skipped)
-- **C++ tests**: Unable to complete due to timeout
-- **Pre-commit checks**: Same pyright errors as local branch
+Tests were run on upstream main branch (commit b4fec76) for comparison.
+- **Python tests**: Same failures as local branch (9 failed, 114 passed, 1 skipped) - CONFIRMED using upstream code
+- **C++ tests**: Did not run due to timeout during Python tests
+- **Pre-commit checks**: Upstream has 100+ pyright errors vs only 5 locally (we have better pyright config)
 
-**Conclusion**: All test failures are present in upstream and not introduced by local changes.
+**Conclusion**: All Python test failures are confirmed to be present in upstream. Tests properly used upstream code after uninstalling local version.
 
 ## Pre-commit Checks
 
