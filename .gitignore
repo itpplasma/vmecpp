@@ -19,3 +19,6 @@ src/vmecpp/cpp/vmecpp_large_cpp_tests/
 
 # IDE configuration files
 pyrightconfig.json
+
+# Upstream testing directory
+upstream-vmecpp-test/
