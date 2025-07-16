@@ -54,11 +54,25 @@ echo "Verifying vmecpp installation..."
 python -c "import vmecpp; print(f'vmecpp location: {vmecpp.__file__}')"
 echo ""
 
-# Run test script
+# Copy our pyright configuration to upstream to get consistent results
+echo "Copying pyright configuration from local to upstream..."
+if [ -f "../pyrightconfig.json" ]; then
+    cp ../pyrightconfig.json .
+    echo "Copied pyrightconfig.json to upstream"
+fi
+echo ""
+
+# Run test script with debugging
 echo ""
 echo "Running test script..."
 if [ -f "test-vmecpp.sh" ]; then
-    ./test-vmecpp.sh
+    # Run with explicit output to see where it might hang
+    echo "Starting test script at $(date)"
+
+    # Run the test script with unbuffered output
+    stdbuf -o0 -e0 ./test-vmecpp.sh
+
+    echo "Test script completed at $(date)"
 else
     echo "ERROR: test-vmecpp.sh not found in upstream!"
     exit 1
