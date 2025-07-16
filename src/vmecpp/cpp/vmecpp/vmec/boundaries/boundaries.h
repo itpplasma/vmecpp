@@ -76,6 +76,12 @@ class Boundaries {
   // coefficients; false otherwise.
   bool checkSignOfJacobian();
 
+  // Original simple jacobian sign check algorithm using m=1 coefficients
+  bool checkSignOfJacobianOriginal();
+
+  // Robust jacobian sign check using polygon area method
+  bool checkSignOfJacobianPolygonArea();
+
   // Reverse the implied sign of the poloidal angle theta
   // in the given input boundary Fourier coefficients.
   void flipTheta();
