@@ -93,6 +93,17 @@
 
 **🎯 CRITICAL DEVELOPMENT PRINCIPLE**: Always use educational_VMEC sources as the definitive reference for debugging asymmetric mode issues. When VMEC++ behavior differs from educational_VMEC, the educational_VMEC implementation should be considered the correct approach to follow.
 
+**📈 PROVEN SUCCESS**: This systematic comparison approach has already yielded major breakthroughs:
+- Fixed theta range bugs in boundary evaluation and axis recovery
+- Improved axis recovery by 70% and brought tau values much closer to educational_VMEC
+- Every fix has been based on understanding how educational_VMEC handles asymmetric cases differently
+
+**🔍 DEVELOPMENT STRATEGY**: Continue this systematic approach by:
+1. **Compare educational_VMEC source code** for every asymmetric-related function
+2. **Identify specific algorithmic differences** between implementations
+3. **Apply fixes to match educational_VMEC behavior** step by step
+4. **Test incrementally** to measure progress after each fix
+
 #### Phase A: Implementation Comparison (Priority 1 - Next 2 weeks)
 
 **A1: Educational VMEC vs VMEC++ Asymmetric Algorithm Comparison**
@@ -129,7 +140,9 @@
   - 📊 **Jacobian comparison**: Educational_VMEC tau ~ -0.75 to -3.17 → axis recovery → success; VMEC++ tau ~ -1.41 to -4.28 → immediate failure
   - 🎯 **MAJOR BREAKTHROUGH**: Fixed axis recovery algorithm by extending theta range to match educational_VMEC
   - ✅ **Axis recovery improvement**: R_axis 6.1002→6.1281 (closer to educational_VMEC 6.1188), tau improved from -1.4 to -4.3 → -0.83 to -0.95
+  - ✅ **Theta shift warning identified**: "need to shift theta by delta = 0.463648" - boundary coefficient handling difference, working correctly
   - ❌ **Still failing**: VMEC++ continues to fail convergence despite significant axis recovery improvement
+  - 🎯 **CRITICAL SUCCESS**: Systematic comparison with educational_VMEC sources proving highly effective
 
 - [ ] **A1.3: Asymmetric Fourier Transform Comparison**
   - [ ] **Compare Fourier basis implementations**:
@@ -560,17 +573,24 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 
 ### 🎯 Next Priority Actions (Use Educational_VMEC as Reference)
 
-**Immediate Next Steps:**
-1. **Investigate remaining convergence issues** - Compare educational_VMEC vs VMEC++ behavior step-by-step
-2. **Analyze theta shift warning** - "need to shift theta by delta = 0.463648" before BAD_JACOBIAN
-3. **Check asymmetric geometry setup** - Compare how both codes handle asymmetric geometry initialization
-4. **Investigate Fourier basis differences** - Educational_VMEC uses combined basis, VMEC++ uses product basis
+**Immediate Next Steps (Continue Systematic Comparison):**
+1. **Compare first iteration behavior** - Step-by-step analysis of educational_VMEC vs VMEC++ first iteration
+2. **Investigate asymmetric geometry setup** - Compare how both codes handle asymmetric geometry initialization
+3. **Analyze Fourier basis differences** - Educational_VMEC uses combined basis, VMEC++ uses product basis  
+4. **Check force calculation differences** - Compare asymmetric force balance computation
 
-**Development Approach:**
-- **Always compare with educational_VMEC sources** when debugging asymmetric issues
+**Development Approach (Proven Successful):**
+- **Always examine educational_VMEC source code first** when debugging asymmetric issues
 - **Use educational_VMEC as ground truth** for correct asymmetric behavior
 - **Apply systematic fixes** based on educational_VMEC implementation patterns
 - **Test incrementally** after each fix to measure progress
+- **Document every difference found** between implementations
+- **Focus on algorithmic differences** rather than implementation style differences
+
+**Key Files to Compare Next:**
+- `educational_VMEC/src/forces.f90` vs `vmecpp/vmec/ideal_mhd_model/ideal_mhd_model.cc`
+- `educational_VMEC/src/bcovar.f90` vs `vmecpp/vmec/fourier_geometry/fourier_geometry.cc`
+- `educational_VMEC/src/tomnsp.f90` vs `vmecpp/vmec/boundaries/boundaries.cc`
 
 ### Phase 1: Symmetric Test Validation with lasym=true
 **Status**: ⚠️ **APPROACH REVISED - SYMMETRIC→ASYMMETRIC CONVERSION PROBLEMATIC**
