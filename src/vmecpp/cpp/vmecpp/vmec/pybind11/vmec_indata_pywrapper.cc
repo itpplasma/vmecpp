@@ -70,20 +70,8 @@ VmecINDATAPyWrapper::VmecINDATAPyWrapper(const VmecINDATA& indata)
       rbc(ToEigenMatrix(indata.rbc, mpol, 2 * ntor + 1)),
       zbs(ToEigenMatrix(indata.zbs, mpol, 2 * ntor + 1)) {
   if (lasym) {
-    // Check if asymmetric axis arrays are properly allocated
-    if (indata.raxis_s.size() == static_cast<size_t>(ntor + 1)) {
-      raxis_s = ToEigenVector(indata.raxis_s);
-    } else {
-      // Initialize with zeros if not properly allocated
-      raxis_s = Eigen::VectorXd::Zero(ntor + 1);
-    }
-
-    if (indata.zaxis_c.size() == static_cast<size_t>(ntor + 1)) {
-      zaxis_c = ToEigenVector(indata.zaxis_c);
-    } else {
-      // Initialize with zeros if not properly allocated
-      zaxis_c = Eigen::VectorXd::Zero(ntor + 1);
-    }
+    raxis_s = ToEigenVector(indata.raxis_s);
+    zaxis_c = ToEigenVector(indata.zaxis_c);
 
     // Check if asymmetric boundary arrays are properly allocated
     if (indata.rbs.size() == static_cast<size_t>(mpol * (2 * ntor + 1))) {
@@ -189,23 +177,20 @@ void VmecINDATAPyWrapper::SetMpolNtor(int new_mpol, int new_ntor) {
   zaxis_s(shortest_range) = old_axis_fc(shortest_range);
 
   if (lasym) {
-    // Always initialize asymmetric axis arrays when lasym is true
-    bool had_raxis_s = raxis_s.has_value();
-    if (had_raxis_s) {
+    if (raxis_s.has_value()) {
       old_axis_fc = raxis_s.value();
-    }
-    raxis_s = VectorXd::Zero(new_ntor + 1);
-    if (had_raxis_s && ntor > 0) {
+      raxis_s = VectorXd::Zero(new_ntor + 1);
       (*raxis_s)(shortest_range) = old_axis_fc(shortest_range);
+    } else {
+      raxis_s = VectorXd::Zero(new_ntor + 1);
     }
 
-    bool had_zaxis_c = zaxis_c.has_value();
-    if (had_zaxis_c) {
+    if (zaxis_c.has_value()) {
       old_axis_fc = zaxis_c.value();
-    }
-    zaxis_c = VectorXd::Zero(new_ntor + 1);
-    if (had_zaxis_c && ntor > 0) {
+      zaxis_c = VectorXd::Zero(new_ntor + 1);
       (*zaxis_c)(shortest_range) = old_axis_fc(shortest_range);
+    } else {
+      zaxis_c = VectorXd::Zero(new_ntor + 1);
     }
   }
 
@@ -228,7 +213,6 @@ void VmecINDATAPyWrapper::SetMpolNtor(int new_mpol, int new_ntor) {
   rbc = resized_2d_coeff(rbc);
   zbs = resized_2d_coeff(zbs);
   if (lasym) {
-    // Always initialize asymmetric boundary arrays when lasym is true
     if (rbs.has_value()) {
       rbs = resized_2d_coeff(rbs.value());
     } else {
@@ -288,25 +272,5 @@ VmecINDATAPyWrapper VmecINDATAPyWrapper::FromJson(
 }
 
 VmecINDATAPyWrapper VmecINDATAPyWrapper::Copy() const { return *this; }
-
-void VmecINDATAPyWrapper::InitializeAsymmetricArraysIfNeeded() {
-  if (lasym) {
-    // Initialize asymmetric axis arrays if not already initialized
-    if (!raxis_s.has_value()) {
-      raxis_s = Eigen::VectorXd::Zero(ntor + 1);
-    }
-    if (!zaxis_c.has_value()) {
-      zaxis_c = Eigen::VectorXd::Zero(ntor + 1);
-    }
-
-    // Initialize asymmetric boundary arrays if not already initialized
-    if (!rbs.has_value()) {
-      rbs = RowMatrixXd::Zero(mpol, 2 * ntor + 1);
-    }
-    if (!zbc.has_value()) {
-      zbc = RowMatrixXd::Zero(mpol, 2 * ntor + 1);
-    }
-  }
-}
 
 }  // namespace vmecpp

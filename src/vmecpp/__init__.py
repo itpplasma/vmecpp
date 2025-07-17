@@ -553,16 +553,6 @@ class VmecInput(BaseModelWithNumpy):
 
         # this also resizes the readonly_attrs
         cpp_indata._set_mpol_ntor(self.mpol, self.ntor)
-
-        # For asymmetric mode, manually ensure optional fields are initialized
-        # The C++ SetMpolNtor only initializes asymmetric fields if lasym is already true
-        # Since we set lasym after construction, we need to manually trigger initialization
-        if cpp_indata.lasym and cpp_indata.raxis_s is None:
-            # Force re-initialization of asymmetric fields by temporarily toggling lasym
-            cpp_indata.lasym = False
-            cpp_indata._set_mpol_ntor(self.mpol, self.ntor)
-            cpp_indata.lasym = True
-            cpp_indata._set_mpol_ntor(self.mpol, self.ntor)
         for attr in readonly_attrs - {"mpol", "ntor"}:
             # now we can set the elements of the readonly_attrs
             value = getattr(self, attr)
@@ -571,26 +561,22 @@ class VmecInput(BaseModelWithNumpy):
             # so we need to skip them for itemwise assignment
             if value is None:
                 assert attr in {"rbs", "zbc", "zaxis_c", "raxis_s"}
+                # All asymmetric fields should be initialized when lasym=True
+                if cpp_indata.lasym:
+                    msg = f"Field {attr} should not be None when lasym=True"
+                    raise ValueError(msg)
                 # Skip None values (don't try to assign them)
-                continue
-            # Check if non-None asymmetric fields are being set when lasym=False
-            if attr in {"rbs", "zbc", "zaxis_c", "raxis_s"} and not cpp_indata.lasym:
-                msg = (
-                    f"Cannot set asymmetric field '{attr}' when lasym=False. "
-                    "Either set lasym=True or remove the asymmetric field."
-                )
-                raise ValueError(msg)
-            # Handle std::optional<> fields for asymmetric arrays
-            if attr in {"rbs", "zbc", "zaxis_c", "raxis_s"}:
-                # These are std::optional<> fields that may be None even after _set_mpol_ntor
-                cpp_field = getattr(cpp_indata, attr)
-                if cpp_field is not None:
-                    cpp_field[:] = value
-                else:
-                    # Skip if the C++ field is None (this happens when lasym=True but
-                    # the field wasn't properly initialized by SetMpolNtor)
-                    pass
             else:
+                # Check if non-None asymmetric fields are being set when lasym=False
+                if (
+                    attr in {"rbs", "zbc", "zaxis_c", "raxis_s"}
+                    and not cpp_indata.lasym
+                ):
+                    msg = (
+                        f"Cannot set asymmetric field '{attr}' when lasym=False. "
+                        "Either set lasym=True or remove the asymmetric field."
+                    )
+                    raise ValueError(msg)
                 getattr(cpp_indata, attr)[:] = value
 
         return cpp_indata
