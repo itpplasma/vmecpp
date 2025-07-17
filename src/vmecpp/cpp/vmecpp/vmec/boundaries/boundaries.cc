@@ -413,6 +413,12 @@ void Boundaries::RecomputeMagneticAxisToFixJacobianSign(
       zaxis_c[n] = w.new_zaxis_c[n];
     }
   }  // n
+
+  // Debug: confirm axis coefficients have been updated
+  if (s_.lasym) {
+    std::cout << "DEBUG: Axis coefficients updated - raxis_c[0]=" << raxis_c[0]
+              << " zaxis_c[0]=" << zaxis_c[0] << std::endl;
+  }
 }  // RecomputeMagneticAxisToFixJacobianSign
 
 }  // namespace vmecpp

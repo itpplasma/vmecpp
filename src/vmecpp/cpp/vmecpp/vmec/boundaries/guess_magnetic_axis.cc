@@ -463,6 +463,12 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
           min_tau = min_tau_temp;
           w.new_r_axis[k] = r_grid;
           w.new_z_axis[k] = z_grid;
+          // Debug: output best tau improvement for plane 0
+          if (k == 0 && index_r <= 5 && index_z <= 5) {
+            std::cout << "    New best: r_grid=" << r_grid
+                      << " z_grid=" << z_grid << " min_tau=" << min_tau
+                      << std::endl;
+          }
         } else if (min_tau_temp == min_tau) {
           // If up-down symmetric and lasym=T, need this to pick z = 0
           if (std::abs(w.new_z_axis[k]) > std::abs(z_grid)) {
@@ -589,6 +595,11 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
         min_tau = *std::min_element(w.tau[k].begin(), w.tau[k].end());
       }
     }
+    // Debug: output final result for this plane
+    if (k == 0) {
+      std::cout << "  Grid search complete - final min_tau for plane 0: "
+                << min_tau << std::endl;
+    }
   }  // k
 
   // flip-mirror stellarator-symmetric half in case of symmetric run
@@ -661,6 +672,11 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
     std::cout << " Z_axis=" << zaxis_c[0];
   }
   std::cout << std::endl;
+
+  // Debug: output grid search parameters and results
+  std::cout << "DEBUG: Grid search parameters - kNumberOfGridPoints="
+            << kNumberOfGridPoints << " ns=" << number_of_flux_surfaces
+            << " lasym=" << s.lasym << std::endl;
 
   return w;
 }  // NOLINT(readability/fn_size)

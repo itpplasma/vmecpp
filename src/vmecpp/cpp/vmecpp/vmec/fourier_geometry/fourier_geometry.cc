@@ -32,6 +32,11 @@ FourierGeometry::FourierGeometry(const Sizes* s, const RadialPartitioning* r,
 void FourierGeometry::interpFromBoundaryAndAxis(
     const FourierBasisFastPoloidal& t, const Boundaries& b,
     const RadialProfiles& p) {
+  // Debug: output axis coefficients being used for interpolation
+  if (s_.lasym) {
+    std::cout << "DEBUG: interpFromBoundaryAndAxis - using axis raxis_c[0]="
+              << b.raxis_c[0] << " zaxis_c[0]=" << b.zaxis_c[0] << std::endl;
+  }
   for (int jF = nsMin_; jF < nsMax_; ++jF) {
     for (int m = 0; m < s_.mpol; ++m) {
       for (int n = 0; n < s_.ntor + 1; ++n) {
