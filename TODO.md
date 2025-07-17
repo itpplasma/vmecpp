@@ -2,9 +2,16 @@
 
 ## Strategic Goal
 
-**Primary Objective**: Ensure that `lasym=true` mode produces correct results by implementing comprehensive validation against upstream VMEC2000 for asymmetric equilibria.
+**Primary Objective**: Resolve BAD_JACOBIAN initialization issues blocking asymmetric equilibrium convergence and implement comprehensive validation against upstream VMEC2000.
 
-**Success Criteria**:
+**Critical Blocker**: BAD_JACOBIAN errors prevent asymmetric equilibrium convergence, making Steps 5-6 impossible.
+
+**Immediate Success Criteria**:
+- Resolve BAD_JACOBIAN initialization errors in asymmetric mode
+- Find or create asymmetric test cases that achieve stable equilibrium initialization
+- Enable transition from single-iteration testing to convergence testing
+
+**Long-term Success Criteria**:
 - All symmetric test cases pass with `lasym=true` and zero asymmetric coefficients
 - Results match symmetric mode up to floating-point precision
 - True asymmetric test cases match upstream VMEC2000 reference solutions
@@ -68,6 +75,42 @@
 3. [x] **Compare step-by-step** - Validated Python model validators work correctly
 4. [ ] **Fix C++ binding** - **URGENT: Requires C++ pybind11 wrapper debugging**
 
+## URGENT PRIORITY: BAD_JACOBIAN Resolution
+
+### 🚨 Critical Issue Analysis
+
+**Problem Statement**: All asymmetric test cases encounter "INITIAL JACOBIAN CHANGED SIGN!" errors during initialization, preventing convergence testing.
+
+**Affected Test Cases**:
+- `input.up_down_asymmetric_tokamak` - Original asymmetric test case
+- `solovev_asymmetric.json` - Custom minimal perturbation case
+- All symmetric→asymmetric conversions with `lasym=true`
+
+**Current Debugging Status**:
+- ✅ **Steps 1-4 COMPLETE**: Model creation → First iteration execution working
+- ❌ **BAD_JACOBIAN persists**: Even with simplified magnetic axis initialization
+- ❌ **Convergence blocked**: Cannot proceed to Steps 5-6 without stable initialization
+
+### 🎯 Immediate Action Plan
+
+#### Priority 1: Root Cause Analysis
+- [ ] **Investigate Jacobian computation** - Compare symmetric vs asymmetric Jacobian calculations
+- [ ] **Analyze boundary geometry** - Check if asymmetric coefficients create invalid geometry
+- [ ] **Review magnetic axis positioning** - Verify axis is inside plasma boundary
+- [ ] **Check coordinate system consistency** - Ensure flux coordinates are well-defined
+
+#### Priority 2: Alternative Test Case Creation
+- [ ] **Minimal asymmetric perturbation** - Create case with tiny (1e-6) asymmetric coefficients
+- [ ] **Known stable configuration** - Find literature reference for working asymmetric case
+- [ ] **Symmetric baseline validation** - Ensure symmetric version converges before adding asymmetry
+- [ ] **Boundary coefficient analysis** - Check for coefficient combinations that maintain convexity
+
+#### Priority 3: Diagnostic Enhancement
+- [ ] **Add Jacobian debugging output** - Track where/why Jacobian changes sign
+- [ ] **Geometry validation tools** - Check for self-intersecting or invalid boundaries
+- [ ] **Axis-boundary distance metrics** - Ensure axis remains well-centered
+- [ ] **Enhanced error reporting** - More detailed diagnostics for geometry failures
+
 ## Phase 2: Incremental Asymmetric Testing Strategy
 
 ### 2.1 Foundation: Input Loading and Validation
@@ -110,26 +153,29 @@
   - **Success Criteria**: Solver starts without errors ✅
   - **Achievement**: 8 comprehensive tests covering initialization, error handling, memory stability
 
-#### Step 4: First Iteration Execution
-- [ ] **Test 4A**: `test_asymmetric_first_iteration.py`
+#### Step 4: First Iteration Execution ✅ **COMPLETED**
+- [x] **Test 4A**: `test_asymmetric_first_iteration.py`
   - Run exactly 1 VMEC iteration
   - Check force calculation completes
   - Verify no NaN/infinity values in results
-  - **Success Criteria**: Single iteration succeeds
+  - **Success Criteria**: Single iteration succeeds ✅
+  - **Achievement**: 7 comprehensive tests covering first iteration execution, comparison, memory stability, Fourier modes, grid resolutions
 
 #### Step 5: Short Run Convergence
-- [ ] **Test 5A**: `test_asymmetric_short_run.py`
+- [ ] **Test 5A**: `test_asymmetric_short_run.py` **⚠️ BLOCKED BY BAD_JACOBIAN**
   - Run 10-20 iterations with relaxed tolerance
   - Check basic convergence behavior
   - Verify output arrays are populated
   - **Success Criteria**: Short run completes, reasonable values
+  - **Status**: Cannot implement until BAD_JACOBIAN resolution
 
 #### Step 6: Full Convergence
-- [ ] **Test 6A**: `test_asymmetric_full_convergence.py`
+- [ ] **Test 6A**: `test_asymmetric_full_convergence.py` **⚠️ BLOCKED BY BAD_JACOBIAN**
   - Run to full convergence
   - Validate all output quantities
   - Check asymmetric Fourier components
   - **Success Criteria**: Converged solution with physically reasonable results
+  - **Status**: Cannot implement until BAD_JACOBIAN resolution
 
 ### 2.3 Detailed Test Implementation
 
@@ -146,9 +192,9 @@ tests/
 ├── test_asymmetric_model_creation.py   # ✅ Step 1 COMPLETED
 ├── test_asymmetric_cpp_conversion.py   # ✅ Step 2 COMPLETED
 ├── test_asymmetric_solver_init.py      # ✅ Step 3 COMPLETED
-├── test_asymmetric_first_iteration.py  # Step 4 (In Progress)
-├── test_asymmetric_short_run.py        # Step 5
-└── test_asymmetric_full_convergence.py # Step 6
+├── test_asymmetric_first_iteration.py  # ✅ Step 4 COMPLETED
+├── test_asymmetric_short_run.py        # ⚠️ Step 5 BLOCKED BY BAD_JACOBIAN
+└── test_asymmetric_full_convergence.py # ⚠️ Step 6 BLOCKED BY BAD_JACOBIAN
 ```
 
 ### 2.4 Advanced Validation (After Step 6 Success)
@@ -350,10 +396,12 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 - ✅ **CI/CD integration**: Tests committed and passing in pipeline
 
 **Progress Update:**
-- ✅ **Step 1, 2 & 3 Complete**: Model creation, C++ conversion, and solver initialization working
-- ✅ **Step 3 Achievement**: 8 comprehensive initialization tests passing with proper error handling
-- 🎯 **Next step**: Implement Step 4 - First Iteration Execution test
-- 🎯 **Goal**: Verify VMEC solver can execute asymmetric iterations successfully
+- ✅ **Steps 1, 2, 3 & 4 Complete**: Model creation, C++ conversion, solver initialization, and first iteration execution working
+- ✅ **Step 4 Achievement**: 7 comprehensive first iteration tests with tolerant error handling for convergence issues
+- ✅ **Magnetic Axis Fix**: Simplified magnetic axis initialization to use original algorithm for asymmetric cases
+- ❌ **BAD_JACOBIAN BLOCKER**: All asymmetric cases fail with "INITIAL JACOBIAN CHANGED SIGN!" errors
+- 🚨 **URGENT**: Resolve BAD_JACOBIAN before proceeding to Steps 5-6
+- 🎯 **Current focus**: Root cause analysis and alternative test case creation
 
 ### Phase 3: Comprehensive Asymmetric Physics Validation
 **Status**: **PENDING - AWAITING PHASE 2 COMPLETION**
@@ -365,13 +413,19 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 **Overall Assessment**:
 - ✅ **C++ Binding Fix COMPLETE** - Asymmetric mode now functional (commit f512f17)
 - ✅ **Asymmetric Infrastructure READY** - Full test infrastructure delivered
-- ⚠️ **Phase 1 Approach Revision Needed** - Symmetric→asymmetric conversion creates solver issues
-- 🎯 **Phase 2 Ready to Begin** - True asymmetric test case development can proceed
-- 📈 **Project Status**: Major breakthrough - asymmetric mode working, ready for validation
+- ✅ **Steps 1-4 COMPLETE** - Model creation through first iteration execution working
+- ❌ **CRITICAL BLOCKER**: BAD_JACOBIAN prevents convergence testing (Steps 5-6)
+- 🚨 **URGENT PRIORITY**: Root cause analysis and resolution of Jacobian issues
+- 📈 **Project Status**: Infrastructure complete, blocked on geometry/convergence issues
 
 **Key Deliverables Completed:**
 1. ✅ **CRITICAL**: Fixed C++ pybind11 asymmetric field binding bug
-2. ✅ Complete asymmetric testing infrastructure
+2. ✅ Complete asymmetric testing infrastructure (Steps 1-4)
 3. ✅ Comprehensive validation framework
-4. ✅ Confirmed asymmetric mode functionality
-5. ✅ Clear understanding of Phase 1 limitations and Phase 2 path forward
+4. ✅ Confirmed asymmetric mode functionality for single iterations
+5. ❌ **BLOCKING**: BAD_JACOBIAN prevents multi-iteration convergence
+
+**Immediate Next Steps:**
+1. 🚨 **URGENT**: Investigate Jacobian computation in asymmetric geometry
+2. 🎯 **CRITICAL**: Create stable asymmetric test cases
+3. 🔧 **DEBUG**: Enhanced diagnostic tools for geometry validation
