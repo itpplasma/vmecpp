@@ -24,42 +24,49 @@
 - Tests exist: `vmec_asymmetric_test.cc` (3 tests) and `test_init.py` (2 validation tests)
 - No actual physics validation - only input creation and convergence checking
 - No reference data for asymmetric cases with non-zero asymmetric coefficients
+- **CRITICAL ISSUE IDENTIFIED**: C++ pybind11 asymmetric field binding bug prevents execution
 
 ### 1.2 Create Symmetric-with-lasym=true Test Suite
 
 **Implementation Plan:**
-- [ ] **Create test utility function** `run_symmetric_as_asymmetric(input_file)`
+- [x] **Create test utility function** `run_symmetric_as_asymmetric(input_file)`
   - Load symmetric input file (JSON format)
   - Set `lasym=true`
   - Set all asymmetric coefficients to zero: `rbs=0`, `zbc=0`, `raxis_s=0`, `zaxis_c=0`
   - Run VMEC++ and return output
-- [ ] **Implement comparison utility** `compare_symmetric_asymmetric_outputs(sym_output, asym_output)`
+- [x] **Implement comparison utility** `compare_symmetric_asymmetric_outputs(sym_output, asym_output)`
   - Compare all output quantities with strict floating-point tolerance
   - Focus on: `rmnc`, `zmns`, `lmns`, `bmnc`, `iotaf`, `presf`, `phi`, `chi`
   - Use `np.testing.assert_allclose` with `rtol=1e-14, atol=1e-14`
 
 **Test Cases to Validate:**
-- [ ] **`solovev.json`** - Analytical tokamak (simplest case)
-- [ ] **`circular_tokamak.json`** - Minimal tokamak boundary
-- [ ] **`cma.json`** - Standard tokamak case
-- [ ] **`cth_like_free_bdy.json`** - Free boundary stellarator
-- [ ] **`li383_low_res.json`** - Low-resolution stellarator
+- [x] **`solovev.json`** - Analytical tokamak (simplest case) - **INFRASTRUCTURE COMPLETE**
+- [x] **`circular_tokamak.json`** - Minimal tokamak boundary - **INFRASTRUCTURE COMPLETE**
+- [x] **`cma.json`** - Standard tokamak case - **INFRASTRUCTURE COMPLETE**
+- [x] **`cth_like_free_bdy.json`** - Free boundary stellarator - **INFRASTRUCTURE COMPLETE**
+- [x] **`li383_low_res.json`** - Low-resolution stellarator - **INFRASTRUCTURE COMPLETE**
 
-**Expected Outcome:** All symmetric results should be identical when run with `lasym=true` and zero asymmetric coefficients.
+**Status:** Infrastructure complete in `tests/test_asymmetric_phase1.py` but **BLOCKED** by C++ binding issue.
 
 ### 1.3 Debug and Fix Asymmetric Infrastructure Issues
 
 **Known Issues to Address:**
-- [ ] **C++ binding issues** - Current asymmetric tests may have pybind11 problems
-- [ ] **Memory initialization** - Ensure all asymmetric arrays are properly initialized
+- [x] **C++ binding issues** - **CRITICAL BUG IDENTIFIED**: pybind11 asymmetric field binding failure
+- [x] **Memory initialization** - Asymmetric arrays properly initialized in Python but fail in C++
 - [ ] **Fourier transform validation** - Verify `fourier_asymmetric.cc` implementations
 - [ ] **Geometry extension** - Check `SymmetrizeRealSpaceGeometry` function
 
+**Critical Bug Details:**
+- **Location**: `VmecINDATAPyWrapper._set_mpol_ntor()` and `_to_cpp_vmecindatapywrapper()`
+- **Symptoms**: `TypeError: 'NoneType' object does not support item assignment`
+- **Root Cause**: C++ wrapper fails to allocate asymmetric arrays even when Python fields are properly set
+- **Impact**: **ALL asymmetric mode execution (lasym=true) is blocked**
+
 **Debugging Strategy:**
-1. **Start with C++ tests** - Run `bazel test //vmecpp/vmec/vmec:vmec_asymmetric_test`
-2. **Add diagnostic output** - Print intermediate values in asymmetric Fourier transforms
-3. **Compare step-by-step** - Validate each stage of asymmetric computation
-4. **Test individual components** - Isolate `fourier_asymmetric.cc` functions
+1. [x] **Start with C++ tests** - Added missing BUILD.bazel targets, identified array bounds issues
+2. [x] **Add diagnostic output** - Created debug script showing Python fields are properly set
+3. [x] **Compare step-by-step** - Validated Python model validators work correctly
+4. [ ] **Fix C++ binding** - **URGENT: Requires C++ pybind11 wrapper debugging**
 
 ## Phase 2: True Asymmetric Test Case Development
 
@@ -262,3 +269,42 @@
 - Document test case generation procedures
 
 This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC++ functionality against upstream VMEC2000, ensuring correctness and completeness of the asymmetric implementation.
+
+## Current Status Summary
+
+### Phase 1: Symmetric Test Validation with lasym=true
+**Status**: **INFRASTRUCTURE COMPLETE - BLOCKED BY C++ BUG**
+
+**Completed Work:**
+- ✅ Comprehensive test infrastructure in `tests/test_asymmetric_phase1.py`
+- ✅ `run_symmetric_as_asymmetric()` utility function
+- ✅ `compare_symmetric_asymmetric_outputs()` comparison framework
+- ✅ Test coverage for all symmetric cases (solovev, circular_tokamak, cma, etc.)
+- ✅ C++ BUILD.bazel targets for asymmetric tests
+
+**Blocking Issue:**
+- ❌ **CRITICAL**: C++ pybind11 asymmetric field binding bug
+- ❌ `VmecINDATAPyWrapper._set_mpol_ntor()` fails to allocate asymmetric arrays
+- ❌ All asymmetric mode execution (lasym=true) is blocked
+
+**Next Steps:**
+1. **URGENT**: Debug and fix C++ asymmetric field binding in pybind11 wrapper
+2. Validate that zero asymmetric coefficients give identical results to symmetric mode
+3. Complete Phase 1 with working asymmetric infrastructure
+
+### Phase 2: True Asymmetric Test Case Development
+**Status**: **PENDING - AWAITING PHASE 1 COMPLETION**
+
+**Requires:**
+- Phase 1 C++ binding fix
+- Working asymmetric mode execution
+- Reference asymmetric test cases from upstream VMEC2000
+
+### Phase 3: Comprehensive Asymmetric Physics Validation
+**Status**: **PENDING - AWAITING PHASE 2 COMPLETION**
+
+### Phase 4: Integration and Regression Testing
+**Status**: **PENDING - AWAITING PHASE 3 COMPLETION**
+
+---
+**Overall Assessment**: Phase 1 test infrastructure is complete and ready for execution once the C++ binding issue is resolved. The critical path is fixing the pybind11 asymmetric field allocation bug.
