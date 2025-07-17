@@ -771,6 +771,14 @@ absl::StatusOr<Vmec::SolveEqLoopStatus> Vmec::SolveEquilibriumLoop(
     }
 
     // check for bad jacobian and bad initial guess for axis
+    // Debug: log why axis recovery might not trigger
+    if (fc_.ijacob != 0 || fc_.ns < 3 || 
+        (status_ != VmecStatus::BAD_JACOBIAN && fc_.restart_reason != RestartReason::HUGE_INITIAL_FORCES)) {
+      std::cout << "DEBUG: Axis recovery not triggered - ijacob=" << fc_.ijacob 
+                << " ns=" << fc_.ns << " status=" << static_cast<int>(status_)
+                << " restart_reason=" << static_cast<int>(fc_.restart_reason) << std::endl;
+    }
+    
     if (fc_.ijacob == 0 &&
         (status_ == VmecStatus::BAD_JACOBIAN ||
          fc_.restart_reason == RestartReason::HUGE_INITIAL_FORCES) &&

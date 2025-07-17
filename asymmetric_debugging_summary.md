@@ -2,7 +2,7 @@
 
 ## Root Cause Found
 We identified that VMEC++ incorrectly handles the theta range in `guess_magnetic_axis.cc` for asymmetric cases:
-- Only fills theta indices 0 to nThetaReduced-1 
+- Only fills theta indices 0 to nThetaReduced-1
 - Leaves indices 9-15 as zeros
 - This causes rmin=0 instead of ~5.27, leading to wrong axis initialization
 
