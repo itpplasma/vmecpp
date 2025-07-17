@@ -109,7 +109,12 @@ PYBIND11_MODULE(_vmecpp, m) {
           .def("copy", &VmecINDATAPyWrapper::Copy)
 
           // numerical resolution, symmetry assumption
-          .def_readwrite("lasym", &VmecINDATAPyWrapper::lasym)
+          .def_property(
+              "lasym", [](const VmecINDATAPyWrapper &w) { return w.lasym; },
+              [](VmecINDATAPyWrapper &w, bool value) {
+                w.lasym = value;
+                w.InitializeAsymmetricArraysIfNeeded();
+              })
           .def_readwrite("nfp", &VmecINDATAPyWrapper::nfp)
           .def_readonly("mpol", &VmecINDATAPyWrapper::mpol)  // readonly!
           .def_readonly("ntor", &VmecINDATAPyWrapper::ntor)  // readonly!

@@ -83,6 +83,9 @@ class VmecINDATAPyWrapper {
   // needed.
   void SetMpolNtor(int new_mpol, int new_ntor);
 
+  // Initialize asymmetric arrays if they are not already initialized
+  void InitializeAsymmetricArraysIfNeeded();
+
   std::string ToJson() const;
   static VmecINDATAPyWrapper FromFile(
       const std::filesystem::path& indata_json_file_path);
