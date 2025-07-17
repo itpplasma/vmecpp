@@ -150,6 +150,9 @@
   - ✅ **BAD_JACOBIAN handling fixed**: VMEC++ now continues iteration like educational_VMEC instead of terminating
   - 🚨 **CURRENT ISSUE**: VMEC++ gets stuck in infinite BAD_JACOBIAN loop - axis recovery not improving jacobian numerically
   - 🔍 **NUMERICAL DIFFERENCE**: Educational_VMEC tau -0.75→-0.18 after recovery, VMEC++ remains at -10 to -15
+  - 🎯 **ROOT CAUSE IDENTIFIED**: Axis recovery algorithm produces reasonable axis positions but jacobian doesn't improve
+  - 🔧 **DEBUG OUTPUT ADDED**: Added detailed debug output to both codes to trace axis recovery step-by-step
+  - 📚 **NEXT INVESTIGATION**: Compare axis recovery algorithms and geometry update process between implementations
   - 🎯 **CRITICAL SUCCESS**: Systematic comparison with educational_VMEC sources proving highly effective
 
 - [x] **A1.3: Compare First Iteration Behavior** ✅ **CRITICAL BREAKTHROUGH**
@@ -604,10 +607,12 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 1. **✅ EXAMINE educational_VMEC first iteration source code** - COMPLETED: Identified BAD_JACOBIAN handling difference
 2. **✅ IDENTIFY where VMEC++ fails during first iteration** - COMPLETED: Root cause was fatal error on BAD_JACOBIAN status
 3. **✅ FIX VMEC++ BAD_JACOBIAN handling** - COMPLETED: Now continues iteration like educational_VMEC
-4. **🔍 INVESTIGATE infinite BAD_JACOBIAN loop** - CURRENT: Axis recovery algorithm not improving jacobian numerically
-5. **🔧 COMPARE numerical jacobian recovery** - Educational_VMEC tau improves from -0.75→-0.18, VMEC++ remains at -10 to -15
-6. **📚 ANALYZE axis recovery numerical differences** - Why educational_VMEC recovery works but VMEC++ doesn't
+4. **✅ INVESTIGATE infinite BAD_JACOBIAN loop** - COMPLETED: Root cause identified as axis recovery not improving jacobian numerically
+5. **✅ COMPARE numerical jacobian recovery** - COMPLETED: Educational_VMEC tau -0.75→-0.18, VMEC++ remains -10 to -15
+6. **🔍 ANALYZE axis recovery numerical differences** - CURRENT: Debug output added, investigating why educational_VMEC recovery works but VMEC++ doesn't
 7. **⚖️ CHECK geometry update after axis recovery** - Ensure new axis properly updates jacobian calculation
+8. **🔧 ADD detailed debug output to both codes** - Compare axis recovery step-by-step between implementations
+9. **📚 EXAMINE source code differences** - Detailed comparison of axis recovery algorithms
 
 **Development Approach (Proven Successful):**
 - **🔍 ALWAYS EXAMINE educational_VMEC source code FIRST** when debugging asymmetric issues
