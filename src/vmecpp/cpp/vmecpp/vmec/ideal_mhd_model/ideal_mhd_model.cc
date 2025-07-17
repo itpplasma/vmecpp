@@ -1635,14 +1635,19 @@ void IdealMhdModel::computeJacobian() {
   }  // j
 
   bool localBadJacobian = (minTau * maxTau < 0.0);
-
+  // Debug: output jacobian status
   if (localBadJacobian) {
+    std::cout << "DEBUG: BAD_JACOBIAN detected - minTau=" << minTau
+              << " maxTau=" << maxTau << std::endl;
 #ifdef _OPENMP
 #pragma omp critical
 #endif  // _OPENMP
     {
       m_fc_.restart_reason = RestartReason::BAD_JACOBIAN;
     }
+  } else {
+    std::cout << "DEBUG: GOOD_JACOBIAN - minTau=" << minTau
+              << " maxTau=" << maxTau << std::endl;
   }
 #ifdef _OPENMP
 #pragma omp barrier

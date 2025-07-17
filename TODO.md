@@ -147,7 +147,9 @@
   - 🎯 **MAJOR BREAKTHROUGH**: Fixed axis recovery algorithm by extending theta range to match educational_VMEC
   - ✅ **Axis recovery improvement**: R_axis 6.1002→6.1281 (closer to educational_VMEC 6.1188), tau improved from -1.4 to -4.3 → -0.83 to -0.95
   - ✅ **Theta shift warning identified**: "need to shift theta by delta = 0.463648" - boundary coefficient handling difference, working correctly
-  - ❌ **Still failing**: VMEC++ continues to fail convergence despite significant axis recovery improvement
+  - ✅ **BAD_JACOBIAN handling fixed**: VMEC++ now continues iteration like educational_VMEC instead of terminating
+  - 🚨 **CURRENT ISSUE**: VMEC++ gets stuck in infinite BAD_JACOBIAN loop - axis recovery not improving jacobian numerically
+  - 🔍 **NUMERICAL DIFFERENCE**: Educational_VMEC tau -0.75→-0.18 after recovery, VMEC++ remains at -10 to -15
   - 🎯 **CRITICAL SUCCESS**: Systematic comparison with educational_VMEC sources proving highly effective
 
 - [x] **A1.3: Compare First Iteration Behavior** ✅ **CRITICAL BREAKTHROUGH**
@@ -594,7 +596,7 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 - **Tau values**: Improved from -1.4 to -4.3 → -0.83 to -0.95 (~70% improvement)
 - **🔥 CRITICAL SUCCESS**: VMEC++ no longer crashes on asymmetric input, continues iteration like educational_VMEC
 
-**🔍 CURRENT STATUS**: VMEC++ continues iterating but gets stuck in infinite BAD_JACOBIAN loop - force calculation not completing properly
+**🔍 CURRENT STATUS**: VMEC++ continues iterating but gets stuck in infinite BAD_JACOBIAN loop - axis recovery not improving jacobian values numerically
 
 ### 🎯 Next Priority Actions (Use Educational_VMEC as Reference)
 
@@ -602,14 +604,14 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 1. **✅ EXAMINE educational_VMEC first iteration source code** - COMPLETED: Identified BAD_JACOBIAN handling difference
 2. **✅ IDENTIFY where VMEC++ fails during first iteration** - COMPLETED: Root cause was fatal error on BAD_JACOBIAN status
 3. **✅ FIX VMEC++ BAD_JACOBIAN handling** - COMPLETED: Now continues iteration like educational_VMEC
-4. **🔍 INVESTIGATE infinite BAD_JACOBIAN loop** - CURRENT: Why force calculation not completing properly
-5. **🔧 COMPARE asymmetric geometry setup** - How both codes handle asymmetric geometry initialization
-6. **📚 ANALYZE Fourier basis differences** - Educational_VMEC uses combined basis, VMEC++ uses product basis
-7. **⚖️ CHECK force calculation differences** - Compare asymmetric force balance computation
+4. **🔍 INVESTIGATE infinite BAD_JACOBIAN loop** - CURRENT: Axis recovery algorithm not improving jacobian numerically
+5. **🔧 COMPARE numerical jacobian recovery** - Educational_VMEC tau improves from -0.75→-0.18, VMEC++ remains at -10 to -15
+6. **📚 ANALYZE axis recovery numerical differences** - Why educational_VMEC recovery works but VMEC++ doesn't
+7. **⚖️ CHECK geometry update after axis recovery** - Ensure new axis properly updates jacobian calculation
 
 **Development Approach (Proven Successful):**
 - **🔍 ALWAYS EXAMINE educational_VMEC source code FIRST** when debugging asymmetric issues
-- **📚 USE educational_VMEC as ground truth** for correct asymmetric behavior  
+- **📚 USE educational_VMEC as ground truth** for correct asymmetric behavior
 - **🔧 APPLY systematic fixes** based on educational_VMEC implementation patterns
 - **✅ TEST incrementally** after each fix to measure progress
 - **📚 DOCUMENT every difference found** between implementations

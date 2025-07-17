@@ -385,18 +385,20 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
   const int k_max = s.lasym ? s.nZeta : s.nZeta / 2 + 1;
   for (int k = 0; k < k_max; ++k) {
     // compute grid extent
-    // For asymmetric cases, extend geometry to full theta range for proper optimization
-    // but still use only the computed range for boundary extent calculation
+    // For asymmetric cases, extend geometry to full theta range for proper
+    // optimization but still use only the computed range for boundary extent
+    // calculation
     const int theta_extent = s.lasym ? s.nThetaReduced : s.nThetaEven;
-    const int theta_max = s.nThetaEven;  // Always use full theta range for optimization
-    const double min_r =
-        *std::min_element(w.r_lcfs[k].begin(), w.r_lcfs[k].begin() + theta_extent);
-    const double max_r =
-        *std::max_element(w.r_lcfs[k].begin(), w.r_lcfs[k].begin() + theta_extent);
-    const double min_z =
-        *std::min_element(w.z_lcfs[k].begin(), w.z_lcfs[k].begin() + theta_extent);
-    const double max_z =
-        *std::max_element(w.z_lcfs[k].begin(), w.z_lcfs[k].begin() + theta_extent);
+    const int theta_max =
+        s.nThetaEven;  // Always use full theta range for optimization
+    const double min_r = *std::min_element(w.r_lcfs[k].begin(),
+                                           w.r_lcfs[k].begin() + theta_extent);
+    const double max_r = *std::max_element(w.r_lcfs[k].begin(),
+                                           w.r_lcfs[k].begin() + theta_extent);
+    const double min_z = *std::min_element(w.z_lcfs[k].begin(),
+                                           w.z_lcfs[k].begin() + theta_extent);
+    const double max_z = *std::max_element(w.z_lcfs[k].begin(),
+                                           w.z_lcfs[k].begin() + theta_extent);
 
     // grid step sizes
     const double delta_r = (max_r - min_r) / (kNumberOfGridPoints - 1.0);
@@ -416,7 +418,7 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
       w.tau0[k][l] = w.d_r_d_theta_half[k][l] * w.d_z_d_s_half[k][l] -
                      w.d_z_d_theta_half[k][l] * w.d_r_d_s_half[k][l];
     }  // l
-    
+
     // For asymmetric cases, extend arrays to full theta range using mirroring
     // This matches educational_VMEC's approach for axis recovery optimization
     if (s.lasym) {
@@ -645,11 +647,18 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
       w.new_zaxis_c[s.nZeta / 2] /= 2.0;
     }
   }
-  
+
   // Debug: output axis recovery results
   std::cout << "DEBUG: Axis recovery results - R_axis=" << w.new_raxis_c[0];
   if (s.lasym) {
     std::cout << " Z_axis=" << w.new_zaxis_c[0];
+  }
+  std::cout << std::endl;
+
+  // Debug: output before/after axis comparison
+  std::cout << "DEBUG: Original axis - R_axis=" << raxis_c[0];
+  if (s.lasym) {
+    std::cout << " Z_axis=" << zaxis_c[0];
   }
   std::cout << std::endl;
 

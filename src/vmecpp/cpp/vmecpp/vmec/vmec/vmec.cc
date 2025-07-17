@@ -759,6 +759,16 @@ absl::StatusOr<Vmec::SolveEqLoopStatus> Vmec::SolveEquilibriumLoop(
   for (int force_iteration = iter2_, bad_resets = 0;
        (force_iteration <= fc_.niterv) && m_liter_flag; force_iteration++) {
     const int iter2 = force_iteration - bad_resets;
+
+    // Fix: Reset status at beginning of each iteration like educational_VMEC
+    // Educational_VMEC: ier_flag = norm_term_flag (eqsolve.f90 line 65)
+#ifdef _OPENMP
+#pragma omp single
+#endif  // _OPENMP
+    {
+      status_ = VmecStatus::NORMAL_TERMINATION;
+    }
+
     // ADVANCE FOURIER AMPLITUDES OF R, Z, AND LAMBDA
     absl::StatusOr<bool> reached_checkpoint =
         Evolve(checkpoint, iterations_before_checkpointing, fc_.delt0r,
@@ -772,13 +782,15 @@ absl::StatusOr<Vmec::SolveEqLoopStatus> Vmec::SolveEquilibriumLoop(
 
     // check for bad jacobian and bad initial guess for axis
     // Debug: log why axis recovery might not trigger
-    if (fc_.ijacob != 0 || fc_.ns < 3 || 
-        (status_ != VmecStatus::BAD_JACOBIAN && fc_.restart_reason != RestartReason::HUGE_INITIAL_FORCES)) {
-      std::cout << "DEBUG: Axis recovery not triggered - ijacob=" << fc_.ijacob 
+    if (fc_.ijacob != 0 || fc_.ns < 3 ||
+        (status_ != VmecStatus::BAD_JACOBIAN &&
+         fc_.restart_reason != RestartReason::HUGE_INITIAL_FORCES)) {
+      std::cout << "DEBUG: Axis recovery not triggered - ijacob=" << fc_.ijacob
                 << " ns=" << fc_.ns << " status=" << static_cast<int>(status_)
-                << " restart_reason=" << static_cast<int>(fc_.restart_reason) << std::endl;
+                << " restart_reason=" << static_cast<int>(fc_.restart_reason)
+                << std::endl;
     }
-    
+
     if (fc_.ijacob == 0 &&
         (status_ == VmecStatus::BAD_JACOBIAN ||
          fc_.restart_reason == RestartReason::HUGE_INITIAL_FORCES) &&
@@ -825,20 +837,25 @@ absl::StatusOr<Vmec::SolveEqLoopStatus> Vmec::SolveEquilibriumLoop(
                status_ != VmecStatus::SUCCESSFUL_TERMINATION) {
       // Fix: Handle BAD_JACOBIAN status like educational_VMEC
       if (status_ == VmecStatus::BAD_JACOBIAN) {
-        // Educational_VMEC continues iteration when ier_flag = bad_jacobian_flag
-        // This allows the iteration to proceed and potentially recover
+        // Educational_VMEC continues iteration when ier_flag =
+        // bad_jacobian_flag This allows the iteration to proceed and
+        // potentially recover
         if (verbose_) {
-          std::cout << "DEBUG: BAD_JACOBIAN status detected after axis recovery, continuing iteration (like educational_VMEC)" << std::endl;
+          std::cout << "DEBUG: BAD_JACOBIAN status detected after axis "
+                       "recovery, continuing iteration (like educational_VMEC)"
+                    << std::endl;
         }
         // Continue iteration loop - do not terminate
       } else {
         // For other non-normal/non-successful statuses, still terminate
-        // Debug: Trace what status causes fatal error - compare with educational_VMEC
+        // Debug: Trace what status causes fatal error - compare with
+        // educational_VMEC
         std::cout << "DEBUG: VMEC++ fatal error path triggered" << std::endl;
         std::cout << "  status_=" << static_cast<int>(status_) << std::endl;
         std::cout << "  iter2_=" << iter2_ << std::endl;
-        std::cout << "  Educational_VMEC would continue iteration loop here" << std::endl;
-        
+        std::cout << "  Educational_VMEC would continue iteration loop here"
+                  << std::endl;
+
         // if something went totally wrong even in this initial steps, do not
         // continue at all
         const auto msg = absl::StrFormat(
