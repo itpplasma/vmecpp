@@ -4,7 +4,7 @@
 
 **Primary Objective**: Resolve BAD_JACOBIAN initialization issues blocking asymmetric equilibrium convergence and implement comprehensive validation against upstream VMEC2000.
 
-**Critical Blocker**: BAD_JACOBIAN errors prevent asymmetric equilibrium convergence, making Steps 5-6 impossible.
+**🔴 CRITICAL BUG FOUND**: VMEC++ incorrectly handles theta range in `guess_magnetic_axis.cc` for asymmetric cases, leaving half the boundary values as zeros. This causes rmin=0 and wrong axis initialization.
 
 **Immediate Success Criteria**:
 - Resolve BAD_JACOBIAN initialization errors in asymmetric mode
@@ -94,23 +94,37 @@
 #### Phase A: Implementation Comparison (Priority 1 - Next 2 weeks)
 
 **A1: Educational VMEC vs VMEC++ Asymmetric Algorithm Comparison**
-- [ ] **A1.1: Setup Reference Environment**
-  - [ ] Build educational_VMEC in separate directory
-  - [ ] Verify `input.up_down_asymmetric_tokamak` runs successfully in educational_VMEC
-  - [ ] Extract reference outputs: wout file, stdout logs, debug output
-  - [ ] Document educational_VMEC version and compilation options
+- [x] **A1.1: Setup Reference Environment**
+  - [x] Build educational_VMEC in separate directory
+  - [x] Verify `input.up_down_asymmetric_tokamak` runs successfully in educational_VMEC
+  - [x] Extract reference outputs: wout file, stdout logs, debug output
+  - [x] Document educational_VMEC version and compilation options
 
-- [ ] **A1.2: Magnetic Axis Initialization Comparison**
-  - [ ] **Compare axis guessing algorithms**:
-    - [ ] Examine educational_VMEC `guess_axis.f` implementation
-    - [ ] Compare with VMEC++ `guess_magnetic_axis.cc`
-    - [ ] Document algorithmic differences in axis search methods
-    - [ ] Check grid resolution differences (61×61 vs higher resolution)
-  - [ ] **Test axis initialization outputs**:
-    - [ ] Run both codes with verbose axis debugging
-    - [ ] Compare initial axis guesses for identical input
-    - [ ] Check if VMEC++ axis guess is geometrically valid
-    - [ ] Verify axis lies inside plasma boundary for both codes
+- [x] **A1.2: Magnetic Axis Initialization Comparison** ✅ **ROOT CAUSE FOUND**
+  - [x] **Compare axis guessing algorithms**:
+    - [x] Examine educational_VMEC `guess_axis.f` implementation
+    - [x] Compare with VMEC++ `guess_magnetic_axis.cc`
+    - [x] Document algorithmic differences in axis search methods
+    - [x] Check grid resolution differences (61×61 vs higher resolution)
+  - [x] **Test axis initialization outputs**:
+    - [x] Run both codes with verbose axis debugging
+    - [x] Compare initial axis guesses for identical input
+    - [x] Check if VMEC++ axis guess is geometrically valid
+    - [x] Verify axis lies inside plasma boundary for both codes
+  - [x] **Debug Step 5: Jacobian tracing comparison**:
+    - [x] Add debug output to both codes' Jacobian calculations
+    - [x] Compare tau values between implementations
+    - [x] Identify where/when negative tau values occur
+    - [x] Document differences in axis recovery effectiveness
+  
+  **🟡 PARTIAL FIX APPLIED**: Fixed theta range handling in guess_magnetic_axis.cc to use nThetaReduced for asymmetric cases. However, VMEC++ still fails with BAD_JACOBIAN, indicating additional issues:
+  - ✅ Fixed: Theta range in axis guessing now uses 0 to nThetaReduced
+  - ❌ Still failing: BAD_JACOBIAN persists after axis recovery
+  - 🔍 New finding: "need to shift theta by delta = 0.463648" warning before BAD_JACOBIAN
+  - 🎯 **CRITICAL DISCOVERY**: Both codes have negative tau values initially and both detect BAD_JACOBIAN
+  - 🔍 **KEY DIFFERENCE**: Educational_VMEC axis recovery significantly reduces negative tau values to ~-0.18 with small tau_main (~-0.004 to +0.01)
+  - 🚨 **CRITICAL ISSUE**: VMEC++ doesn't reach axis recovery stage - fails immediately with "solver failed during first iterations"
+  - 📊 **Jacobian comparison**: Educational_VMEC tau ~ -0.75 to -3.17 → axis recovery → success; VMEC++ tau ~ -1.41 to -4.28 → immediate failure
 
 - [ ] **A1.3: Asymmetric Fourier Transform Comparison**
   - [ ] **Compare Fourier basis implementations**:

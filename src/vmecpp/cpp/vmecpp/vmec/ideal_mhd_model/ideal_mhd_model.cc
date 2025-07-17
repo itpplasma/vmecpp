@@ -1578,6 +1578,13 @@ void IdealMhdModel::computeJacobian() {
                      zue_o * r1o_o - m_ls_.zue_i[kl] * m_ls_.r1o_i[kl]) /
                         sqrtSH;
       double tau_val = tau1 + dSHalfDsInterp * tau2;
+      
+      // Debug: trace negative tau values
+      if (tau_val < 0.0 && jH == r_.nsMinH && kl < 5) {
+        std::cout << "DEBUG: Negative tau at jH=" << jH << " kl=" << kl << " tau=" << tau_val << std::endl;
+        std::cout << "  tau1=" << tau1 << " tau2=" << tau2 << " dSHalfDsInterp=" << dSHalfDsInterp << std::endl;
+        std::cout << "  ru12=" << ru12[iHalf] << " zs=" << zs[iHalf] << " rs=" << rs[iHalf] << " zu12=" << zu12[iHalf] << std::endl;
+      }
 
       if (tau_val < minTau || minTau == 0.0) {
         minTau = tau_val;

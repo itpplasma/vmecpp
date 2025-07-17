@@ -381,17 +381,22 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
 
   // main loop in which, for each poloidal cutplane,
   // the new axis position is estimated
+
   const int k_max = s.lasym ? s.nZeta : s.nZeta / 2 + 1;
   for (int k = 0; k < k_max; ++k) {
     // compute grid extent
+    // For asymmetric cases, only use the computed theta range (0 to nThetaReduced)
+    // to avoid including uninitialized zeros in the second half
+    const int theta_max = s.lasym ? s.nThetaReduced : s.nThetaEven;
     const double min_r =
-        *std::min_element(w.r_lcfs[k].begin(), w.r_lcfs[k].end());
+        *std::min_element(w.r_lcfs[k].begin(), w.r_lcfs[k].begin() + theta_max);
     const double max_r =
-        *std::max_element(w.r_lcfs[k].begin(), w.r_lcfs[k].end());
+        *std::max_element(w.r_lcfs[k].begin(), w.r_lcfs[k].begin() + theta_max);
     const double min_z =
-        *std::min_element(w.z_lcfs[k].begin(), w.z_lcfs[k].end());
+        *std::min_element(w.z_lcfs[k].begin(), w.z_lcfs[k].begin() + theta_max);
     const double max_z =
-        *std::max_element(w.z_lcfs[k].begin(), w.z_lcfs[k].end());
+        *std::max_element(w.z_lcfs[k].begin(), w.z_lcfs[k].begin() + theta_max);
+    
 
     // grid step sizes
     const double delta_r = (max_r - min_r) / (kNumberOfGridPoints - 1.0);
@@ -402,7 +407,8 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
     w.new_z_axis[k] = (max_z + min_z) / 2.0;
 
     // Compute the static part of the Jacobian (tau0)
-    for (int l = 0; l < s.nThetaEven; ++l) {
+    // Use same theta range as for min/max calculation
+    for (int l = 0; l < theta_max; ++l) {
       w.d_r_d_s_half[k][l] =
           (w.r_lcfs[k][l] - w.r_half[k][l]) / delta_s + w.r_axis[k];
       w.d_z_d_s_half[k][l] =
@@ -430,14 +436,14 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
         // Find position of magnetic axis that maximizes the minimum Jacobian
         // value.
 
-        for (int l = 0; l < s.nThetaEven; ++l) {
+        for (int l = 0; l < theta_max; ++l) {
           w.tau[k][l] = sign_of_jacobian *
                         (w.tau0[k][l] - w.d_r_d_theta_half[k][l] * z_grid +
                          w.d_z_d_theta_half[k][l] * r_grid);
         }  // l
 
         double min_tau_temp =
-            *std::min_element(w.tau[k].begin(), w.tau[k].end());
+            *std::min_element(w.tau[k].begin(), w.tau[k].begin() + theta_max);
 
         if (min_tau_temp > min_tau) {
           min_tau = min_tau_temp;
@@ -627,6 +633,7 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
       w.new_zaxis_c[s.nZeta / 2] /= 2.0;
     }
   }
+
 
   return w;
 }  // NOLINT(readability/fn_size)
