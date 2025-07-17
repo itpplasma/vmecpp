@@ -68,61 +68,114 @@
 3. [x] **Compare step-by-step** - Validated Python model validators work correctly
 4. [ ] **Fix C++ binding** - **URGENT: Requires C++ pybind11 wrapper debugging**
 
-## Phase 2: True Asymmetric Test Case Development
+## Phase 2: Incremental Asymmetric Testing Strategy
 
-### 2.1 Create Reference Asymmetric Test Cases
+### 2.1 Foundation: Input Loading and Validation
 
-**Generate Upstream Reference Data:**
-- [ ] **Create simple asymmetric tokamak** - Based on `solovev.json` with small asymmetric perturbations
-  - Add small `rbs[1,0] = 0.001` (n=0, m=1 asymmetric boundary component)
-  - Add small `zbc[1,0] = 0.001` (n=0, m=1 asymmetric boundary component)
-  - Add small `raxis_s[1] = 0.0001` (n=1 asymmetric axis component)
-- [ ] **Create asymmetric stellarator** - Based on `cma.json` with asymmetric perturbations
-  - Add `rbs[1,1] = 0.001` (n=1, m=1 asymmetric boundary)
-  - Add `zbc[1,1] = 0.001` (n=1, m=1 asymmetric boundary)
-- [ ] **Run with upstream VMEC2000** - Generate reference wout files
-  - Use Fortran VMEC with identical input parameters
-  - Save as `wout_solovev_asymmetric_ref.nc`, `wout_cma_asymmetric_ref.nc`
+**Current Status**: ✅ **COMPLETED**
+- [x] **Asymmetric input file**: `examples/data/input.up_down_asymmetric_tokamak`
+- [x] **Automatic array initialization**: Fix in `_from_cpp_vmecindatapywrapper()`
+- [x] **Loading tests**: `tests/test_asymmetric_loading.py` with comprehensive validation
+- [x] **CI/CD integration**: Tests pass and committed to repository
 
-**Test Case Requirements:**
-- Small asymmetric perturbations (< 1% of symmetric components)
-- Should converge reliably with upstream VMEC2000
-- Cover both tokamak and stellarator geometries
-- Include both fixed and free boundary cases
+**Test Coverage:**
+- ✅ Asymmetric input file loads without errors
+- ✅ Missing asymmetric arrays auto-initialized to zero
+- ✅ Array shapes validated for boundary and axis coefficients
+- ✅ Key asymmetric coefficients correctly parsed from INDATA format
 
-### 2.2 Implement Asymmetric Validation Framework
+### 2.2 Step-by-Step Incremental Testing Plan
 
-**Core Testing Infrastructure:**
-- [ ] **Create `test_asymmetric_physics.py`** - New test module for asymmetric validation
-- [ ] **Implement `compare_asymmetric_outputs()`** - Compare VMEC++ vs reference
-  - Handle both symmetric (`rmnc`, `zmns`) and asymmetric (`rmns`, `zmnc`) components
-  - Compare asymmetric axis arrays (`raxis_s`, `zaxis_c`)
-  - Validate asymmetric force balance arrays
-- [ ] **Add asymmetric output quantities** - Ensure all asymmetric arrays are accessible
+**Philosophy**: Build confidence with small, focused tests that isolate potential failure points.
+
+#### Step 1: Basic Asymmetric Model Creation
+- [ ] **Test 1A**: `test_asymmetric_model_creation.py`
+  - Load `input.up_down_asymmetric_tokamak`
+  - Verify `VmecInput` object creation
+  - Check all asymmetric fields are properly set
+  - **Success Criteria**: No validation errors, correct field values
+
+#### Step 2: C++ Object Conversion
+- [ ] **Test 2A**: `test_asymmetric_cpp_conversion.py`
+  - Convert `VmecInput` to C++ `VmecINDATAPyWrapper`
+  - Verify C++ object has asymmetric arrays allocated
+  - Check array dimensions match Python model
+  - **Success Criteria**: C++ binding works, no memory errors
+
+#### Step 3: Solver Initialization
+- [ ] **Test 3A**: `test_asymmetric_solver_init.py`
+  - Initialize VMEC solver with asymmetric input
+  - Check multigrid setup completes
+  - Verify geometry initialization doesn't crash
+  - **Success Criteria**: Solver starts without errors
+
+#### Step 4: First Iteration Execution
+- [ ] **Test 4A**: `test_asymmetric_first_iteration.py`
+  - Run exactly 1 VMEC iteration
+  - Check force calculation completes
+  - Verify no NaN/infinity values in results
+  - **Success Criteria**: Single iteration succeeds
+
+#### Step 5: Short Run Convergence
+- [ ] **Test 5A**: `test_asymmetric_short_run.py`
+  - Run 10-20 iterations with relaxed tolerance
+  - Check basic convergence behavior
+  - Verify output arrays are populated
+  - **Success Criteria**: Short run completes, reasonable values
+
+#### Step 6: Full Convergence
+- [ ] **Test 6A**: `test_asymmetric_full_convergence.py`
+  - Run to full convergence
+  - Validate all output quantities
+  - Check asymmetric Fourier components
+  - **Success Criteria**: Converged solution with physically reasonable results
+
+### 2.3 Detailed Test Implementation
+
+Each test will be implemented as a separate file to enable:
+- **Isolated debugging**: Each step can be tested independently
+- **Clear failure identification**: Know exactly where asymmetric mode fails
+- **Incremental development**: Fix issues step by step
+- **Regression prevention**: Catch breaks at any stage
+
+**Test File Structure:**
+```
+tests/
+├── test_asymmetric_loading.py          # ✅ COMPLETED
+├── test_asymmetric_model_creation.py   # Step 1
+├── test_asymmetric_cpp_conversion.py   # Step 2
+├── test_asymmetric_solver_init.py      # Step 3
+├── test_asymmetric_first_iteration.py  # Step 4
+├── test_asymmetric_short_run.py        # Step 5
+└── test_asymmetric_full_convergence.py # Step 6
+```
+
+### 2.4 Advanced Validation (After Step 6 Success)
+
+**Physics Validation:**
+- [ ] **Compare asymmetric outputs** - Validate asymmetric Fourier components
   - `rmns` (R sin(mθ - nζ) components)
   - `zmnc` (Z cos(mθ - nζ) components)
   - `lmns` (λ sin(mθ - nζ) components)
-  - `bsubs` (B_s asymmetric components)
+- [ ] **Force balance validation** - Check asymmetric force balance equations
+- [ ] **Geometric consistency** - Verify asymmetric geometry calculations
 
-**Test Functions to Implement:**
-- [ ] `test_asymmetric_tokamak_convergence()` - Basic convergence test
-- [ ] `test_asymmetric_stellarator_convergence()` - Stellarator convergence test
-- [ ] `test_asymmetric_vs_upstream_reference()` - Compare against VMEC2000 reference
-- [ ] `test_asymmetric_force_balance()` - Validate force balance equations
-- [ ] `test_asymmetric_geometric_quantities()` - Check geometric consistency
+**Reference Comparison:**
+- [ ] **Generate upstream references** - Run `input.up_down_asymmetric_tokamak` with VMEC2000
+- [ ] **Cross-validation tests** - Compare VMEC++ vs VMEC2000 results
+- [ ] **Tolerance analysis** - Determine acceptable differences
 
-### 2.3 Extend Existing Test Suite
+## Phase 3: Integration and Advanced Testing
 
-**Modify Current Tests:**
-- [ ] **Extend `test_against_reference_wout()`** - Add asymmetric reference comparisons
-- [ ] **Update `test_simsopt_compat.py`** - Add asymmetric compatibility tests
-- [ ] **Enhance `test_free_boundary.py`** - Add asymmetric free boundary tests
-- [ ] **Update C++ tests** - Add true asymmetric cases to `vmec_asymmetric_test.cc`
-
-**SIMSOPT Integration:**
+### 3.1 SIMSOPT Integration (After Phase 2 Success)
 - [ ] **Test asymmetric optimization** - Ensure SIMSOPT can optimize asymmetric equilibria
 - [ ] **Validate derivatives** - Check that asymmetric parameter derivatives are correct
 - [ ] **Hot restart with asymmetric** - Test restart capability with asymmetric configurations
+
+### 3.2 Extended Test Coverage
+- [ ] **Free boundary asymmetric** - Test with external magnetic fields
+- [ ] **Multi-grid convergence** - Test asymmetric cases with multiple grid refinements
+- [ ] **Performance benchmarks** - Compare asymmetric vs symmetric performance
 
 ## Phase 3: Comprehensive Asymmetric Physics Validation
 
@@ -273,36 +326,31 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 ## Current Status Summary
 
 ### Phase 1: Symmetric Test Validation with lasym=true
-**Status**: ⚠️ **INFRASTRUCTURE COMPLETE - SOLVER INITIALIZATION ISSUE IDENTIFIED**
+**Status**: ⚠️ **APPROACH REVISED - SYMMETRIC→ASYMMETRIC CONVERSION PROBLEMATIC**
 
 **Completed Work:**
-- ✅ Comprehensive test infrastructure in `tests/test_asymmetric_phase1.py`
-- ✅ `run_symmetric_as_asymmetric()` utility function
-- ✅ `compare_symmetric_asymmetric_outputs()` comparison framework
-- ✅ Test coverage for all symmetric cases (solovev, circular_tokamak, cma, etc.)
 - ✅ C++ BUILD.bazel targets for asymmetric tests
 - ✅ **FIXED: C++ pybind11 asymmetric field binding bug** (commit f512f17)
 - ✅ Created debugging infrastructure and diagnostic tools
 - ✅ **ASYMMETRIC MODE CONFIRMED WORKING** (existing tests in `test_init.py` pass)
 
-**Current Issue:**
-- ⚠️ **Solver initialization failure in asymmetric mode** when converting symmetric cases
-- ⚠️ Both zero and small non-zero asymmetric coefficients cause "solver failed during first iterations"
-- ⚠️ Issue appears to be in geometry/multigrid initialization, not array allocation
-- ✅ **Root cause identified**: Phase 1 approach (symmetric→asymmetric conversion) may be fundamentally flawed
-
 **Key Finding:**
 - **C++ asymmetric binding is FIXED and working**
-- **Asymmetric mode works correctly** for true asymmetric configurations
-- **Phase 1 test approach needs revision** - converting symmetric equilibria to asymmetric mode creates ill-posed solver initialization
+- **Phase 1 approach abandoned** - converting symmetric equilibria to asymmetric mode creates ill-posed solver initialization
+- **New strategy adopted**: Incremental testing with true asymmetric test cases
 
-### Phase 2: True Asymmetric Test Case Development
-**Status**: **READY TO BEGIN - C++ BINDING FIXED**
+### Phase 2: Incremental Asymmetric Testing Strategy
+**Status**: ✅ **FOUNDATION COMPLETE - STEP 1 READY**
+
+**Completed Work:**
+- ✅ **Asymmetric test case**: `input.up_down_asymmetric_tokamak` with non-zero RBS coefficients
+- ✅ **Array initialization fix**: Automatic zero-initialization of missing asymmetric arrays
+- ✅ **Loading validation**: `tests/test_asymmetric_loading.py` passes all tests
+- ✅ **CI/CD integration**: Tests committed and passing in pipeline
 
 **Ready to Proceed:**
-- ✅ C++ pybind11 binding fix complete (Phase 1 blocker resolved)
-- ✅ Working asymmetric mode execution confirmed
-- 🎯 **Next step**: Generate reference asymmetric test cases from upstream VMEC2000
+- 🎯 **Next step**: Implement Step 1 - Basic Asymmetric Model Creation test
+- 🎯 **Goal**: Build confidence through isolated, incremental testing
 
 ### Phase 3: Comprehensive Asymmetric Physics Validation
 **Status**: **PENDING - AWAITING PHASE 2 COMPLETION**
