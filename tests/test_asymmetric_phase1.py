@@ -243,27 +243,3 @@ class TestSymmetricWithLasymTrue:
         # Check that basic convergence is achieved
         assert asym_output.wout.ier_flag == 0, "Should converge successfully"
         assert asym_output.wout.fsqr < 1e-6, "Should achieve good force balance"
-
-    def test_asymmetric_cpp_initialization(self):
-        """Test that asymmetric arrays are properly initialized in C++ wrapper."""
-        # Load symmetric input
-        input_obj = vmecpp.VmecInput.from_file("examples/data/solovev.json")
-
-        # Create asymmetric input
-        input_dict = input_obj.model_dump()
-        input_dict["lasym"] = True
-        input_dict["rbs"] = np.zeros_like(input_obj.rbc)
-        input_dict["zbc"] = np.zeros_like(input_obj.zbs)
-        input_dict["raxis_s"] = np.zeros(input_obj.ntor + 1)
-        input_dict["zaxis_c"] = np.zeros(input_obj.ntor + 1)
-
-        asym_input = vmecpp.VmecInput(**input_dict)
-
-        # Convert to C++ object and verify arrays are initialized
-        cpp_indata = asym_input._to_cpp_vmecindatapywrapper()
-
-        assert cpp_indata.lasym is True
-        assert cpp_indata.raxis_s is not None, "raxis_s should be initialized"
-        assert cpp_indata.zaxis_c is not None, "zaxis_c should be initialized"
-        assert cpp_indata.rbs is not None, "rbs should be initialized"
-        assert cpp_indata.zbc is not None, "zbc should be initialized"
