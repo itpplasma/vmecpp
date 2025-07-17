@@ -93,6 +93,8 @@
 
 **🎯 CRITICAL DEVELOPMENT PRINCIPLE**: Always use educational_VMEC sources as the definitive reference for debugging asymmetric mode issues. When VMEC++ behavior differs from educational_VMEC, the educational_VMEC implementation should be considered the correct approach to follow.
 
+**📚 EDUCATIONAL_VMEC SOURCE ANALYSIS MANDATE**: Every debugging step must begin with examining the corresponding educational_VMEC source code. The educational_VMEC implementation demonstrates the correct asymmetric algorithm behavior and should guide all VMEC++ fixes.
+
 **📈 PROVEN SUCCESS**: This systematic comparison approach has already yielded major breakthroughs:
 - Fixed theta range bugs in boundary evaluation and axis recovery
 - Improved axis recovery by 70% and brought tau values much closer to educational_VMEC
@@ -101,11 +103,12 @@
 **⚠️ CRITICAL WARNING**: Educational_VMEC has known bugs in asymmetric mode including incorrect timestep computation (factor of 2 error). These bugs make the code inefficient but do not affect correctness. Always cross-reference with jVMEC sources as the definitive reference implementation.
 
 **🔍 DEVELOPMENT STRATEGY**: Continue this systematic approach by:
-1. **Compare educational_VMEC source code** for every asymmetric-related function (but validate against jVMEC)
-2. **Identify specific algorithmic differences** between implementations
-3. **Apply fixes to match educational_VMEC behavior** step by step (but check jVMEC for correctness)
-4. **Test incrementally** to measure progress after each fix
-5. **Always cross-reference with jVMEC** to ensure we're not implementing bugs from educational_VMEC
+1. **🔍 EXAMINE educational_VMEC source code FIRST** for every asymmetric-related function (but validate against jVMEC)
+2. **📊 IDENTIFY specific algorithmic differences** between educational_VMEC and VMEC++ implementations
+3. **🔧 APPLY fixes to match educational_VMEC behavior** step by step (but check jVMEC for correctness)
+4. **✅ TEST incrementally** to measure progress after each fix
+5. **⚖️ CROSS-REFERENCE with jVMEC** to ensure we're not implementing bugs from educational_VMEC
+6. **📚 DOCUMENT every difference found** between educational_VMEC and VMEC++ implementations
 
 #### Phase A: Implementation Comparison (Priority 1 - Next 2 weeks)
 
@@ -158,6 +161,7 @@
     - [x] **VMEC++ axis recovery**: Triggers and improves axis (R_axis=6.1281, Z_axis=0.00616443) but still fails
     - [x] **Error pattern**: "FATAL ERROR in thread=X. The solver failed during the first iterations"
   - [x] **Next priority**: Debug why VMEC++ fails during first iteration before force calculation
+  - [x] **🔍 MUST EXAMINE educational_VMEC source code** to understand successful first iteration algorithm
 
 - [ ] **A1.4: Asymmetric Fourier Transform Comparison**
   - [ ] **Compare Fourier basis implementations**:
@@ -589,18 +593,20 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 ### 🎯 Next Priority Actions (Use Educational_VMEC as Reference)
 
 **Immediate Next Steps (Continue Systematic Comparison):**
-1. **Compare first iteration behavior** - Step-by-step analysis of educational_VMEC vs VMEC++ first iteration
-2. **Investigate asymmetric geometry setup** - Compare how both codes handle asymmetric geometry initialization
-3. **Analyze Fourier basis differences** - Educational_VMEC uses combined basis, VMEC++ uses product basis
-4. **Check force calculation differences** - Compare asymmetric force balance computation
+1. **🔍 EXAMINE educational_VMEC first iteration source code** - Detailed analysis of what happens during successful first iteration
+2. **📊 IDENTIFY where VMEC++ fails during first iteration** - Pinpoint exact failure location before force calculation
+3. **🔧 COMPARE asymmetric geometry setup** - How both codes handle asymmetric geometry initialization
+4. **📚 ANALYZE Fourier basis differences** - Educational_VMEC uses combined basis, VMEC++ uses product basis
+5. **⚖️ CHECK force calculation differences** - Compare asymmetric force balance computation
 
 **Development Approach (Proven Successful):**
-- **Always examine educational_VMEC source code first** when debugging asymmetric issues
-- **Use educational_VMEC as ground truth** for correct asymmetric behavior
-- **Apply systematic fixes** based on educational_VMEC implementation patterns
-- **Test incrementally** after each fix to measure progress
-- **Document every difference found** between implementations
-- **Focus on algorithmic differences** rather than implementation style differences
+- **🔍 ALWAYS EXAMINE educational_VMEC source code FIRST** when debugging asymmetric issues
+- **📚 USE educational_VMEC as ground truth** for correct asymmetric behavior  
+- **🔧 APPLY systematic fixes** based on educational_VMEC implementation patterns
+- **✅ TEST incrementally** after each fix to measure progress
+- **📚 DOCUMENT every difference found** between implementations
+- **🎯 FOCUS on algorithmic differences** rather than implementation style differences
+- **⚖️ CROSS-REFERENCE with jVMEC** to avoid implementing educational_VMEC bugs
 
 **Key Files to Compare Next:**
 - `educational_VMEC/src/forces.f90` vs `vmecpp/vmec/ideal_mhd_model/ideal_mhd_model.cc`
