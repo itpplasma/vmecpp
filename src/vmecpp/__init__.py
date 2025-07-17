@@ -559,21 +559,10 @@ class VmecInput(BaseModelWithNumpy):
 
             # Asymmetric fields are only populated when lasym==True
             # so we need to skip them for itemwise assignment
-            if value is None:
+            if value is None:  # must be a symmetric field and lasym == False
                 assert attr in {"rbs", "zbc", "zaxis_c", "raxis_s"}
-                # For rbs and zbc, they should be initialized as zero arrays when lasym=True
-                # For zaxis_c and raxis_s, they can remain None even when lasym=True
-                if attr in {"rbs", "zbc"}:
-                    assert not cpp_indata.lasym, f"Field {attr} should not be None when lasym=True"
-                # Skip None values (don't try to assign them)
+                assert not cpp_indata.lasym
             else:
-                # Check if non-None asymmetric fields are being set when lasym=False
-                if attr in {"rbs", "zbc", "zaxis_c", "raxis_s"} and not cpp_indata.lasym:
-                    msg = (
-                        f"Cannot set asymmetric field '{attr}' when lasym=False. "
-                        "Either set lasym=True or remove the asymmetric field."
-                    )
-                    raise ValueError(msg)
                 getattr(cpp_indata, attr)[:] = value
 
         return cpp_indata
