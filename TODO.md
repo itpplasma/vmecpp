@@ -98,11 +98,14 @@
 - Improved axis recovery by 70% and brought tau values much closer to educational_VMEC
 - Every fix has been based on understanding how educational_VMEC handles asymmetric cases differently
 
+**⚠️ CRITICAL WARNING**: Educational_VMEC has known bugs in asymmetric mode including incorrect timestep computation (factor of 2 error). These bugs make the code inefficient but do not affect correctness. Always cross-reference with jVMEC sources as the definitive reference implementation.
+
 **🔍 DEVELOPMENT STRATEGY**: Continue this systematic approach by:
-1. **Compare educational_VMEC source code** for every asymmetric-related function
+1. **Compare educational_VMEC source code** for every asymmetric-related function (but validate against jVMEC)
 2. **Identify specific algorithmic differences** between implementations
-3. **Apply fixes to match educational_VMEC behavior** step by step
+3. **Apply fixes to match educational_VMEC behavior** step by step (but check jVMEC for correctness)
 4. **Test incrementally** to measure progress after each fix
+5. **Always cross-reference with jVMEC** to ensure we're not implementing bugs from educational_VMEC
 
 #### Phase A: Implementation Comparison (Priority 1 - Next 2 weeks)
 
@@ -144,7 +147,19 @@
   - ❌ **Still failing**: VMEC++ continues to fail convergence despite significant axis recovery improvement
   - 🎯 **CRITICAL SUCCESS**: Systematic comparison with educational_VMEC sources proving highly effective
 
-- [ ] **A1.3: Asymmetric Fourier Transform Comparison**
+- [x] **A1.3: Compare First Iteration Behavior** ✅ **CRITICAL BREAKTHROUGH**
+  - [x] **Added debug output to both codes**:
+    - [x] VMEC++: Added first iteration force residual debug output
+    - [x] Educational_VMEC: Added first iteration force construction debug output
+    - [x] Both codes show negative tau values initially as expected
+  - [x] **Critical discovery - VMEC++ fails DURING first iteration**:
+    - [x] **Educational_VMEC first iteration**: Successfully completes with `FSQR=1.88E-02, FSQZ=7.27E-03, FSQL=2.13E-02`
+    - [x] **VMEC++ first iteration**: FAILS before force calculation completes - never prints first iteration force values
+    - [x] **VMEC++ axis recovery**: Triggers and improves axis (R_axis=6.1281, Z_axis=0.00616443) but still fails
+    - [x] **Error pattern**: "FATAL ERROR in thread=X. The solver failed during the first iterations"
+  - [x] **Next priority**: Debug why VMEC++ fails during first iteration before force calculation
+
+- [ ] **A1.4: Asymmetric Fourier Transform Comparison**
   - [ ] **Compare Fourier basis implementations**:
     - [ ] Educational_VMEC: Traditional combined basis (cos(mθ-nζ), sin(mθ-nζ))
     - [ ] VMEC++: Product basis (cos(mθ)cos(nζ), sin(mθ)sin(nζ))
@@ -156,7 +171,7 @@
     - [ ] Check for precision loss or phase errors in VMEC++ transforms
     - [ ] Test with exactly the asymmetric coefficients from failing case
 
-- [ ] **A1.4: Asymmetric Geometry Calculation Comparison**
+- [ ] **A1.5: Asymmetric Geometry Calculation Comparison**
   - [ ] **Compare coordinate mapping**:
     - [ ] Examine educational_VMEC geometry calculation in `bcovar.f`, `getbrho.f`
     - [ ] Compare with VMEC++ `FourierGeometry.cc` asymmetric extensions
@@ -566,7 +581,7 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 
 **📊 QUANTITATIVE IMPROVEMENTS**:
 - **Axis recovery R**: 6.1002 → 6.1281 (target: 6.1188 from educational_VMEC)
-- **Axis recovery Z**: 0.0784 → 0.00616 (target: 0.1197 from educational_VMEC)  
+- **Axis recovery Z**: 0.0784 → 0.00616 (target: 0.1197 from educational_VMEC)
 - **Tau values**: Improved from -1.4 to -4.3 → -0.83 to -0.95 (~70% improvement)
 
 **🔍 CURRENT STATUS**: VMEC++ still fails convergence but is **much closer** to educational_VMEC behavior
@@ -576,7 +591,7 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 **Immediate Next Steps (Continue Systematic Comparison):**
 1. **Compare first iteration behavior** - Step-by-step analysis of educational_VMEC vs VMEC++ first iteration
 2. **Investigate asymmetric geometry setup** - Compare how both codes handle asymmetric geometry initialization
-3. **Analyze Fourier basis differences** - Educational_VMEC uses combined basis, VMEC++ uses product basis  
+3. **Analyze Fourier basis differences** - Educational_VMEC uses combined basis, VMEC++ uses product basis
 4. **Check force calculation differences** - Compare asymmetric force balance computation
 
 **Development Approach (Proven Successful):**

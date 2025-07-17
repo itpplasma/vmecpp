@@ -1215,10 +1215,31 @@ absl::StatusOr<bool> IdealMhdModel::update(
 #pragma omp single
 #endif  // _OPENMP
   {
-    if (iter2 == 1 && (m_fc.fsqr + m_fc.fsqz + m_fc.fsql) > 1.0e2) {
-      // first iteration and gigantic force residuals
-      // --> what is going on here?
-      m_fc.restart_reason = RestartReason::HUGE_INITIAL_FORCES;
+    // Debug: Compare first iteration force behavior with educational_VMEC
+    if (iter2 == 1) {
+      std::cout << "DEBUG: First iteration force residuals - comparing with "
+                   "educational_VMEC"
+                << std::endl;
+      std::cout << "  FSQR=" << std::scientific << std::setprecision(2)
+                << m_fc.fsqr;
+      std::cout << " FSQZ=" << std::scientific << std::setprecision(2)
+                << m_fc.fsqz;
+      std::cout << " FSQL=" << std::scientific << std::setprecision(2)
+                << m_fc.fsql << std::endl;
+      std::cout << "  Total force=" << std::scientific << std::setprecision(2)
+                << (m_fc.fsqr + m_fc.fsqz + m_fc.fsql) << std::endl;
+      std::cout << "  Educational_VMEC first iteration shows: FSQR=1.88E-02, "
+                   "FSQZ=7.27E-03, FSQL=2.13E-02"
+                << std::endl;
+
+      if ((m_fc.fsqr + m_fc.fsqz + m_fc.fsql) > 1.0e2) {
+        std::cout
+            << "  WARNING: HUGE_INITIAL_FORCES detected - total force > 1.0e2"
+            << std::endl;
+        // first iteration and gigantic force residuals
+        // --> what is going on here?
+        m_fc.restart_reason = RestartReason::HUGE_INITIAL_FORCES;
+      }
     }
   }
 
