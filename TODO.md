@@ -75,41 +75,194 @@
 3. [x] **Compare step-by-step** - Validated Python model validators work correctly
 4. [ ] **Fix C++ binding** - **URGENT: Requires C++ pybind11 wrapper debugging**
 
-## URGENT PRIORITY: BAD_JACOBIAN Resolution
+## 🚨 CRITICAL ISSUE: VMEC++ Asymmetric Implementation Bug
 
-### 🚨 Critical Issue Analysis
+### Critical Discovery Summary
 
-**Problem Statement**: All asymmetric test cases encounter "INITIAL JACOBIAN CHANGED SIGN!" errors during initialization, preventing convergence testing.
+**Problem Statement**: VMEC++ has a fundamental asymmetric implementation bug that causes BAD_JACOBIAN failures in cases that work perfectly in educational_VMEC and jVMEC.
 
-**Affected Test Cases**:
-- `input.up_down_asymmetric_tokamak` - Original asymmetric test case
-- `solovev_asymmetric.json` - Custom minimal perturbation case
-- All symmetric→asymmetric conversions with `lasym=true`
+**Key Evidence**:
+- ✅ **CONFIRMED BAD_JACOBIAN**: `input.up_down_asymmetric_tokamak` shows "INITIAL JACOBIAN CHANGED SIGN!" in VMEC++
+- ✅ **CONFIRMED RECOVERY FAILURE**: VMEC++ attempts "TRYING TO IMPROVE INITIAL MAGNETIC AXIS GUESS" but still fails
+- ✅ **CONFIRMED DEEPER ISSUE**: Even explicit good axis initialization (RAXIS_C=6.0) doesn't solve the problem
+- 🎯 **CRITICAL INSIGHT**: User confirmed this same input works in `../educational_VMEC` and `../jVMEC`
 
-**Current Debugging Status**:
-- ✅ **Steps 1-4 COMPLETE**: Model creation → First iteration execution working
-- ❌ **BAD_JACOBIAN persists**: Even with simplified magnetic axis initialization
-- ❌ **Convergence blocked**: Cannot proceed to Steps 5-6 without stable initialization
+**Root Cause Assessment**: This is NOT a poorly conditioned test case or axis initialization issue. This is a **fundamental difference in VMEC++ asymmetric implementation** compared to reference implementations.
 
-### 🎯 Immediate Action Plan
+### 🔬 Detailed Debugging Strategy
 
-#### Priority 1: Root Cause Analysis
-- [ ] **Investigate Jacobian computation** - Compare symmetric vs asymmetric Jacobian calculations
-- [ ] **Analyze boundary geometry** - Check if asymmetric coefficients create invalid geometry
-- [ ] **Review magnetic axis positioning** - Verify axis is inside plasma boundary
-- [ ] **Check coordinate system consistency** - Ensure flux coordinates are well-defined
+#### Phase A: Implementation Comparison (Priority 1 - Next 2 weeks)
 
-#### Priority 2: Alternative Test Case Creation
-- [ ] **Minimal asymmetric perturbation** - Create case with tiny (1e-6) asymmetric coefficients
-- [ ] **Known stable configuration** - Find literature reference for working asymmetric case
-- [ ] **Symmetric baseline validation** - Ensure symmetric version converges before adding asymmetry
-- [ ] **Boundary coefficient analysis** - Check for coefficient combinations that maintain convexity
+**A1: Educational VMEC vs VMEC++ Asymmetric Algorithm Comparison**
+- [ ] **A1.1: Setup Reference Environment**
+  - [ ] Build educational_VMEC in separate directory
+  - [ ] Verify `input.up_down_asymmetric_tokamak` runs successfully in educational_VMEC
+  - [ ] Extract reference outputs: wout file, stdout logs, debug output
+  - [ ] Document educational_VMEC version and compilation options
 
-#### Priority 3: Diagnostic Enhancement
-- [ ] **Add Jacobian debugging output** - Track where/why Jacobian changes sign
-- [ ] **Geometry validation tools** - Check for self-intersecting or invalid boundaries
-- [ ] **Axis-boundary distance metrics** - Ensure axis remains well-centered
-- [ ] **Enhanced error reporting** - More detailed diagnostics for geometry failures
+- [ ] **A1.2: Magnetic Axis Initialization Comparison**
+  - [ ] **Compare axis guessing algorithms**:
+    - [ ] Examine educational_VMEC `guess_axis.f` implementation
+    - [ ] Compare with VMEC++ `guess_magnetic_axis.cc`
+    - [ ] Document algorithmic differences in axis search methods
+    - [ ] Check grid resolution differences (61×61 vs higher resolution)
+  - [ ] **Test axis initialization outputs**:
+    - [ ] Run both codes with verbose axis debugging
+    - [ ] Compare initial axis guesses for identical input
+    - [ ] Check if VMEC++ axis guess is geometrically valid
+    - [ ] Verify axis lies inside plasma boundary for both codes
+
+- [ ] **A1.3: Asymmetric Fourier Transform Comparison**
+  - [ ] **Compare Fourier basis implementations**:
+    - [ ] Educational_VMEC: Traditional combined basis (cos(mθ-nζ), sin(mθ-nζ))
+    - [ ] VMEC++: Product basis (cos(mθ)cos(nζ), sin(mθ)sin(nζ))
+    - [ ] Document mathematical equivalence and conversion formulas
+    - [ ] Check for implementation errors in basis conversion
+  - [ ] **Validate transform accuracy**:
+    - [ ] Create simple test functions with known Fourier coefficients
+    - [ ] Compare forward/inverse transform results between implementations
+    - [ ] Check for precision loss or phase errors in VMEC++ transforms
+    - [ ] Test with exactly the asymmetric coefficients from failing case
+
+- [ ] **A1.4: Asymmetric Geometry Calculation Comparison**
+  - [ ] **Compare coordinate mapping**:
+    - [ ] Examine educational_VMEC geometry calculation in `bcovar.f`, `getbrho.f`
+    - [ ] Compare with VMEC++ `FourierGeometry.cc` asymmetric extensions
+    - [ ] Check for differences in coordinate system definitions
+    - [ ] Verify metric tensor calculations are identical
+  - [ ] **Jacobian computation comparison**:
+    - [ ] Compare Jacobian formulas: `τ = ru12*zs - rs*zu12`
+    - [ ] Check partial derivative calculations (∂R/∂θ, ∂R/∂ζ, ∂Z/∂θ, ∂Z/∂ζ)
+    - [ ] Verify asymmetric terms are included correctly
+    - [ ] Compare numerical evaluation at identical grid points
+
+#### Phase B: Step-by-Step Diagnostic Analysis (Priority 2 - Next 3 weeks)
+
+**B1: Minimal Reproducible Case Development**
+- [ ] **B1.1: Create Diagnostic Test Suite**
+  - [ ] **Axis initialization diagnostic**:
+    - [ ] Extract VMEC++ axis guess for `input.up_down_asymmetric_tokamak`
+    - [ ] Test this exact axis in educational_VMEC
+    - [ ] If educational_VMEC succeeds with VMEC++ axis, isolate to post-axis-initialization bug
+    - [ ] If educational_VMEC fails with VMEC++ axis, confirm axis algorithm bug
+  - [ ] **Boundary coefficient validation**:
+    - [ ] Check if `RBS(0,1)=0.6` creates geometrically valid boundaries
+    - [ ] Plot boundary cross-sections for both implementations
+    - [ ] Verify boundary doesn't self-intersect or become non-convex
+    - [ ] Test progressively smaller RBS values: 0.6 → 0.06 → 0.006
+
+- [ ] **B1.2: Incremental Complexity Testing**
+  - [ ] **Start from working symmetric case**:
+    - [ ] Take symmetric solovev.json that converges in VMEC++
+    - [ ] Add tiny asymmetric perturbation: RBS(0,1)=1e-8
+    - [ ] Increase perturbation until BAD_JACOBIAN appears
+    - [ ] Find critical threshold where VMEC++ fails but educational_VMEC succeeds
+  - [ ] **Coefficient sweep analysis**:
+    - [ ] Test different mode combinations: (m,n) = (1,0), (0,1), (1,1), (2,0)
+    - [ ] For each mode, find maximum coefficient before BAD_JACOBIAN
+    - [ ] Compare thresholds between VMEC++ and educational_VMEC
+    - [ ] Document which asymmetric modes are most problematic
+
+**B2: Deep Numerical Analysis**
+- [ ] **B2.1: Jacobian Evolution Tracking**
+  - [ ] **Add extensive debugging to VMEC++**:
+    - [ ] Log Jacobian values at every grid point during initialization
+    - [ ] Track where/when Jacobian first changes sign
+    - [ ] Compare Jacobian patterns with educational_VMEC
+    - [ ] Identify specific (s,θ,ζ) coordinates where Jacobian fails
+  - [ ] **Real-space geometry validation**:
+    - [ ] Output R(s,θ,ζ) and Z(s,θ,ζ) arrays from both codes
+    - [ ] Check for geometric anomalies: negative R, wild oscillations
+    - [ ] Verify flux surface topology is physically reasonable
+    - [ ] Look for coordinate singularities or branch cuts
+
+- [ ] **B2.2: Asymmetric Force Calculation Analysis**
+  - [ ] **Compare force balance terms**:
+    - [ ] Extract `fsqr`, `fsqz`, `fsql` force residuals from first iteration
+    - [ ] Compare force patterns between VMEC++ and educational_VMEC
+    - [ ] Check if asymmetric force terms are computed correctly
+    - [ ] Verify pressure gradient and magnetic force balance
+  - [ ] **Spectral content analysis**:
+    - [ ] Compare Fourier spectrum of forces in both implementations
+    - [ ] Check for spurious high-frequency content in VMEC++
+    - [ ] Verify asymmetric modes are properly coupled
+    - [ ] Look for numerical aliasing or mode corruption
+
+#### Phase C: Implementation Bug Identification (Priority 3 - Next 2 weeks)
+
+**C1: Likely Bug Locations Based on Findings**
+- [ ] **C1.1: Fourier Transform Bugs** (High Probability)
+  - [ ] **Product vs Combined basis conversion errors**:
+    - [ ] Check `fourier_basis_implementation.md` for conversion formulas
+    - [ ] Verify `FourierBasisConversions.cc` handles asymmetric terms correctly
+    - [ ] Test basis conversion with known asymmetric functions
+    - [ ] Look for sign errors or phase shifts in conversions
+  - [ ] **Real-space to spectral-space mapping**:
+    - [ ] Check if asymmetric geometry correctly maps to Fourier coefficients
+    - [ ] Verify that real-space asymmetry produces expected spectral asymmetry
+    - [ ] Test inverse mapping: spectral → real-space → spectral consistency
+
+- [ ] **C1.2: Asymmetric Geometry Extension Bugs** (Medium Probability)
+  - [ ] **SymmetrizeRealSpaceGeometry function**:
+    - [ ] Check if geometry extension from [0,π] to [0,2π] is correct
+    - [ ] Verify asymmetric terms are handled properly in extension
+    - [ ] Test with simple analytical asymmetric functions
+    - [ ] Look for indexing errors or incorrect periodicity assumptions
+  - [ ] **Coordinate system consistency**:
+    - [ ] Check if (s,θ,ζ) coordinates are defined identically to educational_VMEC
+    - [ ] Verify that θ and ζ angle conventions match reference implementation
+    - [ ] Test coordinate transformation jacobians for consistency
+
+- [ ] **C1.3: Magnetic Axis Recovery Algorithm Bugs** (Lower Probability - but user request)
+  - [ ] **Enhanced asymmetric fallback strategy**:
+    - [ ] The disabled enhanced fallback in `guess_magnetic_axis.cc`
+    - [ ] Compare original vs enhanced algorithm performance
+    - [ ] Check if recovery mechanism interferes with subsequent geometry
+    - [ ] Test recovery algorithm with variety of asymmetric cases
+
+**C2: Fix Implementation and Validation**
+- [ ] **C2.1: Create Fix Based on Root Cause**
+  - [ ] **If Fourier transform bug**: Fix basis conversion, validate with test functions
+  - [ ] **If geometry bug**: Fix coordinate mapping, validate against analytical solutions
+  - [ ] **If axis algorithm bug**: Implement educational_VMEC algorithm, test convergence
+  - [ ] **If fundamental algorithm difference**: Document differences, implement compatible version
+
+- [ ] **C2.2: Validation of Fix**
+  - [ ] **Verify `input.up_down_asymmetric_tokamak` works**: Must converge like educational_VMEC
+  - [ ] **Test on additional asymmetric cases**: Ensure fix doesn't break other configurations
+  - [ ] **Compare outputs with reference**: Verify accuracy of corrected implementation
+  - [ ] **Performance testing**: Ensure fix doesn't introduce performance regression
+
+#### Phase D: Comprehensive Testing and Documentation (Priority 4 - Final 1 week)
+
+**D1: Test Suite Enhancement**
+- [ ] **D1.1: Create Asymmetric Reference Test Suite**
+  - [ ] Generate reference solutions with educational_VMEC for multiple asymmetric cases
+  - [ ] Create automated comparison tools for VMEC++ vs reference outputs
+  - [ ] Set appropriate tolerances for asymmetric solution comparison
+  - [ ] Add tests to CI/CD pipeline to prevent regressions
+
+**D2: Documentation and Knowledge Transfer**
+- [ ] **D2.1: Document Root Cause and Fix**
+  - [ ] Create detailed technical report on asymmetric implementation differences
+  - [ ] Document the specific bug location and fix implementation
+  - [ ] Provide guidance for future asymmetric development
+  - [ ] Update asymmetric physics documentation with lessons learned
+
+### 🎯 Success Criteria for Each Phase
+
+**Phase A Success**: Clear understanding of differences between VMEC++ and educational_VMEC asymmetric implementations
+**Phase B Success**: Identification of specific conditions and locations where VMEC++ fails
+**Phase C Success**: Root cause identified and fix implemented, `input.up_down_asymmetric_tokamak` converges
+**Phase D Success**: Comprehensive asymmetric test suite passes, documentation complete
+
+### ⚠️ Risk Assessment
+
+**High Risk**: VMEC++ asymmetric implementation may have multiple related bugs requiring extensive refactoring
+**Medium Risk**: Educational_VMEC may use different physics assumptions requiring algorithm reimplementation
+**Low Risk**: Simple bug fix in one location resolves the entire issue
+
+**Mitigation Strategy**: Systematic approach with incremental validation at each step to isolate exact failure points.
 
 ## Phase 2: Incremental Asymmetric Testing Strategy
 
