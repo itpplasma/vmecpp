@@ -75,9 +75,9 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
   // future in this context.
 
   // grid resolution in R and Z
-  // Use higher resolution for asymmetric cases, original resolution for
-  // symmetric
-  const int kNumberOfGridPoints = s.lasym ? 101 : 61;
+  // Use original resolution for both symmetric and asymmetric cases
+  // (higher resolution for asymmetric was causing convergence issues)
+  const int kNumberOfGridPoints = 61;
 
   // radial index of a flux surface at ~mid-radius
   // -1 wrt. Fortran VMEC since we have 0-based indices in C/C++
@@ -453,7 +453,9 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
     }  // index_z
 
     // Enhanced multi-level fallback strategy for asymmetric cases only
-    if (s.lasym && min_tau <= 0.0) {
+    // DISABLED: Use original simple axis initialization for both symmetric and
+    // asymmetric cases
+    if (false && s.lasym && min_tau <= 0.0) {
       double r_center = (max_r + min_r) / 2.0;
       double z_center = (max_z + min_z) / 2.0;
       double range_r = max_r - min_r;
