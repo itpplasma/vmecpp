@@ -74,3 +74,12 @@ filegroup(
         "wout_cth_like_free_bdy.nc",
     ],
 )
+
+filegroup(
+    name = "circular_tokamak",
+    visibility = ["//visibility:public"],
+    srcs = [
+        "circular_tokamak.json",
+        "wout_circular_tokamak_reference.nc",
+    ],
+)
