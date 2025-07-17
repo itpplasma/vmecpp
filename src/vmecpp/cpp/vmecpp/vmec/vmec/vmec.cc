@@ -823,14 +823,31 @@ absl::StatusOr<Vmec::SolveEqLoopStatus> Vmec::SolveEquilibriumLoop(
       return SolveEqLoopStatus::MUST_RETRY;
     } else if (status_ != VmecStatus::NORMAL_TERMINATION &&
                status_ != VmecStatus::SUCCESSFUL_TERMINATION) {
-      // if something went totally wrong even in this initial steps, do not
-      // continue at all
-      const auto msg = absl::StrFormat(
-          "FATAL ERROR in thread=%d. The solver failed during the first "
-          "iterations. This may happen if the initial boundary is poorly "
-          "shaped or if it isn't spectrally condensed enough.",
-          thread_id);
-      return absl::UnknownError(msg);
+      // Fix: Handle BAD_JACOBIAN status like educational_VMEC
+      if (status_ == VmecStatus::BAD_JACOBIAN) {
+        // Educational_VMEC continues iteration when ier_flag = bad_jacobian_flag
+        // This allows the iteration to proceed and potentially recover
+        if (verbose_) {
+          std::cout << "DEBUG: BAD_JACOBIAN status detected after axis recovery, continuing iteration (like educational_VMEC)" << std::endl;
+        }
+        // Continue iteration loop - do not terminate
+      } else {
+        // For other non-normal/non-successful statuses, still terminate
+        // Debug: Trace what status causes fatal error - compare with educational_VMEC
+        std::cout << "DEBUG: VMEC++ fatal error path triggered" << std::endl;
+        std::cout << "  status_=" << static_cast<int>(status_) << std::endl;
+        std::cout << "  iter2_=" << iter2_ << std::endl;
+        std::cout << "  Educational_VMEC would continue iteration loop here" << std::endl;
+        
+        // if something went totally wrong even in this initial steps, do not
+        // continue at all
+        const auto msg = absl::StrFormat(
+            "FATAL ERROR in thread=%d. The solver failed during the first "
+            "iterations. This may happen if the initial boundary is poorly "
+            "shaped or if it isn't spectrally condensed enough.",
+            thread_id);
+        return absl::UnknownError(msg);
+      }
     }
 
     if (checkpoint == VmecCheckpoint::EVOLVE &&
