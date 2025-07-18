@@ -235,17 +235,22 @@ void SymmetrizeRealSpaceGeometry(const Sizes& s, const RadialPartitioning& r,
         m_geometry.zu_e[idx_full] = -m_geometry.zu_e[idx_mirror];
         m_geometry.zu_o[idx_full] = -m_geometry.zu_o[idx_mirror];
 
-        // dR/dzeta, dZ/dzeta are even in theta
-        m_geometry.rv_e[idx_full] = m_geometry.rv_e[idx_mirror];
-        m_geometry.rv_o[idx_full] = m_geometry.rv_o[idx_mirror];
-        m_geometry.zv_e[idx_full] = m_geometry.zv_e[idx_mirror];
-        m_geometry.zv_o[idx_full] = m_geometry.zv_o[idx_mirror];
-
         // dlambda/dtheta is odd, dlambda/dzeta is even
         m_geometry.lu_e[idx_full] = -m_geometry.lu_e[idx_mirror];
         m_geometry.lu_o[idx_full] = -m_geometry.lu_o[idx_mirror];
-        m_geometry.lv_e[idx_full] = m_geometry.lv_e[idx_mirror];
-        m_geometry.lv_o[idx_full] = m_geometry.lv_o[idx_mirror];
+
+        // For 3D cases only: toroidal derivatives exist when lthreed=true
+        if (s.lthreed) {
+          // dR/dzeta, dZ/dzeta are even in theta
+          m_geometry.rv_e[idx_full] = m_geometry.rv_e[idx_mirror];
+          m_geometry.rv_o[idx_full] = m_geometry.rv_o[idx_mirror];
+          m_geometry.zv_e[idx_full] = m_geometry.zv_e[idx_mirror];
+          m_geometry.zv_o[idx_full] = m_geometry.zv_o[idx_mirror];
+
+          // dlambda/dzeta is even in theta
+          m_geometry.lv_e[idx_full] = m_geometry.lv_e[idx_mirror];
+          m_geometry.lv_o[idx_full] = m_geometry.lv_o[idx_mirror];
+        }
 
         // For asymmetric quantities (when lasym=true):
         // The asymmetric parts have opposite parity
@@ -258,13 +263,18 @@ void SymmetrizeRealSpaceGeometry(const Sizes& s, const RadialPartitioning& r,
           m_geometry_asym.ru_a[idx_full] = m_geometry_asym.ru_a[idx_mirror];
           m_geometry_asym.zu_a[idx_full] = m_geometry_asym.zu_a[idx_mirror];
 
-          // dR_asym/dzeta, dZ_asym/dzeta are odd in theta
-          m_geometry_asym.rv_a[idx_full] = -m_geometry_asym.rv_a[idx_mirror];
-          m_geometry_asym.zv_a[idx_full] = -m_geometry_asym.zv_a[idx_mirror];
-
-          // dlambda_asym/dtheta is even, dlambda_asym/dzeta is odd
+          // dlambda_asym/dtheta is even
           m_geometry_asym.lu_a[idx_full] = m_geometry_asym.lu_a[idx_mirror];
-          m_geometry_asym.lv_a[idx_full] = -m_geometry_asym.lv_a[idx_mirror];
+
+          // For 3D cases only: toroidal derivatives exist when lthreed=true
+          if (s.lthreed) {
+            // dR_asym/dzeta, dZ_asym/dzeta are odd in theta
+            m_geometry_asym.rv_a[idx_full] = -m_geometry_asym.rv_a[idx_mirror];
+            m_geometry_asym.zv_a[idx_full] = -m_geometry_asym.zv_a[idx_mirror];
+
+            // dlambda_asym/dzeta is odd
+            m_geometry_asym.lv_a[idx_full] = -m_geometry_asym.lv_a[idx_mirror];
+          }
         }
       }  // l
     }  // k
@@ -284,14 +294,18 @@ void SymmetrizeRealSpaceGeometry(const Sizes& s, const RadialPartitioning& r,
           // Direct addition for primary interval (jVMEC approach)
           m_geometry.r1_e[idx] += m_geometry_asym.r1_a[idx];
           m_geometry.ru_e[idx] += m_geometry_asym.ru_a[idx];
-          m_geometry.rv_e[idx] += m_geometry_asym.rv_a[idx];
 
           m_geometry.z1_e[idx] += m_geometry_asym.z1_a[idx];
           m_geometry.zu_e[idx] += m_geometry_asym.zu_a[idx];
-          m_geometry.zv_e[idx] += m_geometry_asym.zv_a[idx];
 
           m_geometry.lu_e[idx] += m_geometry_asym.lu_a[idx];
-          m_geometry.lv_e[idx] += m_geometry_asym.lv_a[idx];
+
+          // For 3D cases only: toroidal derivatives exist when lthreed=true
+          if (s.lthreed) {
+            m_geometry.rv_e[idx] += m_geometry_asym.rv_a[idx];
+            m_geometry.zv_e[idx] += m_geometry_asym.zv_a[idx];
+            m_geometry.lv_e[idx] += m_geometry_asym.lv_a[idx];
+          }
 
           // Don't add to odd components - this was causing the doubling issue
           // The asymmetric contribution should only be added once, not twice
@@ -328,10 +342,13 @@ void SymmetrizeRealSpaceGeometry(const Sizes& s, const RadialPartitioning& r,
           m_geometry.ru_e[idx_full] = -m_geometry.ru_e[idx_reflected] +
                                       m_geometry_asym.ru_a[idx_reflected];
 
-          // dR/dzeta: dR/dzeta[extended] = -dR/dzeta[reflected] +
-          // dR_asym/dzeta[reflected]
-          m_geometry.rv_e[idx_full] = -m_geometry.rv_e[idx_reflected] +
-                                      m_geometry_asym.rv_a[idx_reflected];
+          // For 3D cases only: toroidal derivatives exist when lthreed=true
+          if (s.lthreed) {
+            // dR/dzeta: dR/dzeta[extended] = -dR/dzeta[reflected] +
+            // dR_asym/dzeta[reflected]
+            m_geometry.rv_e[idx_full] = -m_geometry.rv_e[idx_reflected] +
+                                        m_geometry_asym.rv_a[idx_reflected];
+          }
 
           // Z: Z[extended] = -Z[reflected] + Z_asym[reflected]
           m_geometry.z1_e[idx_full] = -m_geometry.z1_e[idx_reflected] +
@@ -342,26 +359,34 @@ void SymmetrizeRealSpaceGeometry(const Sizes& s, const RadialPartitioning& r,
           m_geometry.zu_e[idx_full] = m_geometry.zu_e[idx_reflected] -
                                       m_geometry_asym.zu_a[idx_reflected];
 
-          // dZ/dzeta: dZ/dzeta[extended] = dZ/dzeta[reflected] -
-          // dZ_asym/dzeta[reflected]
-          m_geometry.zv_e[idx_full] = m_geometry.zv_e[idx_reflected] -
-                                      m_geometry_asym.zv_a[idx_reflected];
-
           // Lambda derivatives follow Z pattern
           m_geometry.lu_e[idx_full] = m_geometry.lu_e[idx_reflected] -
                                       m_geometry_asym.lu_a[idx_reflected];
-          m_geometry.lv_e[idx_full] = m_geometry.lv_e[idx_reflected] -
-                                      m_geometry_asym.lv_a[idx_reflected];
+
+          // For 3D cases only: toroidal derivatives exist when lthreed=true
+          if (s.lthreed) {
+            // dZ/dzeta: dZ/dzeta[extended] = dZ/dzeta[reflected] -
+            // dZ_asym/dzeta[reflected]
+            m_geometry.zv_e[idx_full] = m_geometry.zv_e[idx_reflected] -
+                                        m_geometry_asym.zv_a[idx_reflected];
+
+            m_geometry.lv_e[idx_full] = m_geometry.lv_e[idx_reflected] -
+                                        m_geometry_asym.lv_a[idx_reflected];
+          }
 
           // For odd components, use simple reflection without asymmetric terms
           m_geometry.r1_o[idx_full] = m_geometry.r1_o[idx_reflected];
           m_geometry.ru_o[idx_full] = -m_geometry.ru_o[idx_reflected];
-          m_geometry.rv_o[idx_full] = -m_geometry.rv_o[idx_reflected];
           m_geometry.z1_o[idx_full] = -m_geometry.z1_o[idx_reflected];
           m_geometry.zu_o[idx_full] = m_geometry.zu_o[idx_reflected];
-          m_geometry.zv_o[idx_full] = m_geometry.zv_o[idx_reflected];
           m_geometry.lu_o[idx_full] = m_geometry.lu_o[idx_reflected];
-          m_geometry.lv_o[idx_full] = m_geometry.lv_o[idx_reflected];
+
+          // For 3D cases only: toroidal derivatives exist when lthreed=true
+          if (s.lthreed) {
+            m_geometry.rv_o[idx_full] = -m_geometry.rv_o[idx_reflected];
+            m_geometry.zv_o[idx_full] = m_geometry.zv_o[idx_reflected];
+            m_geometry.lv_o[idx_full] = m_geometry.lv_o[idx_reflected];
+          }
         }
       }
     }
@@ -615,6 +640,12 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
             (jOffset + idx_kl < static_cast<int>(m_forces.blmn_e.size())) &&
             (jOffset + idx_rev < static_cast<int>(m_forces.blmn_e.size()));
 
+        // clmn arrays only exist when lthreed=true
+        const bool clmn_arrays_valid =
+            s.lthreed &&
+            (jOffset + idx_kl < static_cast<int>(m_forces.clmn_e.size())) &&
+            (jOffset + idx_rev < static_cast<int>(m_forces.clmn_e.size()));
+
         // Apply jVMEC stellarator symmetry decomposition
         // Following the exact pattern from jVMEC:
 
@@ -679,7 +710,7 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
         }
 
         // clmn: symmetric part retained, antisymmetric part goes to asym
-        if (lambda_arrays_valid) {
+        if (clmn_arrays_valid) {
           clmn_sym_e[idx_kl] = 0.5 * (m_forces.clmn_e[jOffset + idx_kl] +
                                       m_forces.clmn_e[jOffset + idx_rev]);
           clmn_sym_o[idx_kl] = 0.5 * (m_forces.clmn_o[jOffset + idx_kl] +
@@ -695,26 +726,39 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
           clmn_asym_o[idx_kl] = 0.0;
         }
 
-        // crmn: antisymmetric part goes to symmetric, symmetric part goes to
-        // asym
-        crmn_sym_e[idx_kl] = 0.5 * (m_forces.crmn_e[jOffset + idx_kl] -
-                                    m_forces.crmn_e[jOffset + idx_rev]);
-        crmn_sym_o[idx_kl] = 0.5 * (m_forces.crmn_o[jOffset + idx_kl] -
-                                    m_forces.crmn_o[jOffset + idx_rev]);
-        crmn_asym_e[idx_kl] = 0.5 * (m_forces.crmn_e[jOffset + idx_kl] +
-                                     m_forces.crmn_e[jOffset + idx_rev]);
-        crmn_asym_o[idx_kl] = 0.5 * (m_forces.crmn_o[jOffset + idx_kl] +
-                                     m_forces.crmn_o[jOffset + idx_rev]);
+        // For 3D cases only: toroidal force components exist when lthreed=true
+        if (s.lthreed) {
+          // crmn: antisymmetric part goes to symmetric, symmetric part goes to
+          // asym
+          crmn_sym_e[idx_kl] = 0.5 * (m_forces.crmn_e[jOffset + idx_kl] -
+                                      m_forces.crmn_e[jOffset + idx_rev]);
+          crmn_sym_o[idx_kl] = 0.5 * (m_forces.crmn_o[jOffset + idx_kl] -
+                                      m_forces.crmn_o[jOffset + idx_rev]);
+          crmn_asym_e[idx_kl] = 0.5 * (m_forces.crmn_e[jOffset + idx_kl] +
+                                       m_forces.crmn_e[jOffset + idx_rev]);
+          crmn_asym_o[idx_kl] = 0.5 * (m_forces.crmn_o[jOffset + idx_kl] +
+                                       m_forces.crmn_o[jOffset + idx_rev]);
 
-        // czmn: symmetric part retained, antisymmetric part goes to asym
-        czmn_sym_e[idx_kl] = 0.5 * (m_forces.czmn_e[jOffset + idx_kl] +
-                                    m_forces.czmn_e[jOffset + idx_rev]);
-        czmn_sym_o[idx_kl] = 0.5 * (m_forces.czmn_o[jOffset + idx_kl] +
-                                    m_forces.czmn_o[jOffset + idx_rev]);
-        czmn_asym_e[idx_kl] = 0.5 * (m_forces.czmn_e[jOffset + idx_kl] -
-                                     m_forces.czmn_e[jOffset + idx_rev]);
-        czmn_asym_o[idx_kl] = 0.5 * (m_forces.czmn_o[jOffset + idx_kl] -
-                                     m_forces.czmn_o[jOffset + idx_rev]);
+          // czmn: symmetric part retained, antisymmetric part goes to asym
+          czmn_sym_e[idx_kl] = 0.5 * (m_forces.czmn_e[jOffset + idx_kl] +
+                                      m_forces.czmn_e[jOffset + idx_rev]);
+          czmn_sym_o[idx_kl] = 0.5 * (m_forces.czmn_o[jOffset + idx_kl] +
+                                      m_forces.czmn_o[jOffset + idx_rev]);
+          czmn_asym_e[idx_kl] = 0.5 * (m_forces.czmn_e[jOffset + idx_kl] -
+                                       m_forces.czmn_e[jOffset + idx_rev]);
+          czmn_asym_o[idx_kl] = 0.5 * (m_forces.czmn_o[jOffset + idx_kl] -
+                                       m_forces.czmn_o[jOffset + idx_rev]);
+        } else {
+          // Zero out toroidal force components for axisymmetric cases
+          crmn_sym_e[idx_kl] = 0.0;
+          crmn_sym_o[idx_kl] = 0.0;
+          crmn_asym_e[idx_kl] = 0.0;
+          crmn_asym_o[idx_kl] = 0.0;
+          czmn_sym_e[idx_kl] = 0.0;
+          czmn_sym_o[idx_kl] = 0.0;
+          czmn_asym_e[idx_kl] = 0.0;
+          czmn_asym_o[idx_kl] = 0.0;
+        }
       }
     }
 
@@ -742,19 +786,28 @@ void SymmetrizeForces(const Sizes& s, const RadialPartitioning& r,
             blmn_sym_e[kl];
         const_cast<double*>(m_forces.blmn_o.data())[jOffset + kl] =
             blmn_sym_o[kl];
+      }
+
+      // clmn arrays only exist when lthreed=true
+      if (s.lthreed &&
+          jOffset + kl < static_cast<int>(m_forces.clmn_e.size())) {
         const_cast<double*>(m_forces.clmn_e.data())[jOffset + kl] =
             clmn_sym_e[kl];
         const_cast<double*>(m_forces.clmn_o.data())[jOffset + kl] =
             clmn_sym_o[kl];
       }
-      const_cast<double*>(m_forces.crmn_e.data())[jOffset + kl] =
-          crmn_sym_e[kl];
-      const_cast<double*>(m_forces.crmn_o.data())[jOffset + kl] =
-          crmn_sym_o[kl];
-      const_cast<double*>(m_forces.czmn_e.data())[jOffset + kl] =
-          czmn_sym_e[kl];
-      const_cast<double*>(m_forces.czmn_o.data())[jOffset + kl] =
-          czmn_sym_o[kl];
+
+      // Toroidal force arrays only exist when lthreed=true
+      if (s.lthreed) {
+        const_cast<double*>(m_forces.crmn_e.data())[jOffset + kl] =
+            crmn_sym_e[kl];
+        const_cast<double*>(m_forces.crmn_o.data())[jOffset + kl] =
+            crmn_sym_o[kl];
+        const_cast<double*>(m_forces.czmn_e.data())[jOffset + kl] =
+            czmn_sym_e[kl];
+        const_cast<double*>(m_forces.czmn_o.data())[jOffset + kl] =
+            czmn_sym_o[kl];
+      }
     }
 
     // Store asymmetric components in the asymmetric force arrays
