@@ -603,6 +603,14 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 
 **🔧 ROOT CAUSE IDENTIFIED**: The axis recovery computes correct improved axis values, but the geometry reinitialization process (`interpFromBoundaryAndAxis`) doesn't translate these improvements into better Jacobian values. While educational_VMEC achieves tau improvement from -0.75 to -0.18, VMEC++ remains at -10 to -15.
 
+**✅ AXIS PROPAGATION CONFIRMED**: Debug output shows:
+- Initial axis: `raxis_c[0]=0, zaxis_c[0]=0`
+- After recovery: `raxis_c[0]=6.1281, zaxis_c[0]=0.00616443`
+- `interpFromBoundaryAndAxis` correctly receives and uses updated axis values
+- However, Jacobian (tau) values remain negative after geometry update
+
+**🎯 CRITICAL FINDING**: The issue is NOT in axis recovery or value propagation, but in how the asymmetric geometry is computed from the axis coefficients. This points to a fundamental algorithmic difference between VMEC++ and educational_VMEC in asymmetric geometry calculation.
+
 ### 🎯 Next Priority Actions (Use Educational_VMEC as Reference)
 
 **Immediate Next Steps (Continue Systematic Comparison):**
@@ -614,8 +622,10 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 6. **✅ ANALYZE axis recovery numerical differences** - COMPLETED: Debug output added, axis recovery works but geometry update fails
 7. **✅ CHECK geometry update after axis recovery** - COMPLETED: Added debug output to track axis propagation to geometry
 8. **✅ ADD detailed debug output to both codes** - COMPLETED: Debug output in guess_magnetic_axis.cc and boundaries.cc
-9. **🔧 FIX geometry reinitialization bug** - CURRENT: Axis values update correctly but Jacobian doesn't improve
-10. **📚 COMPARE educational_VMEC geometry update** - Next: Study how educational_VMEC updates geometry after axis recovery
+9. **✅ VERIFY axis propagation to geometry** - COMPLETED: Axis values correctly propagate to interpFromBoundaryAndAxis
+10. **✅ IDENTIFY root cause** - COMPLETED: Issue is in asymmetric geometry computation, not axis propagation
+11. **🔧 COMPARE asymmetric geometry algorithms** - CURRENT: Study how educational_VMEC computes geometry differently
+12. **📚 FIX asymmetric geometry computation** - Next: Apply fixes based on educational_VMEC implementation
 
 **Development Approach (Proven Successful):**
 - **🔍 ALWAYS EXAMINE educational_VMEC source code FIRST** when debugging asymmetric issues
@@ -631,6 +641,19 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 - `educational_VMEC/src/bcovar.f90` vs `vmecpp/vmec/fourier_geometry/fourier_geometry.cc`
 - `educational_VMEC/src/tomnsp.f90` vs `vmecpp/vmec/boundaries/boundaries.cc`
 
+### 🔍 Next Investigation Focus
+
+**Asymmetric Geometry Computation Analysis:**
+1. **Compare Fourier transform implementations** - How educational_VMEC vs VMEC++ handle asymmetric Fourier coefficients
+2. **Examine coordinate system differences** - Check if theta/zeta definitions differ in asymmetric mode
+3. **Study Jacobian calculation** - Compare tau = ru*zs - rs*zu computation in both codes
+4. **Investigate geometry symmetrization** - How `SymmetrizeRealSpaceGeometry` affects asymmetric cases
+
+**Specific Areas to Compare:**
+- `educational_VMEC/src/jacobian.f90` vs `vmecpp/vmec/fourier_geometry/fourier_geometry.cc`
+- `educational_VMEC/src/tomnsp.f90` (geometry from coefficients) vs VMEC++ equivalent
+- `educational_VMEC/src/symrzl.f90` (symmetrization) vs VMEC++ `SymmetrizeRealSpaceGeometry`
+
 ### 🚀 Recent Implementation Progress (2025-07-17)
 
 **Debug Output Added:**
@@ -638,7 +661,11 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 2. **boundaries.cc**: Added confirmation when axis coefficients are updated after recovery
 3. **fourier_geometry.cc**: Added debug output to verify axis values used in `interpFromBoundaryAndAxis`
 
-**Key Finding**: The axis recovery algorithm works correctly and produces reasonable axis values, but the subsequent geometry reinitialization doesn't improve the Jacobian. This suggests a deeper issue in how asymmetric geometry is computed from the axis coefficients.
+**Key Findings**:
+- The axis recovery algorithm works correctly and produces reasonable axis values (R_axis=6.1281, Z_axis=0.00616443)
+- The axis values are properly propagated to the geometry reinitialization (`interpFromBoundaryAndAxis`)
+- However, the Jacobian doesn't improve, confirming the issue is in the asymmetric geometry computation algorithm itself
+- This represents a fundamental algorithmic difference between VMEC++ and educational_VMEC
 
 ### Phase 1: Symmetric Test Validation with lasym=true
 **Status**: ⚠️ **APPROACH REVISED - SYMMETRIC→ASYMMETRIC CONVERSION PROBLEMATIC**
