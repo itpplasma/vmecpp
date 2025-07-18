@@ -302,8 +302,15 @@ void SymmetrizeRealSpaceGeometry(const Sizes& s, const RadialPartitioning& r,
       // combination
       for (int k = 0; k < s.nZeta; ++k) {
         for (int l = s.nThetaReduced; l < s.nThetaEven; ++l) {
-          int l_mirror = s.nThetaEven - l;         // Mirror index in [0,π]
-          int k_mirror = (s.nZeta - k) % s.nZeta;  // Mirror index for zeta
+          int l_mirror = s.nThetaEven - l;  // Mirror index in [0,π]
+          // Fix: Match educational_VMEC's ireflect behavior
+          // For axisymmetric (nZeta=1): no zeta reflection
+          // For non-axisymmetric: apply zeta reflection
+          int k_mirror = k;  // Default: no zeta reflection
+          if (s.nZeta > 1) {
+            k_mirror = s.nZeta - k;
+            if (k == 0) k_mirror = 0;  // k=0 maps to itself
+          }
 
           int idx_kl = k * s.nThetaEven + l;
           int idx_mirror = k_mirror * s.nThetaEven + l_mirror;
