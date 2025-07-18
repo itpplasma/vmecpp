@@ -752,3 +752,47 @@ to positive values after axis recovery, matching educational_VMEC behavior.
 1. 🚨 **URGENT**: Investigate Jacobian computation in asymmetric geometry
 2. 🎯 **CRITICAL**: Create stable asymmetric test cases
 3. 🔧 **DEBUG**: Enhanced diagnostic tools for geometry validation
+
+---
+
+## Asymmetric Debugging Progress (Current Session)
+
+### Critical Finding: Sign Convention Issue in SymmetrizeRealSpaceGeometry
+
+**Analysis Complete**: The root cause appears to be incorrect sign conventions when combining symmetric and asymmetric geometry components in the extended theta interval [π, 2π].
+
+**Key Discoveries:**
+
+1. **Parity Rules**: The code correctly implements opposite parity for asymmetric vs symmetric components:
+   - R, Z: symmetric=even, asymmetric=odd
+   - ∂R/∂θ, ∂Z/∂θ: symmetric=odd, asymmetric=even
+   - ∂R/∂ζ, ∂Z/∂ζ: symmetric=even, asymmetric=odd
+
+2. **Sign Convention Bug**: In `fourier_asymmetric.cc:314-341`, the extended interval combination shows:
+   ```cpp
+   // R: Different sign pattern
+   R[extended] = R[reflected] - R_asym[reflected]
+
+   // dR/dtheta: Different sign pattern
+   dR/dtheta[extended] = -dR/dtheta[reflected] + dR_asym/dtheta[reflected]
+
+   // Z: Different pattern from R
+   Z[extended] = -Z[reflected] + Z_asym[reflected]
+
+   // dZ/dtheta: Different pattern from dR/dtheta
+   dZ/dtheta[extended] = dZ/dtheta[reflected] - dZ_asym/dtheta[reflected]
+   ```
+
+3. **Inconsistency Identified**: The sign patterns are inconsistent between:
+   - R vs Z (different base signs)
+   - Quantities vs their derivatives (R subtracts asym, but ru adds asym)
+   - This breaks the consistency needed for proper Jacobian calculation
+
+4. **Impact on Jacobian**: The Jacobian tau = ru*zs - rs*zu depends critically on having consistent sign conventions between R/Z and their derivatives.
+
+**Action Plan:**
+1. ✅ Analyzed parity rules in SymmetrizeRealSpaceGeometry
+2. ✅ Created parity_analysis.md documenting the sign convention issues
+3. ⏳ Compare with educational_VMEC's symrzl.f90 to verify correct sign pattern
+4. ⏳ Implement and test corrected sign conventions
+5. ⏳ Verify Jacobian improvement with fixed geometry
