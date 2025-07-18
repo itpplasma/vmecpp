@@ -398,6 +398,20 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
     w.new_r_axis[k] = (max_r + min_r) / 2.0;
     w.new_z_axis[k] = (max_z + min_z) / 2.0;
 
+    // DEBUG: Show grid bounds and search parameters for first plane
+    if (k == 0) {
+      std::cout << "=== GRID SEARCH SETUP (k=0) ===" << std::endl;
+      std::cout << "sign_of_jacobian = " << sign_of_jacobian << std::endl;
+      std::cout << "Grid bounds: r=[" << min_r << ", " << max_r << "], z=["
+                << min_z << ", " << max_z << "]" << std::endl;
+      std::cout << "Grid steps: delta_r=" << delta_r << ", delta_z=" << delta_z
+                << std::endl;
+      std::cout << "Grid resolution: " << kNumberOfGridPoints << " x "
+                << kNumberOfGridPoints << std::endl;
+      std::cout << "Initial center: r=" << w.new_r_axis[k]
+                << ", z=" << w.new_z_axis[k] << std::endl;
+    }
+
     // Compute the static part of the Jacobian (tau0)
     for (int l = 0; l < s.nThetaEven; ++l) {
       w.d_r_d_s_half[k][l] =
@@ -408,7 +422,33 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
                      w.d_z_d_theta_half[k][l] * w.d_r_d_s_half[k][l];
     }  // l
 
-    double min_tau = 0.0;
+    // DEBUG: Show tau0 calculation details for first plane
+    if (k == 0) {
+      std::cout << "=== TAU0 COMPUTATION DEBUG (k=0) ===" << std::endl;
+      std::cout << "delta_s = " << delta_s << std::endl;
+      std::cout << "r_axis[0] = " << w.r_axis[k]
+                << ", z_axis[0] = " << w.z_axis[k] << std::endl;
+      for (int l = 0; l < std::min(s.nThetaEven, 4); ++l) {
+        std::cout << "  l=" << l << ": r_lcfs=" << w.r_lcfs[k][l]
+                  << " r_half=" << w.r_half[k][l]
+                  << " z_lcfs=" << w.z_lcfs[k][l]
+                  << " z_half=" << w.z_half[k][l] << std::endl;
+        std::cout << "    d_r_d_theta_half=" << w.d_r_d_theta_half[k][l]
+                  << " d_z_d_theta_half=" << w.d_z_d_theta_half[k][l]
+                  << std::endl;
+        std::cout << "    d_r_d_s_half=" << w.d_r_d_s_half[k][l]
+                  << " d_z_d_s_half=" << w.d_z_d_s_half[k][l] << std::endl;
+        std::cout << "    tau0=" << w.tau0[k][l] << std::endl;
+      }
+    }
+
+    // Initialize min_tau to a very negative value to allow any improvement
+    double min_tau = -1e10;
+
+    // DEBUG: Check initial min_tau behavior
+    if (k == 0) {
+      std::cout << "Initial min_tau = " << min_tau << std::endl;
+    }
 
     for (int index_z = 0; index_z < kNumberOfGridPoints; ++index_z) {
       double z_grid = min_z + index_z * delta_z;
@@ -419,6 +459,16 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
         if (index_z > 0) {
           break;
         }
+      }
+
+      // DEBUG: Show early exit logic
+      if (k == 0 && index_z == 0) {
+        std::cout << "Early exit check: s.lasym=" << s.lasym
+                  << ", !s.lasym=" << (!s.lasym) << ", k=" << k
+                  << ", s.nZeta=" << s.nZeta << ", s.nZeta/2=" << (s.nZeta / 2)
+                  << std::endl;
+        std::cout << "Condition (!s.lasym && (k == 0 || k == s.nZeta / 2)) = "
+                  << (!s.lasym && (k == 0 || k == s.nZeta / 2)) << std::endl;
       }
 
       for (int index_r = 0; index_r < kNumberOfGridPoints; ++index_r) {
@@ -436,19 +486,60 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
         double min_tau_temp =
             *std::min_element(w.tau[k].begin(), w.tau[k].end());
 
+        // DEBUG: Show grid search progress for first plane
+        if (k == 0 && ((index_r % 10 == 0 && index_z % 10 == 0) ||
+                       min_tau_temp > min_tau)) {
+          std::cout << "Grid search k=0, r_grid=" << r_grid
+                    << ", z_grid=" << z_grid
+                    << ", min_tau_temp=" << min_tau_temp
+                    << ", min_tau=" << min_tau;
+          if (min_tau_temp > min_tau) std::cout << " **NEW BEST**";
+          std::cout << std::endl;
+          // Show a few tau values
+          for (int l = 0; l < std::min(s.nThetaEven, 3); ++l) {
+            std::cout << "  tau[" << l << "]=" << w.tau[k][l] << std::endl;
+          }
+        }
+
+        // DEBUG: Show final optimal position found
+        if (k == 0 && min_tau_temp > min_tau) {
+          std::cout << "NEW OPTIMUM found at r=" << r_grid << ", z=" << z_grid
+                    << ", min_tau=" << min_tau_temp << std::endl;
+        }
+
         if (min_tau_temp > min_tau) {
           min_tau = min_tau_temp;
           w.new_r_axis[k] = r_grid;
           w.new_z_axis[k] = z_grid;
         } else if (min_tau_temp == min_tau) {
-          // If up-down symmetric and lasym=T, need this to pick z = 0
+          // DEBUG: Show tie-breaking logic in action
+          if (k == 0) {
+            std::cout << "TIE at min_tau=" << min_tau
+                      << ": current_z=" << w.new_z_axis[k]
+                      << ", candidate_z=" << z_grid << std::endl;
+          }
+
+          // FIXED: Match educational_VMEC exactly - always prefer z closest to
+          // 0 Educational_VMEC: IF (ABS(zcom(iv)).gt.ABS(zlim)) then zcom(iv) =
+          // zlim
           if (std::abs(w.new_z_axis[k]) > std::abs(z_grid)) {
             w.new_z_axis[k] = z_grid;
+            if (k == 0) {
+              std::cout << "Updated z_axis to value closer to zero: " << z_grid
+                        << std::endl;
+            }
           }
         }
       }  // index_r
     }  // index_z
   }  // k
+
+  // DEBUG: Show axis values after grid search, before symmetrization
+  std::cout << "=== AFTER GRID SEARCH, BEFORE SYMMETRIZATION ===" << std::endl;
+  for (int k = 0; k < std::min(s.nZeta, 4); ++k) {
+    std::cout << "Plane " << k << ": r_axis=" << w.new_r_axis[k]
+              << " z_axis=" << w.new_z_axis[k] << std::endl;
+  }
 
   // flip-mirror stellarator-symmetric half in case of symmetric run
   // in order to always have a full toroidal module for the Fourier transform
@@ -460,6 +551,14 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
       w.new_z_axis[k_reversed] = -w.new_z_axis[k];
     }  // k
   }  // !lasym
+
+  // DEBUG: Show axis values after symmetrization, before Fourier transform
+  std::cout << "=== AFTER SYMMETRIZATION, BEFORE FOURIER TRANSFORM ==="
+            << std::endl;
+  for (int k = 0; k < std::min(s.nZeta, 4); ++k) {
+    std::cout << "Plane " << k << ": r_axis=" << w.new_r_axis[k]
+              << " z_axis=" << w.new_z_axis[k] << std::endl;
+  }
 
   // Fourier-transform the axis guess
   const double delta_v = 2.0 / s.nZeta;
@@ -483,14 +582,56 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
 
   // DEBUG: Show grid search results before Fourier transform
   std::cout << "=== GRID SEARCH RESULTS ===" << std::endl;
-  for (int k = 0; k < s.nZeta && k < 4; ++k) {
+  std::cout << "nZeta=" << s.nZeta << " ntor=" << s.ntor << std::endl;
+  for (int k = 0; k < s.nZeta && k < 8; ++k) {
     std::cout << "Plane " << k << ": r_axis=" << w.new_r_axis[k]
               << " z_axis=" << w.new_z_axis[k] << std::endl;
   }
 
+  // DEBUG: Check if all planes have the same values (axisymmetric case)
+  bool all_same_r = true, all_same_z = true;
+  for (int k = 1; k < s.nZeta; ++k) {
+    if (std::abs(w.new_r_axis[k] - w.new_r_axis[0]) > 1e-12) all_same_r = false;
+    if (std::abs(w.new_z_axis[k] - w.new_z_axis[0]) > 1e-12) all_same_z = false;
+  }
+  std::cout << "All planes identical: r=" << all_same_r << " z=" << all_same_z
+            << std::endl;
+
+  // DEBUG: Compare boundary geometry arrays with educational_VMEC
+  std::cout << "=== BOUNDARY GEOMETRY DEBUG ===" << std::endl;
+  // Show key arrays that feed into tau calculation
+  const int k = 0;  // First toroidal plane
+  std::cout << "Plane " << k << " geometry arrays:" << std::endl;
+  for (int l = 0; l < std::min(5, s.nThetaEven); ++l) {
+    std::cout << "  l=" << l << ": r_lcfs=" << w.r_lcfs[k][l]
+              << " z_lcfs=" << w.z_lcfs[k][l] << std::endl;
+    std::cout << "  l=" << l << ": r_half=" << w.r_half[k][l]
+              << " z_half=" << w.z_half[k][l] << std::endl;
+    std::cout << "  l=" << l << ": dr_dtheta_half=" << w.d_r_d_theta_half[k][l]
+              << " dz_dtheta_half=" << w.d_z_d_theta_half[k][l] << std::endl;
+  }
+
+  std::cout << "=== TAU VALUES AT OPTIMAL POSITION ===" << std::endl;
+  std::cout << "Optimal position: r=" << w.new_r_axis[0]
+            << " z=" << w.new_z_axis[0] << std::endl;
+
   // DEBUG: Show raw Fourier coefficients before scaling
   std::cout << "Raw raxis_c[0]=" << w.new_raxis_c[0]
             << " zaxis_c[0]=" << w.new_zaxis_c[0] << std::endl;
+
+  // DEBUG: Check Fourier transform computation
+  // Educational_VMEC target: raxis_cc=6.1188 after scaling
+  // For axisymmetric case, DC component should be: sum(r_axis) * delta_v /
+  // nscale[0]
+  double manual_raxis = 0.0, manual_zaxis = 0.0;
+  for (int k = 0; k < s.nZeta; ++k) {
+    manual_raxis += w.new_r_axis[k] * delta_v / t.nscale[0];
+    manual_zaxis += w.new_z_axis[k] * delta_v / t.nscale[0];
+  }
+  std::cout << "Manual DC calculation: raxis=" << manual_raxis
+            << " zaxis=" << manual_zaxis << std::endl;
+  std::cout << "nscale[0]=" << t.nscale[0] << " delta_v=" << delta_v
+            << std::endl;
 
   // Match educational_VMEC scaling exactly:
   // Lines 203-206: IF (n.eq.0 .or. n.eq.nzeta/2) THEN
@@ -498,7 +639,8 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
   //                   zaxis_cc(n) = p5*zaxis_cc(n)
   //                 END IF
 
-  // DC component (n=0) scaling - always for both raxis_cc and zaxis_cc
+  // DC component (n=0) scaling - match educational_VMEC exactly
+  // Educational_VMEC applies p5 (0.5) scaling for n=0
   w.new_raxis_c[0] /= 2.0;
   if (s.lasym) {
     w.new_zaxis_c[0] /= 2.0;
