@@ -55,7 +55,41 @@ if (s_.lasym) {
 
 ## Implementation Strategy
 
-### Phase 1: Research and Analysis (High Priority)
+### Phase 1: Cherry-Pick from origin/main (HIGHEST PRIORITY)
+1. **Analyze Commit History**:
+   - Review all commits in `origin/main` since `prepare-asym`
+   - Identify commits that implement asymmetric functionality
+   - Focus on asymmetric DFT implementations, fourier_asymmetric.cc, ideal_mhd_model changes
+
+2. **Systematic Cherry-Picking Process**:
+   - Start from current `asym` branch (based on PR 360)
+   - `git log --oneline prepare-asym..origin/main` to see all commits
+   - For each commit, analyze if it contains asymmetric functionality:
+     - Check commit message for "asymmetric", "lasym", "DFT", "fourier"
+     - `git show <commit>` to examine changes
+     - Look for `fourier_asymmetric.cc`, `ideal_mhd_model.cc` modifications
+   - Cherry-pick relevant commits: `git cherry-pick <commit-hash>`
+   - Resolve conflicts maintaining our axis recovery fixes
+
+3. **Expected Asymmetric Commits to Find**:
+   - Implementation of `fourier_asymmetric.cc` with DFT functions
+   - Updates to `ideal_mhd_model.cc` removing the `abort()` call
+   - Build system updates for asymmetric files
+   - Any symrzl implementation
+
+4. **Cherry-Pick Strategy**:
+   ```bash
+   # From asym branch
+   git log --oneline prepare-asym..origin/main --grep="asymmetric\|lasym\|DFT\|fourier"
+   git log --oneline prepare-asym..origin/main --all --grep="fourier_asymmetric"
+   git log --oneline prepare-asym..origin/main -- "*fourier*" "*asymm*"
+
+   # For each relevant commit:
+   git show <commit-hash>  # Review changes
+   git cherry-pick <commit-hash>  # Apply if asymmetric-related
+   ```
+
+### Phase 2: Research and Analysis (High Priority)
 1. **Study Educational VMEC Implementation**:
    - Analyze `educational_VMEC/src/` asymmetric DFT functions
    - Document mathematical operations and data flow
@@ -70,7 +104,7 @@ if (s_.lasym) {
    - Define input/output interfaces
    - Map data dependencies
 
-### Phase 2: Core Implementation (High Priority)
+### Phase 3: Core Implementation (High Priority)
 1. **Create `fourier_asymmetric.cc`**:
    - Implement `FourierToReal3DAsymmFastPoloidal()`
    - Implement `FourierToReal2DAsymmFastPoloidal()`
@@ -92,7 +126,7 @@ if (s_.lasym) {
    - Add new files to CMake
    - Update includes and dependencies
 
-### Phase 3: Testing and Validation (Medium Priority)
+### Phase 4: Testing and Validation (Medium Priority)
 1. **Basic Functionality Test**:
    - Test with `input.up_down_asymmetric_tokamak`
    - Verify no crashes, basic convergence
@@ -133,33 +167,51 @@ if (s_.lasym) {
 - ✅ Documentation in `../benchmark_vmec/design/` (valuable analysis)
 
 **Remove These Changes**:
-- ❌ Debug output in `guess_magnetic_axis.cc` (clean up before final commit)
 - ❌ Temporary analysis files
 - ❌ Duplicate input files
 
+**Keep These Changes (For Now)**:
+- ✅ Debug output in `guess_magnetic_axis.cc` (KEEP for development and debugging)
+- ✅ All analysis and diagnostic information
+
 ## Development Workflow
 
-### Step 1: Analysis Phase
+### Step 1: Cherry-Pick Phase (IMMEDIATE PRIORITY)
+1. **Search for Asymmetric Commits in origin/main**:
+   ```bash
+   git log --oneline prepare-asym..origin/main --grep="asymmetric\|lasym\|DFT\|fourier"
+   git log --oneline prepare-asym..origin/main -- "*fourier*" "*asymm*" "*ideal_mhd*"
+   ```
+2. **Review Each Potential Commit**:
+   - `git show <commit-hash>` to examine changes
+   - Look for `fourier_asymmetric.cc`, `ideal_mhd_model.cc` modifications
+   - Check if it removes the `abort()` call for asymmetric mode
+3. **Cherry-Pick Relevant Commits**:
+   - `git cherry-pick <commit-hash>` for each asymmetric implementation
+   - Resolve conflicts while preserving our axis recovery fixes
+   - Test after each cherry-pick to ensure no regressions
+
+### Step 2: Analysis Phase
 1. Study educational_VMEC asymmetric DFT implementation
 2. Study jVMEC asymmetric implementation
 3. Document required functions and interfaces
 4. Create implementation specifications
 
-### Step 2: Implementation Phase
-1. Create `fourier_asymmetric.cc` with core functions
-2. Create `fourier_asymmetric.h` with declarations
-3. Update `ideal_mhd_model.cc` to use asymmetric functions
-4. Update build system
+### Step 3: Implementation Phase (if needed after cherry-picking)
+1. Create `fourier_asymmetric.cc` with core functions (if not found in origin/main)
+2. Create `fourier_asymmetric.h` with declarations (if not found in origin/main)
+3. Update `ideal_mhd_model.cc` to use asymmetric functions (if not found in origin/main)
+4. Update build system (if not found in origin/main)
 
-### Step 3: Testing Phase
+### Step 4: Testing Phase
 1. Test basic functionality (no crashes)
 2. Test convergence on simple asymmetric case
 3. Cross-validate with educational_VMEC
 4. Comprehensive testing on all 27 asymmetric inputs
 
-### Step 4: Clean Up Phase
-1. Remove debug output
-2. Clean up commit history
+### Step 5: Validation Phase (NOT Clean Up - Keep Debug Output)
+1. **KEEP debug output for development**
+2. Validate commit history is clean
 3. Update documentation
 4. Final testing and validation
 
@@ -173,7 +225,7 @@ if (s_.lasym) {
 ### Long-term Goals
 - [ ] 100% pass rate on all 27 asymmetric inputs from educational_VMEC
 - [ ] Convergence rates competitive with educational_VMEC
-- [ ] Clean, maintainable code without debug output
+- [ ] Clean, maintainable code WITH debug output preserved for development
 - [ ] Comprehensive documentation
 
 ## Risk Assessment
@@ -193,7 +245,7 @@ if (s_.lasym) {
 
 The path to working asymmetric mode is clear but requires implementing the missing asymmetric DFT functionality. Our current branch has a solid foundation with the axis recovery fixes and PR 360 improvements. The next phase requires focused implementation of the missing asymmetric Fourier transform functions.
 
-**Current Status**: 🟡 Foundation Ready, Core Implementation Needed
-**Next Step**: Analyze educational_VMEC asymmetric DFT implementation
-**Timeline**: Implementation phase estimated 3-5 development cycles
-**Risk Level**: Medium-High (complex mathematical implementation)
+**Current Status**: 🟡 Foundation Ready, Cherry-Pick Phase Required
+**Next Step**: Cherry-pick asymmetric commits from origin/main
+**Timeline**: Cherry-pick phase (immediate), then implementation if needed
+**Risk Level**: Medium (cherry-picking) to Medium-High (if implementation needed)
