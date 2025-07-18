@@ -641,18 +641,32 @@ This comprehensive TODO provides a clear roadmap for validating asymmetric VMEC+
 - `educational_VMEC/src/bcovar.f90` vs `vmecpp/vmec/fourier_geometry/fourier_geometry.cc`
 - `educational_VMEC/src/tomnsp.f90` vs `vmecpp/vmec/boundaries/boundaries.cc`
 
-### 🔍 Next Investigation Focus
+### 🔍 Investigation Results (2025-07-17 continued)
 
-**Asymmetric Geometry Computation Analysis:**
-1. **Compare Fourier transform implementations** - How educational_VMEC vs VMEC++ handle asymmetric Fourier coefficients
-2. **Examine coordinate system differences** - Check if theta/zeta definitions differ in asymmetric mode
-3. **Study Jacobian calculation** - Compare tau = ru*zs - rs*zu computation in both codes
-4. **Investigate geometry symmetrization** - How `SymmetrizeRealSpaceGeometry` affects asymmetric cases
+**Asymmetric Geometry Computation Analysis Completed:**
 
-**Specific Areas to Compare:**
-- `educational_VMEC/src/jacobian.f90` vs `vmecpp/vmec/fourier_geometry/fourier_geometry.cc`
-- `educational_VMEC/src/tomnsp.f90` (geometry from coefficients) vs VMEC++ equivalent
-- `educational_VMEC/src/symrzl.f90` (symmetrization) vs VMEC++ `SymmetrizeRealSpaceGeometry`
+1. **✅ Fourier transform implementation examined**:
+   - VMEC++ uses product basis with specific sign conventions for asymmetric terms
+   - R: sin(m*theta)*cos(n*zeta), Z: cos(m*theta)*cos(n*zeta) for asymmetric parts
+   - Derivatives include sign factors: ru_a = m*xmpq*rsc_term, zu_a = -m*xmpq*zcc_term
+
+2. **✅ Geometry symmetrization studied**:
+   - `SymmetrizeRealSpaceGeometry` extends geometry from [0,π] to [0,2π]
+   - Different parity rules for symmetric vs asymmetric parts
+   - Symmetric derivatives (ru_e) are odd in theta, asymmetric derivatives (ru_a) are even
+
+3. **✅ Jacobian calculation located**:
+   - Formula: `tau = ru12*zs - rs*zu12` in `ideal_mhd_model.cc`
+   - Debug output shows negative tau values even with correct axis
+
+**🎯 Potential Root Cause Identified**:
+The sign conventions and parity rules in `SymmetrizeRealSpaceGeometry` may differ from educational_VMEC.
+The combination of symmetric (odd parity) and asymmetric (even parity) derivatives could be producing
+incorrect Jacobian values when combined.
+
+**Next Critical Comparison**:
+- Compare sign conventions in `educational_VMEC/src/symrzl.f90` vs VMEC++ `SymmetrizeRealSpaceGeometry`
+- Check if derivative combination rules differ between implementations
 
 ### 🚀 Recent Implementation Progress (2025-07-17)
 
