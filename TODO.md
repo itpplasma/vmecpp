@@ -1398,4 +1398,44 @@ if (std::abs(w.new_z_axis[k]) > std::abs(z_grid)) {
 - ✅ Optimization logic: Both find maximum minimum tau correctly
 - ✅ **Tie-breaking logic: FIXED** - Now matches educational_VMEC exactly
 
-**CURRENT STATUS**: **Axis recovery algorithm now working correctly**. Major progress toward educational_VMEC parity achieved. Z-axis positioning dramatically improved with tie-breaking fix.
+### 🚨 CRITICAL CONVERGENCE COMPARISON (2025-07-18 Continued)
+
+**STATUS AFTER AXIS RECOVERY FIX**: Axis recovery now works correctly, but VMEC++ still fails to converge where educational_VMEC succeeds.
+
+**🔍 Educational_VMEC SUCCESS (Reference Behavior):**
+- ✅ **Converges successfully**: "EXECUTION TERMINATED NORMALLY"
+- ✅ **Single Jacobian reset**: "NUMBER OF JACOBIAN RESETS = 1"
+- ✅ **Reaches iteration 1215**: With stable tau values (taumin=-0.303, taumax=-0.107)
+- ✅ **Proper axis recovery**: From BAD_JACOBIAN to GOOD_JACOBIAN successfully
+- ✅ **Final result**: Working asymmetric equilibrium generated
+
+**❌ VMEC++ CRITICAL FAILURE (Must Be Fixed):**
+- ❌ **Infinite retry loop**: "AXIS RECOVERY RETRY FAILED" repeated endlessly
+- ❌ **Never reaches main iteration**: Stuck in axis recovery phase
+- ❌ **No convergence**: RuntimeError terminates execution
+- ❌ **Post-recovery logic broken**: Axis recovery works but transition to iteration fails
+
+**🎯 ROOT CAUSE ANALYSIS REQUIRED:**
+
+The axis recovery algorithm fix was successful (98% improvement in Z-axis positioning), but VMEC++ has a **different critical bug in the iteration control logic**. Educational_VMEC successfully transitions from axis recovery to normal iteration, while VMEC++ gets trapped.
+
+**📊 Progress Assessment:**
+- ✅ **Axis recovery algorithm**: FIXED (major breakthrough achieved)
+- ❌ **Iteration control logic**: BROKEN (prevents convergence)
+- ❌ **Overall convergence**: FAILING (critical blocker remains)
+
+**🔬 IMMEDIATE DEBUGGING PRIORITIES:**
+
+1. **Compare iteration control logic** between educational_VMEC and VMEC++
+2. **Debug post-axis-recovery validation** - what checks determine success/failure?
+3. **Analyze retry decision logic** - why does VMEC++ keep retrying while educational_VMEC proceeds?
+4. **Study Jacobian validation criteria** - are the success thresholds different?
+5. **Deep debug the main iteration entry point** - why doesn't VMEC++ transition to normal iteration?
+
+**🎯 SUCCESS CRITERIA (NO COMPROMISE):**
+- VMEC++ MUST converge on input.up_down_asymmetric_tokamak like educational_VMEC does
+- VMEC++ MUST achieve single Jacobian reset like educational_VMEC
+- VMEC++ MUST reach normal iteration loop like educational_VMEC
+- VMEC++ MUST generate working asymmetric equilibrium like educational_VMEC
+
+**CURRENT STATUS**: Axis recovery fixed, but **critical iteration control bug blocking convergence**. Deep debugging of solver iteration logic required.
