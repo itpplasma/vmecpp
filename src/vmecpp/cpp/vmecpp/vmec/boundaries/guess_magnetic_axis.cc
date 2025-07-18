@@ -442,13 +442,7 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
       }
     }
 
-    // Initialize min_tau to a very negative value to allow any improvement
-    double min_tau = -1e10;
-
-    // DEBUG: Check initial min_tau behavior
-    if (k == 0) {
-      std::cout << "Initial min_tau = " << min_tau << std::endl;
-    }
+    double min_tau = 0.0;
 
     for (int index_z = 0; index_z < kNumberOfGridPoints; ++index_z) {
       double z_grid = min_z + index_z * delta_z;
@@ -624,27 +618,24 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
   //                   zaxis_cc(n) = p5*zaxis_cc(n)
   //                 END IF
 
-  // DC component (n=0) scaling - match educational_VMEC exactly
-  // Educational_VMEC applies p5 (0.5) scaling for n=0
+  // fixup Fourier basis scaling for cos(0) and cos(Nyquist) entries
   w.new_raxis_c[0] /= 2.0;
-  if (s.lasym) {
-    w.new_zaxis_c[0] /= 2.0;
-  }
-
-  // DEBUG: Show coefficients after scaling
-  std::cout << "After scaling raxis_c[0]=" << w.new_raxis_c[0]
-            << " zaxis_c[0]=" << w.new_zaxis_c[0] << std::endl;
-
-  // Nyquist component scaling (n = nZeta/2) - if applicable
   // need to check explicitly for ntor > 0, because otherwise for ntor = 0,
   // nZeta / 2 also is zero (integer division doing the rounding-down),
   // which will lead to the n=0 - component being divided by 2 twice!
   if (s.ntor > 0 && s.ntor >= s.nZeta / 2) {
     w.new_raxis_c[s.nZeta / 2] /= 2.0;
-    if (s.lasym) {
+  }
+  if (s.lasym) {
+    w.new_zaxis_c[0] /= 2.0;
+    if (s.ntor > 0 && s.ntor >= s.nZeta / 2) {
       w.new_zaxis_c[s.nZeta / 2] /= 2.0;
     }
   }
+
+  // DEBUG: Show coefficients after scaling
+  std::cout << "After scaling raxis_c[0]=" << w.new_raxis_c[0]
+            << " zaxis_c[0]=" << w.new_zaxis_c[0] << std::endl;
 
   return w;
 }  // NOLINT(readability/fn_size)

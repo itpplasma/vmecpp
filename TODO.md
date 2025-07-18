@@ -4,7 +4,22 @@
 
 **Primary Objective**: Resolve BAD_JACOBIAN initialization issues blocking asymmetric equilibrium convergence and implement comprehensive validation against upstream VMEC2000.
 
-**🔴 CRITICAL BUG FOUND**: VMEC++ incorrectly handles theta range in `guess_magnetic_axis.cc` for asymmetric cases, leaving half the boundary values as zeros. This causes rmin=0 and wrong axis initialization.
+## 🔴 IMMEDIATE PRIORITY: Document and Analyze All Modified Functions
+
+**Critical Task**: Before proceeding with debugging, we must document and understand all changes made for asymmetric implementation compared to upstream/main.
+
+**Action Items**:
+1. Create detailed documentation for each modified function comparing VMEC++, educational_VMEC, and jVMEC
+2. Identify any algorithmic differences or potential bugs
+3. Use `/home/ert/code/benchmark_vmec/` directory for all documentation
+4. See `/home/ert/code/benchmark_vmec/index.md` for the complete list
+
+**Current Focus**: `fourier_asymmetric.cc` - the new file implementing asymmetric force calculations
+
+**Previously Found Issues**:
+- ✅ FIXED: Axis recovery algorithm had wrong tie-breaking logic
+- ✅ FIXED: min_tau initialization was incorrect (-1e10 instead of 0.0)
+- 🔴 REMAINING: Infinite axis recovery retry loop after successful recovery
 
 **Immediate Success Criteria**:
 - Resolve BAD_JACOBIAN initialization errors in asymmetric mode
