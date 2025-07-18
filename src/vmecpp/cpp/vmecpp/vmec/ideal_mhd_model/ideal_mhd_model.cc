@@ -1209,17 +1209,47 @@ void IdealMhdModel::geometryFromFourier(const FourierGeometry& physical_x) {
   }
 
   if (s_.lasym) {
-    // FIXME(jons): implement non-symmetric DFT variants
-    std::cerr << "asymmetric inv-DFT not implemented yet\n";
+    // Create asymmetric geometry structure
+    auto geometry_asym = RealSpaceGeometryAsym{.r1_a = r1_a,
+                                               .ru_a = ru_a,
+                                               .rv_a = rv_a,
+                                               .z1_a = z1_a,
+                                               .zu_a = zu_a,
+                                               .zv_a = zv_a,
+                                               .lu_a = lu_a,
+                                               .lv_a = lv_a};
 
-    // FIXME(jons): implement symrzl
-    std::cerr << "symrzl not implemented yet\n";
+    // Asymmetric DFT contributions
+    if (s_.lthreed) {
+      FourierToReal3DAsymmFastPoloidal(physical_x, xmpq, r_, s_, m_p_, t_,
+                                       geometry_asym);
+    } else {
+      FourierToReal2DAsymmFastPoloidal(physical_x, xmpq, r_, s_, m_p_, t_,
+                                       geometry_asym);
+    }
 
-#ifdef _OPENMP
-    abort();
-#else
-    exit(-1);
-#endif  // _OPENMP
+    // Create symmetric geometry structure for symmetrization
+    auto geometry = RealSpaceGeometry{.r1_e = r1_e,
+                                      .r1_o = r1_o,
+                                      .ru_e = ru_e,
+                                      .ru_o = ru_o,
+                                      .rv_e = rv_e,
+                                      .rv_o = rv_o,
+                                      .z1_e = z1_e,
+                                      .z1_o = z1_o,
+                                      .zu_e = zu_e,
+                                      .zu_o = zu_o,
+                                      .zv_e = zv_e,
+                                      .zv_o = zv_o,
+                                      .lu_e = lu_e,
+                                      .lu_o = lu_o,
+                                      .lv_e = lv_e,
+                                      .lv_o = lv_o,
+                                      .rCon = rCon,
+                                      .zCon = zCon};
+
+    // Symmetrize geometry for extended theta interval
+    SymmetrizeRealSpaceGeometry(s_, r_, geometry, geometry_asym);
   }  // lasym
 
   // related post-processing:
@@ -3057,17 +3087,52 @@ void IdealMhdModel::forcesToFourier(FourierForces& m_physical_f) {
   }
 
   if (s_.lasym) {
-    // FIXME(jons): implement non-symmetric DFT variants
-    std::cerr << "asymmetric fwd-DFT not implemented yet\n";
+    // Create force structures
+    auto forces = RealSpaceForces{
+        .armn_e = armn_e,
+        .armn_o = armn_o,
+        .azmn_e = azmn_e,
+        .azmn_o = azmn_o,
+        .blmn_e = blmn_e,
+        .blmn_o = blmn_o,
+        .brmn_e = brmn_e,
+        .brmn_o = brmn_o,
+        .bzmn_e = bzmn_e,
+        .bzmn_o = bzmn_o,
+        .clmn_e = clmn_e,
+        .clmn_o = clmn_o,
+        .crmn_e = crmn_e,
+        .crmn_o = crmn_o,
+        .czmn_e = czmn_e,
+        .czmn_o = czmn_o,
+        .frcon_e = frcon_e,
+        .frcon_o = frcon_o,
+        .fzcon_e = fzcon_e,
+        .fzcon_o = fzcon_o,
+    };
 
-    // FIXME(jons): implement symforce
-    std::cerr << "symforce not implemented yet\n";
+    auto forces_asym = RealSpaceForcesAsym{
+        .armn_a = armn_a,
+        .azmn_a = azmn_a,
+        .blmn_a = blmn_a,
+        .brmn_a = brmn_a,
+        .bzmn_a = bzmn_a,
+        .clmn_a = clmn_a,
+        .crmn_a = crmn_a,
+        .czmn_a = czmn_a,
+    };
 
-#ifdef _OPENMP
-    abort();
-#else
-    exit(-1);
-#endif  // _OPENMP
+    // First symmetrize forces
+    SymmetrizeForces(s_, r_, forces, forces_asym);
+
+    // Then transform antisymmetric forces to Fourier space
+    if (s_.lthreed) {
+      ForcesToFourier3DAsymmFastPoloidal(forces_asym, xmpq, r_, s_, t_,
+                                         m_physical_f);
+    } else {
+      ForcesToFourier2DAsymmFastPoloidal(forces_asym, xmpq, r_, s_, t_,
+                                         m_physical_f);
+    }
   }  // lasym
 }
 

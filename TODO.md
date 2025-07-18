@@ -932,3 +932,60 @@ if (s.nZeta > 1) {
 3. Optional: Basic test case demonstrating the fix
 
 **Key Achievement**: From hundreds of debug changes down to a surgical 7-line fix!
+
+---
+
+## Next Phase: Achieving Educational_VMEC Parity with Minimal Changes
+
+### Current Status After Asymmetric Function Wiring
+✅ **SOLVED**: Infinite BAD_JACOBIAN loop - asymmetric mode can now iterate
+✅ **IMPLEMENTED**: Asymmetric inv-DFT calls properly wired up
+✅ **IMPLEMENTED**: Asymmetric fwd-DFT calls properly wired up
+✅ **IMPLEMENTED**: SymmetrizeRealSpaceGeometry calls integrated
+⚠️ **ISSUE**: Segmentation fault during test execution
+🔍 **INVESTIGATION**: Build succeeds but runtime error suggests data structure issues
+
+### Recent Implementation Progress (2025-07-18)
+
+**Functions Successfully Wired Up:**
+1. ✅ **FourierToReal3DAsymmFastPoloidal**: Asymmetric inverse DFT for geometry
+2. ✅ **FourierToReal2DAsymmFastPoloidal**: Asymmetric inverse DFT for 2D case
+3. ✅ **SymmetrizeRealSpaceGeometry**: Geometry symmetrization with fixed zeta reflection
+4. ✅ **ForcesToFourier3DAsymmFastPoloidal**: Asymmetric forward DFT for forces
+5. ✅ **ForcesToFourier2DAsymmFastPoloidal**: Asymmetric forward DFT for 2D forces
+6. ✅ **SymmetrizeForces**: Force symmetrization for asymmetric terms
+
+**Data Structure Integration:**
+- ✅ Created proper `RealSpaceGeometryAsym` structures for asymmetric geometry arrays
+- ✅ Created proper `RealSpaceForcesAsym` structures for asymmetric force arrays
+- ✅ Mapped member variables (`r1_a`, `z1_a`, etc.) to data structure spans
+- ✅ Function parameter signatures match expected interfaces
+
+**Build System:**
+- ✅ Code compiles without errors
+- ✅ All function calls use correct parameter order and types
+- ⚠️ Runtime segmentation fault suggests memory or initialization issue
+
+### Current Investigation: Segmentation Fault
+
+**Error Pattern:**
+- Build succeeds completely
+- Segmentation fault occurs during test execution
+- Error happens inside `vmecpp.run()` in Python
+
+**Likely Causes:**
+1. **Array Initialization**: Asymmetric arrays (`r1_a`, `z1_a`, etc.) may not be properly sized
+2. **Memory Access**: Data structures may be accessing uninitialized memory
+3. **Parameter Passing**: Function calls may have incorrect parameter types or order
+
+### Immediate Actions
+1. 🔍 **Debug array initialization** - Verify asymmetric arrays are properly sized
+2. 🔍 **Add bounds checking** - Ensure data structure spans point to valid memory
+3. 🔍 **Test minimal case** - Start with simple input to isolate crash
+4. 🔍 **Memory debugging** - Use GDB or valgrind to identify exact crash location
+
+### Success Criteria Refined
+- Asymmetric test cases run without crashes
+- Functions execute through first iteration successfully
+- Jacobian values show improvement with wired-up functions
+- Results begin to match educational_VMEC patterns
