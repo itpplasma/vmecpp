@@ -20,7 +20,6 @@
 #include "vmecpp/common/util/util.h"
 #include "vmecpp/vmec/fourier_geometry/fourier_geometry.h"
 #include "vmecpp/vmec/handover_storage/handover_storage.h"
-#include "vmecpp/vmec/ideal_mhd_model/fourier_asymmetric.h"
 #include "vmecpp/vmec/radial_partitioning/radial_partitioning.h"
 #include "vmecpp/vmec/radial_profiles/radial_profiles.h"
 #include "vmecpp/vmec/vmec_constants/vmec_algorithm_constants.h"
@@ -526,25 +525,13 @@ IdealMhdModel::IdealMhdModel(
   lu_e.resize(nrzt1);
   lu_o.resize(nrzt1);
 
-  if (s_.lthreed || s_.lasym) {
+  if (s_.lthreed) {
     rv_e.resize(nrzt1);
     rv_o.resize(nrzt1);
     zv_e.resize(nrzt1);
     zv_o.resize(nrzt1);
     lv_e.resize(nrzt1);
     lv_o.resize(nrzt1);
-  }
-
-  // Allocate asymmetric arrays if needed
-  if (s_.lasym) {
-    r1_a.resize(nrzt1);
-    ru_a.resize(nrzt1);
-    rv_a.resize(nrzt1);
-    z1_a.resize(nrzt1);
-    zu_a.resize(nrzt1);
-    zv_a.resize(nrzt1);
-    lu_a.resize(nrzt1);
-    lv_a.resize(nrzt1);
   }
 
   int nrztIncludingBoundary = s_.nZnT * (r_.nsMaxFIncludingLcfs - r_.nsMinF);
@@ -596,28 +583,13 @@ IdealMhdModel::IdealMhdModel(
   blmn_e.resize(nrztIncludingBoundary);
   blmn_o.resize(nrztIncludingBoundary);
 
-  // Always allocate toroidal force arrays (like educational_VMEC)
-  // They will be zero for 2D cases but must exist for asymmetric force handling
-  crmn_e.resize(nrzt, 0.0);
-  crmn_o.resize(nrzt, 0.0);
-  czmn_e.resize(nrzt, 0.0);
-  czmn_o.resize(nrzt, 0.0);
-  clmn_e.resize(nrztIncludingBoundary, 0.0);
-  clmn_o.resize(nrztIncludingBoundary, 0.0);
-
-  // Allocate asymmetric force arrays when lasym=true
-  if (s_.lasym) {
-    armn_a.resize(nrzt, 0.0);
-    azmn_a.resize(nrzt, 0.0);
-    brmn_a.resize(nrzt, 0.0);
-    bzmn_a.resize(nrzt, 0.0);
-    blmn_a.resize(nrztIncludingBoundary, 0.0);
-
-    // Always allocate asymmetric toroidal force arrays (like main arrays)
-    // They will be zero for 2D cases but must exist for SymmetrizeForces
-    clmn_a.resize(nrztIncludingBoundary, 0.0);
-    crmn_a.resize(nrzt, 0.0);
-    czmn_a.resize(nrzt, 0.0);
+  if (s_.lthreed) {
+    crmn_e.resize(nrzt);
+    crmn_o.resize(nrzt);
+    czmn_e.resize(nrzt);
+    czmn_o.resize(nrzt);
+    clmn_e.resize(nrztIncludingBoundary);
+    clmn_o.resize(nrztIncludingBoundary);
   }
 
   // TODO(jons): +1 only if at LCFS
@@ -1215,31 +1187,10 @@ absl::StatusOr<bool> IdealMhdModel::update(
 #pragma omp single
 #endif  // _OPENMP
   {
-    // Debug: Compare first iteration force behavior with educational_VMEC
-    if (iter2 == 1) {
-      std::cout << "DEBUG: First iteration force residuals - comparing with "
-                   "educational_VMEC"
-                << std::endl;
-      std::cout << "  FSQR=" << std::scientific << std::setprecision(2)
-                << m_fc.fsqr;
-      std::cout << " FSQZ=" << std::scientific << std::setprecision(2)
-                << m_fc.fsqz;
-      std::cout << " FSQL=" << std::scientific << std::setprecision(2)
-                << m_fc.fsql << std::endl;
-      std::cout << "  Total force=" << std::scientific << std::setprecision(2)
-                << (m_fc.fsqr + m_fc.fsqz + m_fc.fsql) << std::endl;
-      std::cout << "  Educational_VMEC first iteration shows: FSQR=1.88E-02, "
-                   "FSQZ=7.27E-03, FSQL=2.13E-02"
-                << std::endl;
-
-      if ((m_fc.fsqr + m_fc.fsqz + m_fc.fsql) > 1.0e2) {
-        std::cout
-            << "  WARNING: HUGE_INITIAL_FORCES detected - total force > 1.0e2"
-            << std::endl;
-        // first iteration and gigantic force residuals
-        // --> what is going on here?
-        m_fc.restart_reason = RestartReason::HUGE_INITIAL_FORCES;
-      }
+    if (iter2 == 1 && (m_fc.fsqr + m_fc.fsqz + m_fc.fsql) > 1.0e2) {
+      // first iteration and gigantic force residuals
+      // --> what is going on here?
+      m_fc.restart_reason = RestartReason::HUGE_INITIAL_FORCES;
     }
   }
 
@@ -1258,16 +1209,17 @@ void IdealMhdModel::geometryFromFourier(const FourierGeometry& physical_x) {
   }
 
   if (s_.lasym) {
-    // Compute antisymmetric contributions
-    if (s_.lthreed) {
-      dft_FourierToReal_3d_asymm(physical_x);
-    } else {
-      dft_FourierToReal_2d_asymm(physical_x);
-    }
+    // FIXME(jons): implement non-symmetric DFT variants
+    std::cerr << "asymmetric inv-DFT not implemented yet\n";
 
-    // Extend geometry from [0,pi] to [0,2pi] and combine
-    // symmetric/antisymmetric parts
-    symrzl();
+    // FIXME(jons): implement symrzl
+    std::cerr << "symrzl not implemented yet\n";
+
+#ifdef _OPENMP
+    abort();
+#else
+    exit(-1);
+#endif  // _OPENMP
   }  // lasym
 
   // related post-processing:
@@ -1600,17 +1552,6 @@ void IdealMhdModel::computeJacobian() {
                         sqrtSH;
       double tau_val = tau1 + dSHalfDsInterp * tau2;
 
-      // Debug: trace negative tau values
-      if (tau_val < 0.0 && jH == r_.nsMinH && kl < 5) {
-        std::cout << "DEBUG: Negative tau at jH=" << jH << " kl=" << kl
-                  << " tau=" << tau_val << std::endl;
-        std::cout << "  tau1=" << tau1 << " tau2=" << tau2
-                  << " dSHalfDsInterp=" << dSHalfDsInterp << std::endl;
-        std::cout << "  ru12=" << ru12[iHalf] << " zs=" << zs[iHalf]
-                  << " rs=" << rs[iHalf] << " zu12=" << zu12[iHalf]
-                  << std::endl;
-      }
-
       if (tau_val < minTau || minTau == 0.0) {
         minTau = tau_val;
       }
@@ -1635,19 +1576,14 @@ void IdealMhdModel::computeJacobian() {
   }  // j
 
   bool localBadJacobian = (minTau * maxTau < 0.0);
-  // Debug: output jacobian status
+
   if (localBadJacobian) {
-    std::cout << "DEBUG: BAD_JACOBIAN detected - minTau=" << minTau
-              << " maxTau=" << maxTau << std::endl;
 #ifdef _OPENMP
 #pragma omp critical
 #endif  // _OPENMP
     {
       m_fc_.restart_reason = RestartReason::BAD_JACOBIAN;
     }
-  } else {
-    std::cout << "DEBUG: GOOD_JACOBIAN - minTau=" << minTau
-              << " maxTau=" << maxTau << std::endl;
   }
 #ifdef _OPENMP
 #pragma omp barrier
@@ -3110,58 +3046,6 @@ void IdealMhdModel::assembleTotalForces() {
       fzcon_o[idx_kl] = fzcon_e[idx_kl] * m_p_.sqrtSF[jF - r_.nsMinF1];
     }
   }
-
-  // Apply force symmetrization for asymmetric configurations
-  if (s_.lasym) {
-    auto force_data = RealSpaceForces{.armn_e = armn_e,
-                                      .armn_o = armn_o,
-                                      .azmn_e = azmn_e,
-                                      .azmn_o = azmn_o,
-                                      .blmn_e = blmn_e,
-                                      .blmn_o = blmn_o,
-                                      .brmn_e = brmn_e,
-                                      .brmn_o = brmn_o,
-                                      .bzmn_e = bzmn_e,
-                                      .bzmn_o = bzmn_o,
-                                      .clmn_e = clmn_e,
-                                      .clmn_o = clmn_o,
-                                      .crmn_e = crmn_e,
-                                      .crmn_o = crmn_o,
-                                      .czmn_e = czmn_e,
-                                      .czmn_o = czmn_o,
-                                      .frcon_e = frcon_e,
-                                      .frcon_o = frcon_o,
-                                      .fzcon_e = fzcon_e,
-                                      .fzcon_o = fzcon_o};
-
-    // Create asymmetric force structure with allocated arrays
-    // For 2D case (lthreed=false), clmn_a, crmn_a, czmn_a are empty vectors
-    // and should not be passed to avoid undefined behavior with spans
-    RealSpaceForcesAsym force_asym;
-    if (s_.lthreed) {
-      force_asym = RealSpaceForcesAsym{.armn_a = armn_a,
-                                       .azmn_a = azmn_a,
-                                       .blmn_a = blmn_a,
-                                       .brmn_a = brmn_a,
-                                       .bzmn_a = bzmn_a,
-                                       .clmn_a = clmn_a,
-                                       .crmn_a = crmn_a,
-                                       .czmn_a = czmn_a};
-    } else {
-      // For 2D case, create empty spans for the 3D-only arrays
-      static const std::vector<double> empty_vector;
-      force_asym = RealSpaceForcesAsym{.armn_a = armn_a,
-                                       .azmn_a = azmn_a,
-                                       .blmn_a = blmn_a,
-                                       .brmn_a = brmn_a,
-                                       .bzmn_a = bzmn_a,
-                                       .clmn_a = empty_vector,
-                                       .crmn_a = empty_vector,
-                                       .czmn_a = empty_vector};
-    }
-
-    SymmetrizeForces(s_, r_, force_data, force_asym);
-  }
 }
 
 void IdealMhdModel::forcesToFourier(FourierForces& m_physical_f) {
@@ -3173,43 +3057,17 @@ void IdealMhdModel::forcesToFourier(FourierForces& m_physical_f) {
   }
 
   if (s_.lasym) {
-    // Transform antisymmetric forces to Fourier space
-    // This is the missing piece for asymmetric convergence!
+    // FIXME(jons): implement non-symmetric DFT variants
+    std::cerr << "asymmetric fwd-DFT not implemented yet\n";
 
-    // Reconstruct the asymmetric force structure that was used in
-    // SymmetrizeForces
-    RealSpaceForcesAsym force_asym;
-    if (s_.lthreed) {
-      force_asym = RealSpaceForcesAsym{
-          .armn_a = armn_a,
-          .azmn_a = azmn_a,
-          .blmn_a = blmn_a,
-          .brmn_a = brmn_a,
-          .bzmn_a = bzmn_a,
-          .clmn_a = clmn_a,
-          .crmn_a = crmn_a,
-          .czmn_a = czmn_a,
-      };
-      ForcesToFourier3DAsymmFastPoloidal(force_asym, xmpq, r_, s_, t_,
-                                         m_physical_f);
-    } else {
-      // For 2D case, only 3D toroidal force arrays (clmn_a, crmn_a, czmn_a) are
-      // empty blmn_a, brmn_a, bzmn_a are still needed for 2D asymmetric cases
-      static const std::vector<double> empty_vector;
-      force_asym = RealSpaceForcesAsym{
-          .armn_a = armn_a,
-          .azmn_a = azmn_a,
-          .blmn_a = blmn_a,
-          .brmn_a = brmn_a,
-          .bzmn_a = bzmn_a,
-          .clmn_a = empty_vector,
-          .crmn_a = empty_vector,
-          .czmn_a = empty_vector,
-      };
-      // Call 2D asymmetric force-to-Fourier transform
-      ForcesToFourier2DAsymmFastPoloidal(force_asym, xmpq, r_, s_, t_,
-                                         m_physical_f);
-    }
+    // FIXME(jons): implement symforce
+    std::cerr << "symforce not implemented yet\n";
+
+#ifdef _OPENMP
+    abort();
+#else
+    exit(-1);
+#endif  // _OPENMP
   }  // lasym
 }
 
@@ -3712,76 +3570,5 @@ double IdealMhdModel::get_delbsq() const {
 }
 
 int IdealMhdModel::get_ivacskip() const { return ivacskip; }
-
-// Inverse-DFT for flux surface geometry and lambda, 3D asymmetric case
-void IdealMhdModel::dft_FourierToReal_3d_asymm(
-    const FourierGeometry& physical_x) {
-  auto geometry_asym = RealSpaceGeometryAsym{.r1_a = r1_a,
-                                             .ru_a = ru_a,
-                                             .rv_a = rv_a,
-                                             .z1_a = z1_a,
-                                             .zu_a = zu_a,
-                                             .zv_a = zv_a,
-                                             .lu_a = lu_a,
-                                             .lv_a = lv_a};
-
-  FourierToReal3DAsymmFastPoloidal(physical_x, xmpq, r_, s_, m_p_, t_,
-                                   geometry_asym);
-}
-
-// Inverse-DFT for flux surface geometry and lambda, 2D asymmetric case
-void IdealMhdModel::dft_FourierToReal_2d_asymm(
-    const FourierGeometry& physical_x) {
-  auto geometry_asym = RealSpaceGeometryAsym{.r1_a = r1_a,
-                                             .ru_a = ru_a,
-                                             .rv_a = rv_a,
-                                             .z1_a = z1_a,
-                                             .zu_a = zu_a,
-                                             .zv_a = zv_a,
-                                             .lu_a = lu_a,
-                                             .lv_a = lv_a};
-
-  FourierToReal2DAsymmFastPoloidal(physical_x, xmpq, r_, s_, m_p_, t_,
-                                   geometry_asym);
-}
-
-// Extend geometry from [0,pi] to [0,2pi] and combine symmetric/antisymmetric
-void IdealMhdModel::symrzl() {
-  auto geometry = RealSpaceGeometry{.r1_e = r1_e,
-                                    .r1_o = r1_o,
-                                    .ru_e = ru_e,
-                                    .ru_o = ru_o,
-                                    .rv_e = rv_e,
-                                    .rv_o = rv_o,
-                                    .z1_e = z1_e,
-                                    .z1_o = z1_o,
-                                    .zu_e = zu_e,
-                                    .zu_o = zu_o,
-                                    .zv_e = zv_e,
-                                    .zv_o = zv_o,
-                                    .lu_e = lu_e,
-                                    .lu_o = lu_o,
-                                    .lv_e = lv_e,
-                                    .lv_o = lv_o,
-                                    .rCon = rCon,
-                                    .zCon = zCon};
-
-  // For asymmetric case, pass the actual arrays
-  // For symmetric case, pass empty spans
-  RealSpaceGeometryAsym geometry_asym;
-
-  if (s_.lasym) {
-    geometry_asym = RealSpaceGeometryAsym{.r1_a = r1_a,
-                                          .ru_a = ru_a,
-                                          .rv_a = rv_a,
-                                          .z1_a = z1_a,
-                                          .zu_a = zu_a,
-                                          .zv_a = zv_a,
-                                          .lu_a = lu_a,
-                                          .lv_a = lv_a};
-  }
-
-  SymmetrizeRealSpaceGeometry(s_, r_, geometry, geometry_asym);
-}
 
 }  // namespace vmecpp

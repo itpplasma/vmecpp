@@ -759,16 +759,6 @@ absl::StatusOr<Vmec::SolveEqLoopStatus> Vmec::SolveEquilibriumLoop(
   for (int force_iteration = iter2_, bad_resets = 0;
        (force_iteration <= fc_.niterv) && m_liter_flag; force_iteration++) {
     const int iter2 = force_iteration - bad_resets;
-
-    // Fix: Reset status at beginning of each iteration like educational_VMEC
-    // Educational_VMEC: ier_flag = norm_term_flag (eqsolve.f90 line 65)
-#ifdef _OPENMP
-#pragma omp single
-#endif  // _OPENMP
-    {
-      status_ = VmecStatus::NORMAL_TERMINATION;
-    }
-
     // ADVANCE FOURIER AMPLITUDES OF R, Z, AND LAMBDA
     absl::StatusOr<bool> reached_checkpoint =
         Evolve(checkpoint, iterations_before_checkpointing, fc_.delt0r,
@@ -781,16 +771,6 @@ absl::StatusOr<Vmec::SolveEqLoopStatus> Vmec::SolveEquilibriumLoop(
     }
 
     // check for bad jacobian and bad initial guess for axis
-    // Debug: log why axis recovery might not trigger
-    if (fc_.ijacob != 0 || fc_.ns < 3 ||
-        (status_ != VmecStatus::BAD_JACOBIAN &&
-         fc_.restart_reason != RestartReason::HUGE_INITIAL_FORCES)) {
-      std::cout << "DEBUG: Axis recovery not triggered - ijacob=" << fc_.ijacob
-                << " ns=" << fc_.ns << " status=" << static_cast<int>(status_)
-                << " restart_reason=" << static_cast<int>(fc_.restart_reason)
-                << std::endl;
-    }
-
     if (fc_.ijacob == 0 &&
         (status_ == VmecStatus::BAD_JACOBIAN ||
          fc_.restart_reason == RestartReason::HUGE_INITIAL_FORCES) &&
@@ -835,36 +815,14 @@ absl::StatusOr<Vmec::SolveEqLoopStatus> Vmec::SolveEquilibriumLoop(
       return SolveEqLoopStatus::MUST_RETRY;
     } else if (status_ != VmecStatus::NORMAL_TERMINATION &&
                status_ != VmecStatus::SUCCESSFUL_TERMINATION) {
-      // Fix: Handle BAD_JACOBIAN status like educational_VMEC
-      if (status_ == VmecStatus::BAD_JACOBIAN) {
-        // Educational_VMEC continues iteration when ier_flag =
-        // bad_jacobian_flag This allows the iteration to proceed and
-        // potentially recover
-        if (verbose_) {
-          std::cout << "DEBUG: BAD_JACOBIAN status detected after axis "
-                       "recovery, continuing iteration (like educational_VMEC)"
-                    << std::endl;
-        }
-        // Continue iteration loop - do not terminate
-      } else {
-        // For other non-normal/non-successful statuses, still terminate
-        // Debug: Trace what status causes fatal error - compare with
-        // educational_VMEC
-        std::cout << "DEBUG: VMEC++ fatal error path triggered" << std::endl;
-        std::cout << "  status_=" << static_cast<int>(status_) << std::endl;
-        std::cout << "  iter2_=" << iter2_ << std::endl;
-        std::cout << "  Educational_VMEC would continue iteration loop here"
-                  << std::endl;
-
-        // if something went totally wrong even in this initial steps, do not
-        // continue at all
-        const auto msg = absl::StrFormat(
-            "FATAL ERROR in thread=%d. The solver failed during the first "
-            "iterations. This may happen if the initial boundary is poorly "
-            "shaped or if it isn't spectrally condensed enough.",
-            thread_id);
-        return absl::UnknownError(msg);
-      }
+      // if something went totally wrong even in this initial steps, do not
+      // continue at all
+      const auto msg = absl::StrFormat(
+          "FATAL ERROR in thread=%d. The solver failed during the first "
+          "iterations. This may happen if the initial boundary is poorly "
+          "shaped or if it isn't spectrally condensed enough.",
+          thread_id);
+      return absl::UnknownError(msg);
     }
 
     if (checkpoint == VmecCheckpoint::EVOLVE &&
@@ -914,6 +872,17 @@ absl::StatusOr<Vmec::SolveEqLoopStatus> Vmec::SolveEquilibriumLoop(
       // try again: GOTO 20
       // but need to leave m_liter_flag loop first...
       return SolveEqLoopStatus::MUST_RETRY;
+    } else if (fc_.ijacob >= 75) {
+      // jacobian changed sign at least 75 times: time to give up :-(
+
+#ifdef _OPENMP
+#pragma omp single
+#endif  // _OPENMP
+      {
+        // 'MORE THAN 75 JACOBIAN ITERATIONS (DECREASE DELT)'
+        status_ = VmecStatus::JACOBIAN_75_TIMES_BAD;
+        m_liter_flag = false;
+      }
     }
 
 #ifdef _OPENMP
@@ -1125,13 +1094,6 @@ absl::StatusOr<bool> Vmec::Evolve(VmecCheckpoint checkpoint,
 
       m_liter_flag = false;
       status_ = VmecStatus::SUCCESSFUL_TERMINATION;
-    } else if (fc_.ijacob >= 75) {
-      // jacobian changed sign at least 75 times: time to give up :-(
-      // But only if we haven't already converged above
-
-      // 'MORE THAN 75 JACOBIAN ITERATIONS (DECREASE DELT)'
-      status_ = VmecStatus::JACOBIAN_75_TIMES_BAD;
-      m_liter_flag = false;
     }
   }  // #pragma omp single (there is an implicit omp barrier here)
 
@@ -1445,26 +1407,7 @@ void Vmec::performTimeStep(const Sizes& s, const FlowControl& fc,
       }
     }  // lthreed
 
-    if (s_.lasym) {
-      for (int mn = 0; mn < s_.mnsize; ++mn) {
-        int idx_mn = (r.nsMinF - r.nsMinF1) * s_.mnsize + mn;
-        m_h_.rmnsc_o[r.get_thread_id() - 1][mn] = m_decomposed_x.rmnsc[idx_mn];
-        m_h_.zmncc_o[r.get_thread_id() - 1][mn] = m_decomposed_x.zmncc[idx_mn];
-        m_h_.lmncc_o[r.get_thread_id() - 1][mn] = m_decomposed_x.lmncc[idx_mn];
-      }
-
-      if (s_.lthreed) {
-        for (int mn = 0; mn < s_.mnsize; ++mn) {
-          int idx_mn = (r.nsMinF - r.nsMinF1) * s_.mnsize + mn;
-          m_h_.rmncs_o[r.get_thread_id() - 1][mn] =
-              m_decomposed_x.rmncs[idx_mn];
-          m_h_.zmnss_o[r.get_thread_id() - 1][mn] =
-              m_decomposed_x.zmnss[idx_mn];
-          m_h_.lmnss_o[r.get_thread_id() - 1][mn] =
-              m_decomposed_x.lmnss[idx_mn];
-        }
-      }
-    }  // lasym
+    // TODO(jons) : non-stellarator-symmetric terms!
   }
 
   if (hasOutside) {
@@ -1485,26 +1428,7 @@ void Vmec::performTimeStep(const Sizes& s, const FlowControl& fc,
       }
     }  // lthreed
 
-    if (s_.lasym) {
-      for (int mn = 0; mn < s_.mnsize; ++mn) {
-        int idx_mn = (r.nsMaxF - 1 - r.nsMinF1) * s_.mnsize + mn;
-        m_h_.rmnsc_i[r.get_thread_id() + 1][mn] = m_decomposed_x.rmnsc[idx_mn];
-        m_h_.zmncc_i[r.get_thread_id() + 1][mn] = m_decomposed_x.zmncc[idx_mn];
-        m_h_.lmncc_i[r.get_thread_id() + 1][mn] = m_decomposed_x.lmncc[idx_mn];
-      }
-
-      if (s_.lthreed) {
-        for (int mn = 0; mn < s_.mnsize; ++mn) {
-          int idx_mn = (r.nsMaxF - 1 - r.nsMinF1) * s_.mnsize + mn;
-          m_h_.rmncs_i[r.get_thread_id() + 1][mn] =
-              m_decomposed_x.rmncs[idx_mn];
-          m_h_.zmnss_i[r.get_thread_id() + 1][mn] =
-              m_decomposed_x.zmnss[idx_mn];
-          m_h_.lmnss_i[r.get_thread_id() + 1][mn] =
-              m_decomposed_x.lmnss[idx_mn];
-        }
-      }
-    }  // lasym
+    // TODO(jons) : non-stellarator-symmetric terms!
   }
 
 #ifdef _OPENMP
@@ -1531,24 +1455,6 @@ void Vmec::performTimeStep(const Sizes& s, const FlowControl& fc,
         m_decomposed_x.lmncs[idx_mn] = m_h_.lmncs_o[r.get_thread_id()][mn];
       }
     }  // lthreed
-
-    if (s_.lasym) {
-      for (int mn = 0; mn < s_.mnsize; ++mn) {
-        int idx_mn = (r.nsMaxF1 - 1 - r.nsMinF1) * s_.mnsize + mn;
-        m_decomposed_x.rmnsc[idx_mn] = m_h_.rmnsc_o[r.get_thread_id()][mn];
-        m_decomposed_x.zmncc[idx_mn] = m_h_.zmncc_o[r.get_thread_id()][mn];
-        m_decomposed_x.lmncc[idx_mn] = m_h_.lmncc_o[r.get_thread_id()][mn];
-      }
-
-      if (s_.lthreed) {
-        for (int mn = 0; mn < s_.mnsize; ++mn) {
-          int idx_mn = (r.nsMaxF1 - 1 - r.nsMinF1) * s_.mnsize + mn;
-          m_decomposed_x.rmncs[idx_mn] = m_h_.rmncs_o[r.get_thread_id()][mn];
-          m_decomposed_x.zmnss[idx_mn] = m_h_.zmnss_o[r.get_thread_id()][mn];
-          m_decomposed_x.lmnss[idx_mn] = m_h_.lmnss_o[r.get_thread_id()][mn];
-        }
-      }
-    }  // lasym
   }
 
   if (hasInside) {
@@ -1568,24 +1474,6 @@ void Vmec::performTimeStep(const Sizes& s, const FlowControl& fc,
         m_decomposed_x.lmncs[idx_mn] = m_h_.lmncs_i[r.get_thread_id()][mn];
       }
     }  // lthreed
-
-    if (s_.lasym) {
-      for (int mn = 0; mn < s_.mnsize; ++mn) {
-        int idx_mn = (r.nsMinF1 - r.nsMinF1) * s_.mnsize + mn;
-        m_decomposed_x.rmnsc[idx_mn] = m_h_.rmnsc_i[r.get_thread_id()][mn];
-        m_decomposed_x.zmncc[idx_mn] = m_h_.zmncc_i[r.get_thread_id()][mn];
-        m_decomposed_x.lmncc[idx_mn] = m_h_.lmncc_i[r.get_thread_id()][mn];
-      }
-
-      if (s_.lthreed) {
-        for (int mn = 0; mn < s_.mnsize; ++mn) {
-          int idx_mn = (r.nsMinF1 - r.nsMinF1) * s_.mnsize + mn;
-          m_decomposed_x.rmncs[idx_mn] = m_h_.rmncs_i[r.get_thread_id()][mn];
-          m_decomposed_x.zmnss[idx_mn] = m_h_.zmnss_i[r.get_thread_id()][mn];
-          m_decomposed_x.lmnss[idx_mn] = m_h_.lmnss_i[r.get_thread_id()][mn];
-        }
-      }
-    }  // lasym
   }
 
 #ifdef _OPENMP

@@ -852,3 +852,83 @@ if (s.nZeta > 1) {
 2. Run comprehensive asymmetric test suite
 3. Verify convergence for various asymmetric cases
 4. Remove debugging code once fully validated
+
+---
+
+## Systematic Plan for Code Cleanup and Continued Debugging
+
+### Phase 1: Identify and Revert Unnecessary Changes
+**Goal**: Clean up debugging code while preserving the critical fix
+
+**Changes to Revert**:
+1. ✅ Debug output in `guess_magnetic_axis.cc` (lines with std::cout)
+2. ✅ Debug output in `boundaries.cc` (axis coefficient confirmation)
+3. ✅ Debug output in `fourier_geometry.cc` (interpFromBoundaryAndAxis)
+4. ✅ Debug output in `ideal_mhd_model.cc` (Jacobian trace output)
+5. ✅ Debug output in `vmec.cc` (iteration tracking)
+
+**Changes to KEEP**:
+1. ✨ **CRITICAL FIX**: Zeta reflection logic in `fourier_asymmetric.cc` (lines 306-313)
+2. 📄 Documentation files: `parity_analysis.md`, `symrzl_comparison.md`
+3. 📝 TODO.md updates documenting the debugging journey
+
+### Phase 2: Verification Strategy
+**Goal**: Ensure the fix works without debug code
+
+1. **Create clean branch** from upstream main
+2. **Cherry-pick only the critical fix** (zeta reflection)
+3. **Run asymmetric test suite** to verify fix is sufficient
+4. **Document minimal changes** needed for asymmetric support
+
+### Phase 3: Remaining Issues to Address
+**Goal**: Achieve full asymmetric convergence
+
+**Known Issues**:
+1. ⚠️ Negative Jacobian values (~-0.5) - needs investigation
+2. ⚠️ Convergence issues - may need parameter tuning
+3. ⚠️ Sign conventions - verify against educational_VMEC
+
+**Investigation Plan**:
+1. Compare Jacobian calculation with educational_VMEC
+2. Test with various asymmetric equilibria
+3. Analyze convergence behavior patterns
+4. Document any additional fixes needed
+
+### Phase 4: Upstream Contribution
+**Goal**: Prepare minimal PR for upstream
+
+1. **Single commit** with zeta reflection fix
+2. **Comprehensive test case** demonstrating the fix
+3. **Clear documentation** of the bug and solution
+4. **No debug code** in final submission
+
+---
+
+## Code Cleanup Status
+
+### Completed Cleanup
+✅ **Debug Output Reverted**:
+- `guess_magnetic_axis.cc` - all std::cout statements removed
+- `boundaries.cc` - debug output removed
+- `fourier_geometry.cc` - debug output removed
+- `ideal_mhd_model.cc` - Jacobian trace output removed
+- `vmec.cc` - iteration tracking removed
+
+### Essential Changes Preserved
+✅ **Critical Fix**: Zeta reflection logic in `fourier_asymmetric.cc` (lines 306-313)
+✅ **Python Support**: Asymmetric array initialization in `__init__.py`
+✅ **Test Suite**: Comprehensive asymmetric tests in `tests/test_asymmetric_*.py`
+✅ **Documentation**: `parity_analysis.md`, `symrzl_comparison.md`, updated `TODO.md`
+
+### Still to Clean
+⏳ Temporary debug scripts (debug_*.py, test_*.py)
+⏳ Test input files (input.test, *.cma)
+⏳ BUILD.bazel changes (if not essential)
+
+### Upstream PR Preparation
+**Minimal changeset identified**:
+1. One file change: `fourier_asymmetric.cc` (7 lines)
+2. Optional: Python array initialization fix
+3. Optional: Basic test case demonstrating the fix
+
+**Key Achievement**: From hundreds of debug changes down to a surgical 7-line fix!

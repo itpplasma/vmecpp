@@ -75,9 +75,7 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
   // future in this context.
 
   // grid resolution in R and Z
-  // Use original resolution for both symmetric and asymmetric cases
-  // (higher resolution for asymmetric was causing convergence issues)
-  const int kNumberOfGridPoints = 61;
+  static constexpr int kNumberOfGridPoints = 61;
 
   // radial index of a flux surface at ~mid-radius
   // -1 wrt. Fortran VMEC since we have 0-based indices in C/C++
@@ -381,24 +379,16 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
 
   // main loop in which, for each poloidal cutplane,
   // the new axis position is estimated
-
-  const int k_max = s.lasym ? s.nZeta : s.nZeta / 2 + 1;
-  for (int k = 0; k < k_max; ++k) {
+  for (int k = 0; k < s.nZeta / 2 + 1; ++k) {
     // compute grid extent
-    // For asymmetric cases, extend geometry to full theta range for proper
-    // optimization but still use only the computed range for boundary extent
-    // calculation
-    const int theta_extent = s.lasym ? s.nThetaReduced : s.nThetaEven;
-    const int theta_max =
-        s.nThetaEven;  // Always use full theta range for optimization
-    const double min_r = *std::min_element(w.r_lcfs[k].begin(),
-                                           w.r_lcfs[k].begin() + theta_extent);
-    const double max_r = *std::max_element(w.r_lcfs[k].begin(),
-                                           w.r_lcfs[k].begin() + theta_extent);
-    const double min_z = *std::min_element(w.z_lcfs[k].begin(),
-                                           w.z_lcfs[k].begin() + theta_extent);
-    const double max_z = *std::max_element(w.z_lcfs[k].begin(),
-                                           w.z_lcfs[k].begin() + theta_extent);
+    const double min_r =
+        *std::min_element(w.r_lcfs[k].begin(), w.r_lcfs[k].end());
+    const double max_r =
+        *std::max_element(w.r_lcfs[k].begin(), w.r_lcfs[k].end());
+    const double min_z =
+        *std::min_element(w.z_lcfs[k].begin(), w.z_lcfs[k].end());
+    const double max_z =
+        *std::max_element(w.z_lcfs[k].begin(), w.z_lcfs[k].end());
 
     // grid step sizes
     const double delta_r = (max_r - min_r) / (kNumberOfGridPoints - 1.0);
@@ -409,8 +399,7 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
     w.new_z_axis[k] = (max_z + min_z) / 2.0;
 
     // Compute the static part of the Jacobian (tau0)
-    // First compute for the directly calculated range
-    for (int l = 0; l < theta_extent; ++l) {
+    for (int l = 0; l < s.nThetaEven; ++l) {
       w.d_r_d_s_half[k][l] =
           (w.r_lcfs[k][l] - w.r_half[k][l]) / delta_s + w.r_axis[k];
       w.d_z_d_s_half[k][l] =
@@ -418,18 +407,6 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
       w.tau0[k][l] = w.d_r_d_theta_half[k][l] * w.d_z_d_s_half[k][l] -
                      w.d_z_d_theta_half[k][l] * w.d_r_d_s_half[k][l];
     }  // l
-
-    // For asymmetric cases, extend arrays to full theta range using mirroring
-    // This matches educational_VMEC's approach for axis recovery optimization
-    if (s.lasym) {
-      for (int l = theta_extent; l < theta_max; ++l) {
-        int l_mirror = theta_max - 1 - (l - theta_extent);
-        w.d_r_d_s_half[k][l] = w.d_r_d_s_half[k][l_mirror];
-        w.d_z_d_s_half[k][l] = -w.d_z_d_s_half[k][l_mirror];  // antisymmetric
-        w.tau0[k][l] = w.d_r_d_theta_half[k][l] * w.d_z_d_s_half[k][l] -
-                       w.d_z_d_theta_half[k][l] * w.d_r_d_s_half[k][l];
-      }
-    }
 
     double min_tau = 0.0;
 
@@ -450,25 +427,19 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
         // Find position of magnetic axis that maximizes the minimum Jacobian
         // value.
 
-        for (int l = 0; l < theta_max; ++l) {
+        for (int l = 0; l < s.nThetaEven; ++l) {
           w.tau[k][l] = sign_of_jacobian *
                         (w.tau0[k][l] - w.d_r_d_theta_half[k][l] * z_grid +
                          w.d_z_d_theta_half[k][l] * r_grid);
         }  // l
 
         double min_tau_temp =
-            *std::min_element(w.tau[k].begin(), w.tau[k].begin() + theta_max);
+            *std::min_element(w.tau[k].begin(), w.tau[k].end());
 
         if (min_tau_temp > min_tau) {
           min_tau = min_tau_temp;
           w.new_r_axis[k] = r_grid;
           w.new_z_axis[k] = z_grid;
-          // Debug: output best tau improvement for plane 0
-          if (k == 0 && index_r <= 5 && index_z <= 5) {
-            std::cout << "    New best: r_grid=" << r_grid
-                      << " z_grid=" << z_grid << " min_tau=" << min_tau
-                      << std::endl;
-          }
         } else if (min_tau_temp == min_tau) {
           // If up-down symmetric and lasym=T, need this to pick z = 0
           if (std::abs(w.new_z_axis[k]) > std::abs(z_grid)) {
@@ -477,129 +448,6 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
         }
       }  // index_r
     }  // index_z
-
-    // Enhanced multi-level fallback strategy for asymmetric cases only
-    // DISABLED: Use original simple axis initialization for both symmetric and
-    // asymmetric cases
-    if (false && s.lasym && min_tau <= 0.0) {
-      double r_center = (max_r + min_r) / 2.0;
-      double z_center = (max_z + min_z) / 2.0;
-      double range_r = max_r - min_r;
-      double range_z = max_z - min_z;
-
-      // Sanity check - if the range is too small, expand it
-      if (range_r < 1e-10) {
-        range_r = 0.1;
-        r_center = w.r_axis[k];
-      }
-      if (range_z < 1e-10) {
-        range_z = 0.1;
-        z_center = w.z_axis[k];
-      }
-
-      // Multi-level grid search with increasing resolution
-      std::vector<double> perturbation_factors = {0.8,  0.5,  0.2, 0.1,
-                                                  0.05, 0.02, 0.01};
-      std::vector<int> grid_resolutions = {11, 21, 31, 41, 51, 61, 71};
-
-      for (size_t level = 0;
-           level < perturbation_factors.size() && min_tau <= 0.0; ++level) {
-        double perturbation =
-            perturbation_factors[level] * std::min(range_r, range_z);
-        int grid_size = grid_resolutions[level];
-
-        for (int i = 0; i < grid_size && min_tau <= 0.0; ++i) {
-          for (int j = 0; j < grid_size && min_tau <= 0.0; ++j) {
-            double r_test =
-                r_center + perturbation * (2.0 * i / (grid_size - 1) - 1.0);
-            double z_test =
-                z_center + perturbation * (2.0 * j / (grid_size - 1) - 1.0);
-
-            // Ensure we stay within reasonable bounds, with some tolerance
-            double r_margin = 0.1 * range_r;
-            double z_margin = 0.1 * range_z;
-            if (r_test < min_r - r_margin || r_test > max_r + r_margin ||
-                z_test < min_z - z_margin || z_test > max_z + z_margin) {
-              continue;
-            }
-
-            for (int l = 0; l < s.nThetaEven; ++l) {
-              w.tau[k][l] = sign_of_jacobian *
-                            (w.tau0[k][l] - w.d_r_d_theta_half[k][l] * z_test +
-                             w.d_z_d_theta_half[k][l] * r_test);
-            }
-
-            double min_tau_test =
-                *std::min_element(w.tau[k].begin(), w.tau[k].end());
-
-            if (min_tau_test > min_tau) {
-              min_tau = min_tau_test;
-              w.new_r_axis[k] = r_test;
-              w.new_z_axis[k] = z_test;
-            }
-          }
-        }
-      }
-
-      // Final fallback: radial search from center outward
-      if (min_tau <= 0.0) {
-        double min_range = std::min(range_r, range_z);
-        for (int radius_steps = 1; radius_steps <= 20 && min_tau <= 0.0;
-             ++radius_steps) {
-          double radius = (radius_steps * 0.01) * min_range;
-
-          // Try 16 directions around the center
-          for (int angle_step = 0; angle_step < 16 && min_tau <= 0.0;
-               ++angle_step) {
-            double angle = (2.0 * M_PI * angle_step) / 16.0;
-            double r_test = r_center + radius * cos(angle);
-            double z_test = z_center + radius * sin(angle);
-
-            double r_margin = 0.1 * range_r;
-            double z_margin = 0.1 * range_z;
-            if (r_test < min_r - r_margin || r_test > max_r + r_margin ||
-                z_test < min_z - z_margin || z_test > max_z + z_margin) {
-              continue;
-            }
-
-            for (int l = 0; l < s.nThetaEven; ++l) {
-              w.tau[k][l] = sign_of_jacobian *
-                            (w.tau0[k][l] - w.d_r_d_theta_half[k][l] * z_test +
-                             w.d_z_d_theta_half[k][l] * r_test);
-            }
-
-            double min_tau_test =
-                *std::min_element(w.tau[k].begin(), w.tau[k].end());
-
-            if (min_tau_test > min_tau) {
-              min_tau = min_tau_test;
-              w.new_r_axis[k] = r_test;
-              w.new_z_axis[k] = z_test;
-            }
-          }
-        }
-      }
-
-      // Ultimate fallback: if all else fails, use the original axis position
-      if (min_tau <= 0.0) {
-        w.new_r_axis[k] = w.r_axis[k];
-        w.new_z_axis[k] = w.z_axis[k];
-
-        // Evaluate tau at the original axis position
-        for (int l = 0; l < s.nThetaEven; ++l) {
-          w.tau[k][l] = sign_of_jacobian *
-                        (w.tau0[k][l] - w.d_r_d_theta_half[k][l] * w.z_axis[k] +
-                         w.d_z_d_theta_half[k][l] * w.r_axis[k]);
-        }
-
-        min_tau = *std::min_element(w.tau[k].begin(), w.tau[k].end());
-      }
-    }
-    // Debug: output final result for this plane
-    if (k == 0) {
-      std::cout << "  Grid search complete - final min_tau for plane 0: "
-                << min_tau << std::endl;
-    }
   }  // k
 
   // flip-mirror stellarator-symmetric half in case of symmetric run
@@ -615,17 +463,6 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
 
   // Fourier-transform the axis guess
   const double delta_v = 2.0 / s.nZeta;
-
-  // Initialize arrays to zero before accumulating
-  for (int n = 0; n <= s.ntor; ++n) {
-    w.new_raxis_c[n] = 0.0;
-    w.new_zaxis_s[n] = 0.0;
-    if (s.lasym) {
-      w.new_raxis_s[n] = 0.0;
-      w.new_zaxis_c[n] = 0.0;
-    }
-  }
-
   for (int k = 0; k < s.nZeta; ++k) {
     for (int n = 0; n <= s.ntor; ++n) {
       // accumulate all contributions to the toroidal Fourier integral
@@ -658,25 +495,6 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
       w.new_zaxis_c[s.nZeta / 2] /= 2.0;
     }
   }
-
-  // Debug: output axis recovery results
-  std::cout << "DEBUG: Axis recovery results - R_axis=" << w.new_raxis_c[0];
-  if (s.lasym) {
-    std::cout << " Z_axis=" << w.new_zaxis_c[0];
-  }
-  std::cout << std::endl;
-
-  // Debug: output before/after axis comparison
-  std::cout << "DEBUG: Original axis - R_axis=" << raxis_c[0];
-  if (s.lasym) {
-    std::cout << " Z_axis=" << zaxis_c[0];
-  }
-  std::cout << std::endl;
-
-  // Debug: output grid search parameters and results
-  std::cout << "DEBUG: Grid search parameters - kNumberOfGridPoints="
-            << kNumberOfGridPoints << " ns=" << number_of_flux_surfaces
-            << " lasym=" << s.lasym << std::endl;
 
   return w;
 }  // NOLINT(readability/fn_size)
