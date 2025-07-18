@@ -56,38 +56,49 @@ if (s_.lasym) {
 ## Implementation Strategy
 
 ### Phase 1: Cherry-Pick from origin/main (HIGHEST PRIORITY)
-1. **Analyze Commit History**:
-   - Review all commits in `origin/main` since `prepare-asym`
-   - Identify commits that implement asymmetric functionality
-   - Focus on asymmetric DFT implementations, fourier_asymmetric.cc, ideal_mhd_model changes
+1. **SELECTIVE CHERRY-PICKING STRATEGY**:
+   - **GOAL**: Pick ONLY what's needed to make asymmetric mode work
+   - **FOCUS**: Get from current failing state to working asymmetric mode
+   - **AVOID**: Over-engineering, unnecessary features, cosmetic changes
+   - **GUIDE**: Use ../benchmark_vmec/design analysis for corrections and simplifications
 
 2. **Systematic Cherry-Picking Process**:
    - Start from current `asym` branch (based on PR 360)
    - `git log --oneline prepare-asym..origin/main` to see all commits
-   - For each commit, analyze if it contains asymmetric functionality:
+   - **CRITICAL FILTERING**: For each commit, ask "Does this fix the asymmetric abort()?"
      - Check commit message for "asymmetric", "lasym", "DFT", "fourier"
      - `git show <commit>` to examine changes
      - Look for `fourier_asymmetric.cc`, `ideal_mhd_model.cc` modifications
+     - **ONLY cherry-pick if it directly enables asymmetric functionality**
    - Cherry-pick relevant commits: `git cherry-pick <commit-hash>`
    - Resolve conflicts maintaining our axis recovery fixes
 
-3. **Expected Asymmetric Commits to Find**:
+3. **ESSENTIAL ASYMMETRIC COMMITS TO FIND** (ignore everything else):
    - Implementation of `fourier_asymmetric.cc` with DFT functions
    - Updates to `ideal_mhd_model.cc` removing the `abort()` call
    - Build system updates for asymmetric files
    - Any symrzl implementation
+   - **NOTHING ELSE** - avoid feature creep, optimization, refactoring
 
-4. **Cherry-Pick Strategy**:
+4. **Cherry-Pick Strategy** (SELECTIVE AND FOCUSED):
    ```bash
-   # From asym branch
+   # From asym branch - search for ESSENTIAL asymmetric commits only
    git log --oneline prepare-asym..origin/main --grep="asymmetric\|lasym\|DFT\|fourier"
    git log --oneline prepare-asym..origin/main --all --grep="fourier_asymmetric"
    git log --oneline prepare-asym..origin/main -- "*fourier*" "*asymm*"
 
-   # For each relevant commit:
+   # For each relevant commit - STRICT FILTERING:
    git show <commit-hash>  # Review changes
-   git cherry-pick <commit-hash>  # Apply if asymmetric-related
+   # ASK: "Does this fix the abort() in ideal_mhd_model.cc?"
+   # ASK: "Does this add fourier_asymmetric.cc functionality?"
+   # ASK: "Is this ESSENTIAL for asymmetric mode to work?"
+   # ONLY IF YES: git cherry-pick <commit-hash>
    ```
+
+5. **POST-CHERRY-PICK VALIDATION**:
+   - Apply corrections from ../benchmark_vmec/design analysis
+   - Test: `python -m vmecpp examples/data/input.up_down_asymmetric_tokamak`
+   - Goal: No more "asymmetric inv-DFT not implemented yet" abort()
 
 ### Phase 2: Research and Analysis (High Priority)
 1. **Study Educational VMEC Implementation**:
@@ -176,20 +187,23 @@ if (s_.lasym) {
 
 ## Development Workflow
 
-### Step 1: Cherry-Pick Phase (IMMEDIATE PRIORITY)
-1. **Search for Asymmetric Commits in origin/main**:
+### Step 1: Cherry-Pick Phase (IMMEDIATE PRIORITY) - SELECTIVE ONLY
+1. **Search for ESSENTIAL Asymmetric Commits in origin/main**:
    ```bash
    git log --oneline prepare-asym..origin/main --grep="asymmetric\|lasym\|DFT\|fourier"
    git log --oneline prepare-asym..origin/main -- "*fourier*" "*asymm*" "*ideal_mhd*"
    ```
-2. **Review Each Potential Commit**:
+2. **Review Each Potential Commit with STRICT CRITERIA**:
    - `git show <commit-hash>` to examine changes
-   - Look for `fourier_asymmetric.cc`, `ideal_mhd_model.cc` modifications
-   - Check if it removes the `abort()` call for asymmetric mode
-3. **Cherry-Pick Relevant Commits**:
-   - `git cherry-pick <commit-hash>` for each asymmetric implementation
+   - **PRIMARY FILTER**: Does it fix the `abort()` call in `ideal_mhd_model.cc`?
+   - **SECONDARY FILTER**: Does it add `fourier_asymmetric.cc` functionality?
+   - **TERTIARY FILTER**: Is it ESSENTIAL for asymmetric mode to work?
+   - **REJECT**: Optimizations, refactoring, cosmetic changes, feature additions
+3. **Cherry-Pick ONLY Essential Commits**:
+   - `git cherry-pick <commit-hash>` for each ESSENTIAL asymmetric implementation
    - Resolve conflicts while preserving our axis recovery fixes
    - Test after each cherry-pick to ensure no regressions
+   - **GOAL**: Reach state where asymmetric mode doesn't abort
 
 ### Step 2: Analysis Phase
 1. Study educational_VMEC asymmetric DFT implementation
