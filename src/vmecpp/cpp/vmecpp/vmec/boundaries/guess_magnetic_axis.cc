@@ -441,7 +441,7 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
           w.new_r_axis[k] = r_grid;
           w.new_z_axis[k] = z_grid;
         } else if (min_tau_temp == min_tau) {
-          // If up-down symmetric and lasym=T, need this to pick z = 0
+          // FIXED: Match educational_VMEC tie-breaking logic exactly
           if (std::abs(w.new_z_axis[k]) > std::abs(z_grid)) {
             w.new_z_axis[k] = z_grid;
           }
