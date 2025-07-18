@@ -4,22 +4,107 @@
 
 **Primary Objective**: Resolve BAD_JACOBIAN initialization issues blocking asymmetric equilibrium convergence and implement comprehensive validation against upstream VMEC2000.
 
-## 🔴 IMMEDIATE PRIORITY: Document and Analyze All Modified Functions
+## 🔴 IMMEDIATE PRIORITY: Cherry-pick from PR 360 (prepare-asym branch) for Critical Bug Fixes
 
-**Critical Task**: Before proceeding with debugging, we must document and understand all changes made for asymmetric implementation compared to upstream/main.
+**Critical Task**: The analysis in `../benchmark_vmec/design/PR.md` shows PR 360 has essential bug fixes that PR 359 lacks. We must rebase our work onto PR 360 to get the latest fixes.
 
 **Action Items**:
-1. Create detailed documentation for each modified function comparing VMEC++, educational_VMEC, and jVMEC
-2. Identify any algorithmic differences or potential bugs
-3. Use `/home/ert/code/benchmark_vmec/` directory for all documentation
-4. See `/home/ert/code/benchmark_vmec/index.md` for the complete list
+1. **Rebase onto PR 360 (prepare-asym branch)** - Get critical bug fixes including:
+   - Python wrapper initialization fixes (vmec_indata_pywrapper.cc)
+   - Output quantities array indexing corrections (output_quantities.cc)
+   - Comprehensive test suite (test_asymmetric_loading.py)
+   - Complete asymmetric input example (input.up_down_asymmetric_tokamak)
+2. **Cherry-pick selective changes** - Only take what's needed for asymmetric functionality
+3. **Preserve debug output** - Keep axis recovery debugging for continued investigation
+4. **Compare implementations** - Validate our fixes against PR 360 improvements
 
-**Current Focus**: `fourier_asymmetric.cc` - the new file implementing asymmetric force calculations
+## 🎯 CRITICAL PLAN: Rebase on PR 360 for Superior Bug Fixes
 
-**Previously Found Issues**:
+**Based on PR.md Analysis - PR 360 is Superior Because:**
+1. **Python wrapper initialization fixes** - Resolves critical allocation logic
+2. **Output quantities array indexing fixes** - Corrects bsubs_a indexing errors
+3. **Comprehensive test suite** - Includes test_asymmetric_loading.py
+4. **Complete asymmetric example** - input.up_down_asymmetric_tokamak ready to use
+5. **Cleaner implementation** - Less debug clutter, more robust code
+
+**Previously Found Issues on Current Branch**:
 - ✅ FIXED: Axis recovery algorithm had wrong tie-breaking logic
 - ✅ FIXED: min_tau initialization was incorrect (-1e10 instead of 0.0)
 - 🔴 REMAINING: Infinite axis recovery retry loop after successful recovery
+
+**New Strategy**: Instead of continuing to debug our current branch, rebase on PR 360 to get the latest fixes, then apply only our essential debugging improvements.
+
+## 🚀 STEP-BY-STEP REBASE PLAN
+
+### Phase 1: Prepare for Rebase
+
+**Step 1: Fetch PR 360 (prepare-asym branch)**
+- [ ] Fetch origin/prepare-asym branch (PR 360)
+- [ ] Compare current main branch with prepare-asym branch
+- [ ] Identify what asymmetric functionality already exists in PR 360
+- [ ] Analyze build status and test results on prepare-asym
+
+**Step 2: Prepare Current Branch**
+- [x] Stash current changes (already done)
+- [ ] Commit any important work-in-progress changes
+- [ ] Create backup branch from current state (safety)
+- [ ] Document current state for reference
+
+### Phase 2: Execute Rebase
+
+**Step 3: Rebase onto PR 360**
+- [ ] Checkout current branch with asymmetric work
+- [ ] Rebase current branch onto origin/prepare-asym
+- [ ] Resolve any conflicts during rebase
+- [ ] Ensure all commits are properly rebased
+
+**Step 4: Resolve Conflicts**
+- [ ] For each conflict, analyze what's better: our changes vs PR 360
+- [ ] Keep PR 360 changes for critical bug fixes (wrapper, output quantities)
+- [ ] Preserve our debug output and axis recovery fixes where needed
+- [ ] Test build after each conflict resolution
+
+### Phase 3: Validation and Testing
+
+**Step 5: Test Rebased Branch**
+- [ ] Build and verify no compilation errors
+- [ ] Run existing tests to ensure no regressions
+- [ ] Test asymmetric functionality on rebased branch
+- [ ] Compare with educational_VMEC convergence
+
+**Step 6: Validate Integration**
+- [ ] Test input.up_down_asymmetric_tokamak
+- [ ] Verify Python wrapper improvements from PR 360
+- [ ] Check output quantities fixes are working
+- [ ] Ensure debug output still functions if needed
+
+### Phase 4: Finalize and Document
+
+**Step 7: Clean Up**
+- [ ] Remove any temporary debug output if no longer needed
+- [ ] Ensure all changes follow project coding standards
+- [ ] Run pre-commit hooks and fix any issues
+- [ ] Update documentation as needed
+
+**Step 8: Final Testing**
+- [ ] Comprehensive test of asymmetric modes
+- [ ] Verify both fixed and free boundary cases
+- [ ] Test with various asymmetric input configurations
+- [ ] Document final status and any remaining issues
+
+## 🎯 SUCCESS CRITERIA
+
+**Must Achieve**:
+- [ ] Asymmetric mode works without abort() on PR 360 base
+- [ ] input.up_down_asymmetric_tokamak converges like educational_VMEC
+- [ ] All existing symmetric functionality preserved
+- [ ] Build and test infrastructure working properly
+
+**Stretch Goals**:
+- [ ] Better convergence than current branch
+- [ ] Cleaner implementation than current branch
+- [ ] More robust test suite than current branch
+- [ ] Documentation improvements from PR 360
 
 **Immediate Success Criteria**:
 - Resolve BAD_JACOBIAN initialization errors in asymmetric mode
