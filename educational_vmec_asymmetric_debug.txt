@@ -1,0 +1,32 @@
+Educational VMEC asymmetric test case behavior analysis:
+
+1. INITIAL STATE:
+   - NS = 17, 5 Fourier modes, FTOLV = 1.000E-11
+   - Multiple negative tau values reported:
+     * tau = -0.75 to -3.38 (very negative)
+     * tau_main = -0.58 to -3.22
+
+2. AXIS RECOVERY TRIGGERED:
+   - "INITIAL JACOBIAN CHANGED SIGN!"
+   - "TRYING TO IMPROVE INITIAL MAGNETIC AXIS GUESS"
+   - Uses full theta range for asymmetric mode
+   - Initial axis: R=0, Z=0
+   - Final recovered axis: R=6.1188, Z=0.1197
+
+3. POST-RECOVERY BEHAVIOR:
+   - Dramatically improved tau values:
+     * tau = -0.18 to positive values
+     * tau_main = -0.004 to +0.076
+   - Convergence achieves much better Jacobian behavior
+   - Final negative tau range: -0.18 to -0.03 (much better)
+
+4. KEY SUCCESS FACTORS:
+   - Axis recovery produces significant improvement in Jacobian
+   - Educational VMEC successfully continues after BAD_JACOBIAN
+   - Final result shows proper asymmetric equilibrium convergence
+
+5. COMPARISON WITH VMEC++:
+   - VMEC++ now continues past BAD_JACOBIAN (✓ FIXED)
+   - VMEC++ reaches axis recovery stage (✓ WORKING)
+   - Need to verify: Does VMEC++ axis recovery improve tau values like educational_VMEC?
+   - Need to verify: Does VMEC++ continue to convergence after recovery?

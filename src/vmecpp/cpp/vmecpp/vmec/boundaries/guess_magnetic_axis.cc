@@ -481,17 +481,40 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
     }  // n
   }  // k
 
-  // fixup Fourier basis scaling for cos(0) and cos(Nyquist) entries
+  // DEBUG: Show grid search results before Fourier transform
+  std::cout << "=== GRID SEARCH RESULTS ===" << std::endl;
+  for (int k = 0; k < s.nZeta && k < 4; ++k) {
+    std::cout << "Plane " << k << ": r_axis=" << w.new_r_axis[k]
+              << " z_axis=" << w.new_z_axis[k] << std::endl;
+  }
+
+  // DEBUG: Show raw Fourier coefficients before scaling
+  std::cout << "Raw raxis_c[0]=" << w.new_raxis_c[0]
+            << " zaxis_c[0]=" << w.new_zaxis_c[0] << std::endl;
+
+  // Match educational_VMEC scaling exactly:
+  // Lines 203-206: IF (n.eq.0 .or. n.eq.nzeta/2) THEN
+  //                   raxis_cc(n) = p5*raxis_cc(n)
+  //                   zaxis_cc(n) = p5*zaxis_cc(n)
+  //                 END IF
+
+  // DC component (n=0) scaling - always for both raxis_cc and zaxis_cc
   w.new_raxis_c[0] /= 2.0;
+  if (s.lasym) {
+    w.new_zaxis_c[0] /= 2.0;
+  }
+
+  // DEBUG: Show coefficients after scaling
+  std::cout << "After scaling raxis_c[0]=" << w.new_raxis_c[0]
+            << " zaxis_c[0]=" << w.new_zaxis_c[0] << std::endl;
+
+  // Nyquist component scaling (n = nZeta/2) - if applicable
   // need to check explicitly for ntor > 0, because otherwise for ntor = 0,
   // nZeta / 2 also is zero (integer division doing the rounding-down),
   // which will lead to the n=0 - component being divided by 2 twice!
   if (s.ntor > 0 && s.ntor >= s.nZeta / 2) {
     w.new_raxis_c[s.nZeta / 2] /= 2.0;
-  }
-  if (s.lasym) {
-    w.new_zaxis_c[0] /= 2.0;
-    if (s.ntor > 0 && s.ntor >= s.nZeta / 2) {
+    if (s.lasym) {
       w.new_zaxis_c[s.nZeta / 2] /= 2.0;
     }
   }

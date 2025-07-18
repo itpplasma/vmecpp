@@ -815,6 +815,16 @@ absl::StatusOr<Vmec::SolveEqLoopStatus> Vmec::SolveEquilibriumLoop(
       return SolveEqLoopStatus::MUST_RETRY;
     } else if (status_ != VmecStatus::NORMAL_TERMINATION &&
                status_ != VmecStatus::SUCCESSFUL_TERMINATION) {
+      // DEBUG: Show what status we got after axis recovery retry
+      std::cout << "=== AXIS RECOVERY RETRY FAILED ===\n";
+      std::cout << "Final status after retry: " << static_cast<int>(status_)
+                << "\n";
+      std::cout << "BAD_JACOBIAN = "
+                << static_cast<int>(VmecStatus::BAD_JACOBIAN) << "\n";
+      std::cout << "NORMAL_TERMINATION = "
+                << static_cast<int>(VmecStatus::NORMAL_TERMINATION) << "\n";
+      std::cout << "iter2 = " << iter2 << "\n";
+
       // if something went totally wrong even in this initial steps, do not
       // continue at all
       const auto msg = absl::StrFormat(
