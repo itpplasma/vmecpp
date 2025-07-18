@@ -635,32 +635,32 @@ IdealMhdModel::IdealMhdModel(
   fzcon_e.resize(nrzt);
   fzcon_o.resize(nrzt);
 
-  // Allocate asymmetric arrays if needed
+  // Allocate and initialize asymmetric arrays if needed
   if (s_.lasym) {
-    // Asymmetric geometry arrays
-    r1_a.resize(nrzt1);
-    ru_a.resize(nrzt1);
-    z1_a.resize(nrzt1);
-    zu_a.resize(nrzt1);
-    lu_a.resize(nrzt1);
+    // Asymmetric geometry arrays - allocate and zero-initialize
+    r1_a.assign(nrzt1, 0.0);
+    ru_a.assign(nrzt1, 0.0);
+    z1_a.assign(nrzt1, 0.0);
+    zu_a.assign(nrzt1, 0.0);
+    lu_a.assign(nrzt1, 0.0);
 
     if (s_.lthreed) {
-      rv_a.resize(nrzt1);
-      zv_a.resize(nrzt1);
-      lv_a.resize(nrzt1);
+      rv_a.assign(nrzt1, 0.0);
+      zv_a.assign(nrzt1, 0.0);
+      lv_a.assign(nrzt1, 0.0);
     }
 
-    // Asymmetric force arrays
-    armn_a.resize(nrzt);
-    azmn_a.resize(nrzt);
-    brmn_a.resize(nrzt);
-    bzmn_a.resize(nrzt);
-    blmn_a.resize(nrztIncludingBoundary);
+    // Asymmetric force arrays - allocate and zero-initialize
+    armn_a.assign(nrzt, 0.0);
+    azmn_a.assign(nrzt, 0.0);
+    brmn_a.assign(nrzt, 0.0);
+    bzmn_a.assign(nrzt, 0.0);
+    blmn_a.assign(nrztIncludingBoundary, 0.0);
 
     if (s_.lthreed) {
-      crmn_a.resize(nrzt);
-      czmn_a.resize(nrzt);
-      clmn_a.resize(nrztIncludingBoundary);
+      crmn_a.assign(nrzt, 0.0);
+      czmn_a.assign(nrzt, 0.0);
+      clmn_a.assign(nrztIncludingBoundary, 0.0);
     }
   }
 
