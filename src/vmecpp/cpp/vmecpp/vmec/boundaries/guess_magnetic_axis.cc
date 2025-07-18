@@ -501,33 +501,18 @@ RecomputeAxisWorkspace RecomputeMagneticAxisToFixJacobianSign(
           }
         }
 
-        // DEBUG: Show final optimal position found
-        if (k == 0 && min_tau_temp > min_tau) {
-          std::cout << "NEW OPTIMUM found at r=" << r_grid << ", z=" << z_grid
-                    << ", min_tau=" << min_tau_temp << std::endl;
-        }
+        // Update optimal position if better tau found
 
         if (min_tau_temp > min_tau) {
           min_tau = min_tau_temp;
           w.new_r_axis[k] = r_grid;
           w.new_z_axis[k] = z_grid;
         } else if (min_tau_temp == min_tau) {
-          // DEBUG: Show tie-breaking logic in action
-          if (k == 0) {
-            std::cout << "TIE at min_tau=" << min_tau
-                      << ": current_z=" << w.new_z_axis[k]
-                      << ", candidate_z=" << z_grid << std::endl;
-          }
-
-          // FIXED: Match educational_VMEC exactly - always prefer z closest to
-          // 0 Educational_VMEC: IF (ABS(zcom(iv)).gt.ABS(zlim)) then zcom(iv) =
-          // zlim
+          // FIXED: Match educational_VMEC tie-breaking logic exactly
+          // Educational_VMEC: IF (ABS(zcom(iv)).gt.ABS(zlim)) then zcom(iv) =
+          // zlim Always prefer z-position closest to zero
           if (std::abs(w.new_z_axis[k]) > std::abs(z_grid)) {
             w.new_z_axis[k] = z_grid;
-            if (k == 0) {
-              std::cout << "Updated z_axis to value closer to zero: " << z_grid
-                        << std::endl;
-            }
           }
         }
       }  // index_r

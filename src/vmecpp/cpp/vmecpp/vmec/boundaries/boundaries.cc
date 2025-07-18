@@ -267,20 +267,7 @@ void Boundaries::RecomputeMagneticAxisToFixJacobianSign(
       number_of_flux_surfaces, sign_of_jacobian, s_, t_, rbcc, rbss, rbsc, rbcs,
       zbsc, zbcs, zbcc, zbss, raxis_c, raxis_s, zaxis_s, zaxis_c);
 
-  // DEBUG: Show old vs new axis values
-  std::cout << "=== AXIS RECOVERY DEBUG ===\n";
-  for (int n = 0; n <= s_.ntor; ++n) {
-    std::cout << "n=" << n << ": OLD raxis_c=" << raxis_c[n]
-              << " -> NEW=" << w.new_raxis_c[n] << "\n";
-    std::cout << "n=" << n << ": OLD zaxis_s=" << zaxis_s[n]
-              << " -> NEW=" << w.new_zaxis_s[n] << "\n";
-    if (s_.lasym) {
-      std::cout << "n=" << n << ": OLD raxis_s=" << raxis_s[n]
-                << " -> NEW=" << w.new_raxis_s[n] << "\n";
-      std::cout << "n=" << n << ": OLD zaxis_c=" << zaxis_c[n]
-                << " -> NEW=" << w.new_zaxis_c[n] << "\n";
-    }
-  }
+  // Apply new axis coefficients from grid search optimization
 
   // Now copy over the Fourier coefficients of the new axis:
   for (int n = 0; n <= s_.ntor; ++n) {
@@ -292,7 +279,7 @@ void Boundaries::RecomputeMagneticAxisToFixJacobianSign(
     }
   }  // n
 
-  std::cout << "=== AXIS RECOVERY COMPLETE ===\n";
+  // Axis recovery completed successfully
 }  // RecomputeMagneticAxisToFixJacobianSign
 
 }  // namespace vmecpp
