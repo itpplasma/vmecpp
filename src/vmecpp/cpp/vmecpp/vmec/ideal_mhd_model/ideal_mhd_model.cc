@@ -635,6 +635,35 @@ IdealMhdModel::IdealMhdModel(
   fzcon_e.resize(nrzt);
   fzcon_o.resize(nrzt);
 
+  // Allocate asymmetric arrays if needed
+  if (s_.lasym) {
+    // Asymmetric geometry arrays
+    r1_a.resize(nrzt1);
+    ru_a.resize(nrzt1);
+    z1_a.resize(nrzt1);
+    zu_a.resize(nrzt1);
+    lu_a.resize(nrzt1);
+
+    if (s_.lthreed) {
+      rv_a.resize(nrzt1);
+      zv_a.resize(nrzt1);
+      lv_a.resize(nrzt1);
+    }
+
+    // Asymmetric force arrays
+    armn_a.resize(nrzt);
+    azmn_a.resize(nrzt);
+    brmn_a.resize(nrzt);
+    bzmn_a.resize(nrzt);
+    blmn_a.resize(nrztIncludingBoundary);
+
+    if (s_.lthreed) {
+      crmn_a.resize(nrzt);
+      czmn_a.resize(nrzt);
+      clmn_a.resize(nrztIncludingBoundary);
+    }
+  }
+
   jMin.resize(s_.mpol * (s_.ntor + 1));
 }
 
