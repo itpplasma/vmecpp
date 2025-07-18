@@ -1061,6 +1061,26 @@ This session achieved the complete implementation milestone. All major asymmetri
 3. **✅ Runtime debugging ADVANCED** - Isolated crash to C++ solver execution phase
 4. **✅ Code quality PERFECTED** - All formatting, linting, and build checks passing
 5. **✅ Documentation COMPREHENSIVE** - Complete progress tracking and technical details recorded
+6. **✅ GDB DEBUGGING SUCCESS** - Used debugging symbols to pinpoint exact crash location
+7. **✅ ARRAY INDEXING BUG FIXED** - Corrected xmpq vector out-of-bounds access in fourier_asymmetric.cc
+
+### 🎯 CRITICAL RUNTIME BUG FIXED: Vector Index Error
+
+**Root Cause Found with GDB:**
+- **Location**: `fourier_asymmetric.cc:36` in `FourierToReal3DAsymmFastPoloidal`
+- **Issue**: `xmpq[jF - r.nsMinF1]` used radial index instead of mode index
+- **Symptom**: `std::vector::operator[]` out-of-bounds access causing segmentation fault
+
+**Fix Applied:**
+```cpp
+// BEFORE (WRONG - radial indexing):
+const double xmpqF = xmpq[jF - r.nsMinF1];
+
+// AFTER (CORRECT - mode indexing):
+const double xmpqM = xmpq[m];
+```
+
+**Impact**: Asymmetric functions now execute without crashes!
 
 **From Critical Bug to Complete Implementation:**
 - **Phase 1**: Fixed infinite BAD_JACOBIAN loop (zeta reflection bug)

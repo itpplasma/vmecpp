@@ -33,9 +33,9 @@ void FourierToReal3DAsymmFastPoloidal(const FourierGeometry& physical_x,
 #pragma omp parallel for
   for (int jF = r.nsMinF1; jF < r.nsMaxF1; ++jF) {
     const double sqrtSF = rp.sqrtSF[jF - r.nsMinF1];
-    const double xmpqF = xmpq[jF - r.nsMinF1];
 
     for (int m = 0; m < s.mpol; ++m) {
+      const double xmpqM = xmpq[m];
       // Apply mode scaling with sqrt(s) for odd-m modes
       // This implements Equation (8c) from Hirshman, Schwenn & Nührenberg
       // (1990)
@@ -75,7 +75,7 @@ void FourierToReal3DAsymmFastPoloidal(const FourierGeometry& physical_x,
 
             m_geometry_asym.r1_a[idx_kl1] += rsc_term;
             m_geometry_asym.ru_a[idx_kl1] +=
-                rsc_term * m * xmpqF;  // derivative w.r.t. theta
+                rsc_term * m * xmpqM;  // derivative w.r.t. theta
             m_geometry_asym.rv_a[idx_kl1] +=
                 rsc_term * (-n);  // derivative w.r.t. zeta
 
@@ -84,7 +84,7 @@ void FourierToReal3DAsymmFastPoloidal(const FourierGeometry& physical_x,
                               fb.cosnv[idx_kn] * modeScale;
             m_geometry_asym.z1_a[idx_kl1] += zcc_term;
             m_geometry_asym.zu_a[idx_kl1] +=
-                zcc_term * (-m) * xmpqF;  // derivative w.r.t. theta
+                zcc_term * (-m) * xmpqM;  // derivative w.r.t. theta
             m_geometry_asym.zv_a[idx_kl1] +=
                 zcc_term * (-n);  // derivative w.r.t. zeta
 
@@ -92,7 +92,7 @@ void FourierToReal3DAsymmFastPoloidal(const FourierGeometry& physical_x,
             double lcc_term = physical_x.lmncc[idx_fc] * fb.cosmu[idx_ml] *
                               fb.cosnv[idx_kn] * modeScale;
             m_geometry_asym.lu_a[idx_kl1] +=
-                lcc_term * (-m) * xmpqF;  // derivative w.r.t. theta
+                lcc_term * (-m) * xmpqM;  // derivative w.r.t. theta
             m_geometry_asym.lv_a[idx_kl1] +=
                 lcc_term * (-n);  // derivative w.r.t. zeta
 
@@ -102,7 +102,7 @@ void FourierToReal3DAsymmFastPoloidal(const FourierGeometry& physical_x,
                                 fb.sinnv[idx_kn] * modeScale;
               m_geometry_asym.r1_a[idx_kl1] += rcs_term;
               m_geometry_asym.ru_a[idx_kl1] +=
-                  rcs_term * (-m) * xmpqF;  // derivative w.r.t. theta
+                  rcs_term * (-m) * xmpqM;  // derivative w.r.t. theta
               m_geometry_asym.rv_a[idx_kl1] +=
                   rcs_term * n;  // derivative w.r.t. zeta
 
@@ -111,7 +111,7 @@ void FourierToReal3DAsymmFastPoloidal(const FourierGeometry& physical_x,
                                 fb.sinnv[idx_kn] * modeScale;
               m_geometry_asym.z1_a[idx_kl1] += zss_term;
               m_geometry_asym.zu_a[idx_kl1] +=
-                  zss_term * m * xmpqF;  // derivative w.r.t. theta
+                  zss_term * m * xmpqM;  // derivative w.r.t. theta
               m_geometry_asym.zv_a[idx_kl1] +=
                   zss_term * n;  // derivative w.r.t. zeta
 
@@ -119,7 +119,7 @@ void FourierToReal3DAsymmFastPoloidal(const FourierGeometry& physical_x,
               double lss_term = physical_x.lmnss[idx_fc] * fb.sinmu[idx_ml] *
                                 fb.sinnv[idx_kn] * modeScale;
               m_geometry_asym.lu_a[idx_kl1] +=
-                  lss_term * m * xmpqF;  // derivative w.r.t. theta
+                  lss_term * m * xmpqM;  // derivative w.r.t. theta
               m_geometry_asym.lv_a[idx_kl1] +=
                   lss_term * n;  // derivative w.r.t. zeta
             }
@@ -148,9 +148,9 @@ void FourierToReal2DAsymmFastPoloidal(const FourierGeometry& physical_x,
   // For 2D case, only poloidal variation
   for (int jF = r.nsMinF1; jF < r.nsMaxF1; ++jF) {
     const double sqrtSF = rp.sqrtSF[jF - r.nsMinF1];
-    const double xmpqF = xmpq[jF - r.nsMinF1];
 
     for (int m = 0; m < s.mpol; ++m) {
+      const double xmpqM = xmpq[m];
       // Apply mode scaling with sqrt(s) for odd-m modes
       double modeScale = 1.0;
       if (m % 2 == 1) {  // odd-m modes
@@ -174,20 +174,20 @@ void FourierToReal2DAsymmFastPoloidal(const FourierGeometry& physical_x,
             physical_x.rmnsc[idx_fc] * fb.sinmu[idx_ml] * modeScale;
         m_geometry_asym.r1_a[idx_l1] += rsc_term;
         m_geometry_asym.ru_a[idx_l1] +=
-            rsc_term * m * xmpqF;  // derivative w.r.t. theta
+            rsc_term * m * xmpqM;  // derivative w.r.t. theta
 
         // zmncc contribution: Z ~ cos(m*theta)
         double zcc_term =
             physical_x.zmncc[idx_fc] * fb.cosmu[idx_ml] * modeScale;
         m_geometry_asym.z1_a[idx_l1] += zcc_term;
         m_geometry_asym.zu_a[idx_l1] +=
-            zcc_term * (-m) * xmpqF;  // derivative w.r.t. theta
+            zcc_term * (-m) * xmpqM;  // derivative w.r.t. theta
 
         // lmncc contribution: lambda ~ cos(m*theta)
         double lcc_term =
             physical_x.lmncc[idx_fc] * fb.cosmu[idx_ml] * modeScale;
         m_geometry_asym.lu_a[idx_l1] +=
-            lcc_term * (-m) * xmpqF;  // derivative w.r.t. theta
+            lcc_term * (-m) * xmpqM;  // derivative w.r.t. theta
       }  // l
     }  // m
   }  // jF
