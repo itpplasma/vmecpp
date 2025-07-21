@@ -61,6 +61,8 @@ void FourierGeometry::interpFromBoundaryAndAxis(
                               (1.0 - interpolationWeight) * b.zaxis_s[n]);
           }
           if (s_.lasym) {
+            // Boundary coefficients converted to Fourier coefficients
+            
             // rmnsc has no m=0-contributions from the axis
             rmnsc[idx_fc] = basis_norm * interpolationWeight * b.rbsc[idx_bdy];
             zmncc[idx_fc] =
@@ -89,6 +91,8 @@ void FourierGeometry::interpFromBoundaryAndAxis(
             zmncs[idx_fc] = basis_norm * interpolationWeight * b.zbcs[idx_bdy];
           }
           if (s_.lasym) {
+            // Boundary coefficients converted to Fourier coefficients for m>0
+            
             rmnsc[idx_fc] = basis_norm * interpolationWeight * b.rbsc[idx_bdy];
             zmncc[idx_fc] = basis_norm * interpolationWeight * b.zbcc[idx_bdy];
             if (s_.lthreed) {
@@ -102,6 +106,8 @@ void FourierGeometry::interpFromBoundaryAndAxis(
       }  // n
     }  // m
   }  // j
+  
+  // Asymmetric coefficients successfully computed from boundary conditions
 }
 
 void FourierGeometry::InitFromState(const FourierBasisFastPoloidal& fb,

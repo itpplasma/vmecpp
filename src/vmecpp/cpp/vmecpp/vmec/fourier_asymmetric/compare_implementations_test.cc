@@ -89,8 +89,8 @@ TEST_F(CompareImplementationsTest, CompareOriginalVsCorrected2D) {
 
   std::cout << "Initialized with symmetric baseline: R=1.0, Z=0.0" << std::endl;
 
-  // Second: Add asymmetric contribution
-  FourierToReal2DAsymmFastPoloidal_Corrected(
+  // Second: Add asymmetric contribution using the regular function
+  FourierToReal2DAsymmFastPoloidal(
       sizes, absl::Span<const double>(rmncc), absl::Span<const double>(rmnss),
       absl::Span<const double>(rmnsc), absl::Span<const double>(rmncs),
       absl::Span<const double>(zmnsc), absl::Span<const double>(zmncs),

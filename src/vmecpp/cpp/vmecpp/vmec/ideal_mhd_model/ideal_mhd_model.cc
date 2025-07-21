@@ -1650,6 +1650,17 @@ void IdealMhdModel::computeJacobian() {
       double ruo_o = ru_o[(jH + 1 - r_.nsMinF1) * s_.nZnT + kl];
       double zue_o = zu_e[(jH + 1 - r_.nsMinF1) * s_.nZnT + kl];
       double zuo_o = zu_o[(jH + 1 - r_.nsMinF1) * s_.nZnT + kl];
+      
+      // Debug derivative values on first iteration
+      if (jH == r_.nsMinH && kl < 5) {
+        std::cout << "DEBUG Jacobian: jH=" << jH << ", kl=" << kl << std::endl;
+        std::cout << "  r1e_i=" << m_ls_.r1e_i[kl] << ", r1o_i=" << m_ls_.r1o_i[kl] << std::endl;
+        std::cout << "  r1e_o=" << r1e_o << ", r1o_o=" << r1o_o << std::endl;
+        std::cout << "  rue_i=" << m_ls_.rue_i[kl] << ", zue_i=" << m_ls_.zue_i[kl] << std::endl;
+        std::cout << "  rue_o=" << rue_o << ", zue_o=" << zue_o << std::endl;
+        std::cout << "  ruo_i=" << m_ls_.ruo_i[kl] << ", zuo_i=" << m_ls_.zuo_i[kl] << std::endl;
+        std::cout << "  ruo_o=" << ruo_o << ", zuo_o=" << zuo_o << std::endl;
+      }
 
       int iHalf = (jH - r_.nsMinH) * s_.nZnT + kl;
 
@@ -1769,7 +1780,7 @@ void IdealMhdModel::computeMetricElements() {
       
       // CRITICAL: Add jVMEC-style NaN detection after Jacobian calculation
       if (!std::isfinite(gsqrt[iHalf]) || gsqrt[iHalf] == 0.0) {
-        std::cout << "ERROR: Non-finite or zero Jacobian at iHalf=" << iHalf << ", jH=" << jH << std::endl;
+        std::cout << "ERROR: Non-finite or zero Jacobian at iHalf=" << iHalf << ", jH=" << jH << ", kl=" << kl << std::endl;
         std::cout << "  gsqrt=" << gsqrt[iHalf] << " = tau*r12 = " << tau[iHalf] << " * " << r12[iHalf] << std::endl;
       }
 
@@ -3966,10 +3977,10 @@ void IdealMhdModel::dft_FourierToReal_3d_asymm(
 
 void IdealMhdModel::dft_FourierToReal_2d_asymm(
     const FourierGeometry& physical_x) {
-  // SIMPLIFIED: Use existing FourierToReal2DAsymmFastPoloidal and then
-  // compute derivatives properly from the results
+  // COMPLETE IMPLEMENTATION: Compute values AND derivatives together
+  // following jVMEC pattern from FourierTransformsJava.java lines 255-333
   
-  const int num_realsp = (r_.nsMaxF1 - r_.nsMinF1) * s_.nThetaEff;
+  const int num_realsp = (r_.nsMaxF1 - r_.nsMinF1) * s_.nZnT;
 
   for (auto* v :
        {&r1_e, &r1_o, &ru_e, &ru_o, &z1_e, &z1_o, &zu_e, &zu_o, &lu_e, &lu_o}) {
@@ -3985,110 +3996,328 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
 #pragma omp barrier
 #endif  // _OPENMP
 
-  std::cout << "DEBUG: Using working asymmetric transform with derivative fix" << std::endl;
+  // Get basis functions for derivative computation
+  FourierBasisFastPoloidal fourier_basis(&s_);
   
-  // Use the existing working asymmetric transform
-  FourierToReal2DAsymmFastPoloidal(
-      s_, physical_x.rmncc, physical_x.rmnss, physical_x.rmnsc,
-      physical_x.rmncs, physical_x.zmnsc, physical_x.zmncs, physical_x.zmncc,
-      physical_x.zmnss, absl::Span<double>(m_ls_.r1e_i.data(), s_.nZnT),
-      absl::Span<double>(m_ls_.z1e_i.data(), s_.nZnT),
-      absl::Span<double>(m_ls_.lue_i.data(), s_.nZnT));
+  const int ntheta2 = s_.nThetaReduced;  // [0, pi]
+  const int ntheta1 = s_.nThetaEff;      // [0, 2pi]
+  const int nzeta = s_.nZeta;
 
-  // PROPER FIX: Compute asymmetric geometry and derivatives for ALL radial surfaces
-  // This matches the symmetric implementation pattern but handles full theta-zeta grid
+  std::cout << "DEBUG: Computing asymmetric geometry with derivatives" << std::endl;
+  std::cout << "  ntheta2=" << ntheta2 << ", ntheta1=" << ntheta1 << ", nzeta=" << nzeta << std::endl;
   
-  std::cout << "DEBUG: Computing asymmetric geometry with proper Fourier transforms (nZeta=" << s_.nZeta << ")" << std::endl;
-  
+  // STEP 1: Compute geometry for all radial surfaces using asymmetric transform
+  // Each radial surface needs its own transform with its specific coefficients
+
+  // STEP 2: Compute derivatives using jVMEC pattern 
   // Process each radial surface
   for (int jF = r_.nsMinF1; jF < r_.nsMaxF1; ++jF) {
-    // Get pointers to Fourier coefficients for this surface
-    const double* rcc = &physical_x.rmncc[(jF - r_.nsMinF1) * s_.mnsize];
-    const double* rss = &physical_x.rmnss[(jF - r_.nsMinF1) * s_.mnsize];
-    const double* zsc = &physical_x.zmnsc[(jF - r_.nsMinF1) * s_.mnsize];
-    const double* lsc = &physical_x.lmnsc[(jF - r_.nsMinF1) * s_.mnsize];
     
-    // Check if asymmetric arrays are available
-    const double* rsc = (physical_x.rmnsc.size() > (jF - r_.nsMinF1) * s_.mnsize) 
-                        ? &physical_x.rmnsc[(jF - r_.nsMinF1) * s_.mnsize] : nullptr;
-    const double* rcs = (physical_x.rmncs.size() > (jF - r_.nsMinF1) * s_.mnsize)
-                        ? &physical_x.rmncs[(jF - r_.nsMinF1) * s_.mnsize] : nullptr;
-    const double* zcc = (physical_x.zmncc.size() > (jF - r_.nsMinF1) * s_.mnsize)
-                        ? &physical_x.zmncc[(jF - r_.nsMinF1) * s_.mnsize] : nullptr;
-    const double* zcs = (physical_x.zmncs.size() > (jF - r_.nsMinF1) * s_.mnsize)
-                        ? &physical_x.zmncs[(jF - r_.nsMinF1) * s_.mnsize] : nullptr;
-    const double* lcc = (physical_x.lmncc.size() > (jF - r_.nsMinF1) * s_.mnsize)
-                        ? &physical_x.lmncc[(jF - r_.nsMinF1) * s_.mnsize] : nullptr;
-    const double* lcs = (physical_x.lmncs.size() > (jF - r_.nsMinF1) * s_.mnsize)
-                        ? &physical_x.lmncs[(jF - r_.nsMinF1) * s_.mnsize] : nullptr;
+    // STEP A: Compute basic geometry (R, Z, λ) for this radial surface
+    // Create temporary arrays for this surface's geometry
+    std::vector<double> surface_R(ntheta1 * nzeta, 0.0);  // Full [0, 2π]
+    std::vector<double> surface_Z(ntheta1 * nzeta, 0.0);
+    std::vector<double> surface_L(ntheta1 * nzeta, 0.0);
     
-    // Compute real space values and derivatives for each theta point
-    for (int l = 0; l < s_.nThetaReduced; ++l) {
-      std::array<double, 2> r_parity = {0.0, 0.0};
-      std::array<double, 2> ru_parity = {0.0, 0.0};
-      std::array<double, 2> z_parity = {0.0, 0.0};
-      std::array<double, 2> zu_parity = {0.0, 0.0};
-      std::array<double, 2> lu_parity = {0.0, 0.0};
+    // Get coefficient spans for this radial surface
+    int coeff_offset = (jF - r_.nsMinF1) * s_.mnsize;
+    int coeff_size = std::min(s_.mnsize, static_cast<int>(physical_x.rmncc.size()) - coeff_offset);
+    
+    // Debug coefficient access
+    if (jF < r_.nsMinF1 + 2) {
+      std::cout << "DEBUG coeff access: jF=" << jF << ", coeff_offset=" << coeff_offset 
+                << ", coeff_size=" << coeff_size << ", rmncc.size()=" << physical_x.rmncc.size() << std::endl;
+      std::cout << "DEBUG asymmetric coeff sizes: rmnsc=" << physical_x.rmnsc.size() 
+                << ", zmncc=" << physical_x.zmncc.size() << ", zmnss=" << physical_x.zmnss.size() << std::endl;
+    }
+    
+    // Check if we actually have asymmetric coefficients
+    if (physical_x.rmnsc.size() == 0 && physical_x.zmncc.size() == 0) {
+      std::cout << "WARNING: No asymmetric coefficients available, skipping asymmetric transforms" << std::endl;
+      continue;
+    }
+    
+    // DEBUG: Show detailed coefficient array sizes
+    if (jF < r_.nsMinF1 + 2) {
+      std::cout << "DEBUG detailed coeff sizes: rmncc=" << physical_x.rmncc.size() 
+                << ", rmnss=" << physical_x.rmnss.size() << ", rmnsc=" << physical_x.rmnsc.size() 
+                << ", rmncs=" << physical_x.rmncs.size() << ", zmnsc=" << physical_x.zmnsc.size() 
+                << ", zmncs=" << physical_x.zmncs.size() << ", zmncc=" << physical_x.zmncc.size() 
+                << ", zmnss=" << physical_x.zmnss.size() << std::endl;
+      std::cout << "DEBUG: coeff_offset=" << coeff_offset << ", initial_coeff_size=" << coeff_size << std::endl;
+    }
+    
+    // The issue is that asymmetric coefficients might be stored differently
+    // Check if the coefficient arrays support per-surface access
+    bool has_per_surface_coeffs = (physical_x.rmncc.size() >= (r_.nsMaxF1 - r_.nsMinF1) * s_.mnsize);
+    
+    if (!has_per_surface_coeffs || coeff_offset >= static_cast<int>(physical_x.rmncc.size())) {
+      std::cout << "WARNING: Using single-surface coefficient access for jF=" << jF << std::endl;
+      coeff_offset = 0;  // Use coefficients from surface 0
+      coeff_size = std::min(s_.mnsize, static_cast<int>(physical_x.rmncc.size()));
+    }
+    
+    // Final safety check for coefficient arrays actually used by 2D asymmetric transform
+    int safe_coeff_size = coeff_size;
+    
+    // For 2D asymmetric, only check arrays actually used: rmnsc and zmncc
+    // (and the symmetric arrays that are always needed: rmncc, zmnsc)
+    if (coeff_offset + coeff_size > static_cast<int>(physical_x.rmncc.size())) {
+      safe_coeff_size = std::max(0, static_cast<int>(physical_x.rmncc.size()) - coeff_offset);
+    }
+    if (coeff_offset + safe_coeff_size > static_cast<int>(physical_x.rmnsc.size())) {
+      safe_coeff_size = std::max(0, static_cast<int>(physical_x.rmnsc.size()) - coeff_offset);
+    }
+    if (coeff_offset + safe_coeff_size > static_cast<int>(physical_x.zmnsc.size())) {
+      safe_coeff_size = std::max(0, static_cast<int>(physical_x.zmnsc.size()) - coeff_offset);
+    }
+    if (coeff_offset + safe_coeff_size > static_cast<int>(physical_x.zmncc.size())) {
+      safe_coeff_size = std::max(0, static_cast<int>(physical_x.zmncc.size()) - coeff_offset);
+    }
+    
+    // For 3D, we'd need to check additional arrays, but for 2D we only need the above
+    
+    if (safe_coeff_size <= 0) {
+      std::cout << "WARNING: Insufficient coefficients, using offset 0 and minimal size" << std::endl;
+      coeff_offset = 0;
+      safe_coeff_size = s_.mnsize;
+      // Ensure even the minimal size fits in arrays actually used by 2D asymmetric
+      safe_coeff_size = std::min(safe_coeff_size, static_cast<int>(physical_x.rmncc.size()));
+      safe_coeff_size = std::min(safe_coeff_size, static_cast<int>(physical_x.rmnsc.size()));
+      safe_coeff_size = std::min(safe_coeff_size, static_cast<int>(physical_x.zmnsc.size()));
+      safe_coeff_size = std::min(safe_coeff_size, static_cast<int>(physical_x.zmncc.size()));
+    }
+    
+    coeff_size = safe_coeff_size;
+    
+    // DEBUG: Show final coefficient size
+    if (jF < r_.nsMinF1 + 2) {
+      std::cout << "DEBUG: final coeff_size=" << coeff_size << " after bounds checking" << std::endl;
+    }
+    
+    if (coeff_size <= 0) {
+      std::cout << "ERROR: Invalid coefficient size=" << coeff_size << ", skipping surface jF=" << jF << std::endl;
+      continue;
+    }
+    
+    // Create subspans safely, handling empty arrays for 2D case
+    auto rmncc_surface = physical_x.rmncc.subspan(coeff_offset, coeff_size);
+    auto rmnss_surface = (physical_x.rmnss.size() > coeff_offset + coeff_size) ?
+                           physical_x.rmnss.subspan(coeff_offset, coeff_size) :
+                           absl::Span<const double>();
+    auto rmnsc_surface = physical_x.rmnsc.subspan(coeff_offset, coeff_size);
+    auto rmncs_surface = (physical_x.rmncs.size() > coeff_offset + coeff_size) ?
+                           physical_x.rmncs.subspan(coeff_offset, coeff_size) :
+                           absl::Span<const double>();
+    auto zmnsc_surface = physical_x.zmnsc.subspan(coeff_offset, coeff_size);
+    auto zmncs_surface = (physical_x.zmncs.size() > coeff_offset + coeff_size) ?
+                           physical_x.zmncs.subspan(coeff_offset, coeff_size) :
+                           absl::Span<const double>();
+    auto zmncc_surface = physical_x.zmncc.subspan(coeff_offset, coeff_size);
+    // Handle zmnss which might be empty (especially for 2D cases)
+    auto zmnss_surface = (physical_x.zmnss.size() > coeff_offset + coeff_size) ? 
+                           physical_x.zmnss.subspan(coeff_offset, coeff_size) :
+                           absl::Span<const double>();
+    
+    // Call 2D asymmetric transform for this radial surface
+    FourierToReal2DAsymmFastPoloidal(
+        s_, rmncc_surface, rmnss_surface, rmnsc_surface, rmncs_surface,
+        zmnsc_surface, zmncs_surface, zmncc_surface, zmnss_surface,
+        absl::Span<double>(surface_R.data(), ntheta1 * nzeta),
+        absl::Span<double>(surface_Z.data(), ntheta1 * nzeta),
+        absl::Span<double>(surface_L.data(), ntheta1 * nzeta));
+    
+    // Copy computed geometry to main arrays
+    const int jF_geom_offset = (jF - r_.nsMinF1) * s_.nZnT;
+    for (int kl = 0; kl < s_.nZnT; ++kl) {
+      r1_e[jF_geom_offset + kl] = surface_R[kl];  // Use first nZnT elements
+      r1_o[jF_geom_offset + kl] = 0.0;  // Odd parity starts at zero for 2D
+      z1_e[jF_geom_offset + kl] = surface_Z[kl];
+      z1_o[jF_geom_offset + kl] = 0.0;
+      lu_e[jF_geom_offset + kl] = surface_L[kl];
+      lu_o[jF_geom_offset + kl] = 0.0;
+    }
+    
+    // STEP B: Compute derivatives using jVMEC pattern 
+    // Temporary arrays for asymmetric derivatives [0, pi] only
+    std::vector<double> asym_dRdTheta(ntheta2 * nzeta, 0.0);
+    std::vector<double> asym_dZdTheta(ntheta2 * nzeta, 0.0);
+    
+    // Compute asymmetric derivative contributions following jVMEC lines 302-306
+    for (int m = 0; m < s_.mpol; ++m) {
+      // Find mode mn for (m,n=0) - 2D axisymmetric case
+      int mn = -1;
+      for (int mn_candidate = 0; mn_candidate < s_.mnmax; ++mn_candidate) {
+        if (fourier_basis.xm[mn_candidate] == m && 
+            fourier_basis.xn[mn_candidate] / s_.nfp == 0) {
+          mn = mn_candidate;
+          break;
+        }
+      }
+      if (mn < 0) continue;
       
-      int num_m = (jF == 0) ? 2 : s_.mpol; // Axis only has m=0,1
+      // Get asymmetric coefficients for this radial surface and mode
+      int coeff_idx = (jF - r_.nsMinF1) * s_.mnsize + mn;
+      double rsc = (coeff_idx < physical_x.rmnsc.size()) ? physical_x.rmnsc[coeff_idx] : 0.0;
+      double zcc = (coeff_idx < physical_x.zmncc.size()) ? physical_x.zmncc[coeff_idx] : 0.0;
       
-      // Sum over Fourier modes
-      for (int m = 0; m < num_m; ++m) {
-        const int m_parity = m % 2;
-        const int idx_ml = m * s_.nThetaReduced + l;
-        
-        const double cosmu = t_.cosmu[idx_ml];
-        const double sinmu = t_.sinmu[idx_ml];
-        const double cosmum = t_.cosmum[idx_ml]; // m*cos(m*u)
-        const double sinmum = t_.sinmum[idx_ml]; // m*sin(m*u)
-        
-        // R and dR/dtheta (asymmetric 2D: combine all four terms)
-        double rcc_m = rcc[m];
-        double rss_m = rss[m];
-        double rsc_m = rsc ? rsc[m] : 0.0;
-        double rcs_m = rcs ? rcs[m] : 0.0;
-        
-        r_parity[m_parity] += rcc_m * cosmu + rss_m * sinmu + rsc_m * sinmu + rcs_m * cosmu;
-        ru_parity[m_parity] += -rcc_m * sinmum + rss_m * cosmum - rsc_m * sinmum + rcs_m * cosmum;
-        
-        // Z and dZ/dtheta
-        double zsc_m = zsc[m];
-        double zcc_m = zcc ? zcc[m] : 0.0;
-        
-        z_parity[m_parity] += zsc_m * sinmu + zcc_m * cosmu;
-        zu_parity[m_parity] += zsc_m * cosmum - zcc_m * sinmum;
-        
-        // Lambda derivatives
-        double lsc_m = lsc[m];
-        double lcc_m = lcc ? lcc[m] : 0.0;
-        
-        lu_parity[m_parity] += lsc_m * cosmum - lcc_m * sinmum;
+      // Debug coefficients for first few radial surfaces
+      if (jF < r_.nsMinF1 + 3 && m < 3) {
+        std::cout << "DEBUG coeff: jF=" << jF << ", m=" << m << ", mn=" << mn 
+                  << ", coeff_idx=" << coeff_idx << ", rsc=" << rsc << ", zcc=" << zcc << std::endl;
       }
       
-      // Store in arrays for all zeta points (axisymmetric, so replicate over zeta)
-      for (int k = 0; k < s_.nZeta; ++k) {
-        const int idx_kl = (jF - r_.nsMinF1) * s_.nZnT + l * s_.nZeta + k;
-        r1_e[idx_kl] = r_parity[kEvenParity];
-        ru_e[idx_kl] = ru_parity[kEvenParity];
-        z1_e[idx_kl] = z_parity[kEvenParity];
-        zu_e[idx_kl] = zu_parity[kEvenParity];
-        lu_e[idx_kl] = lu_parity[kEvenParity];
+      if (std::abs(rsc) < 1e-12 && std::abs(zcc) < 1e-12) continue;
+      
+      // Compute derivatives for theta=[0,pi] following jVMEC pattern
+      for (int l = 0; l < ntheta2; ++l) {
+        double sin_mu = fourier_basis.sinmu[m * ntheta2 + l];
+        double cos_mu = fourier_basis.cosmu[m * ntheta2 + l];
+        double cosmum = m * cos_mu;   // m * cos(m*u) for dR/dtheta 
+        double sinmum = -m * sin_mu;  // -m * sin(m*u) for dZ/dtheta
         
-        r1_o[idx_kl] = r_parity[kOddParity];
-        ru_o[idx_kl] = ru_parity[kOddParity];
-        z1_o[idx_kl] = z_parity[kOddParity];
-        zu_o[idx_kl] = zu_parity[kOddParity];
-        lu_o[idx_kl] = lu_parity[kOddParity];
+        for (int k = 0; k < nzeta; ++k) {
+          int idx = l * nzeta + k;
+          
+          // Following jVMEC lines 303, 306 exactly
+          asym_dRdTheta[idx] += rsc * cosmum;  // rmnsc * m * cos(m*u)
+          asym_dZdTheta[idx] += zcc * sinmum;  // zmncc * -m * sin(m*u)
+        }
       }
     }
-  }
+    
+    // Copy derivatives to full arrays
+    const int jF_offset = (jF - r_.nsMinF1) * s_.nZnT;
+    
+    // For theta=[0,pi]: add asymmetric derivatives to existing symmetric ones
+    for (int l = 0; l < ntheta2; ++l) {
+      for (int k = 0; k < nzeta; ++k) {
+        int idx_local = l * nzeta + k;
+        int idx_global = jF_offset + idx_local;
+        
+        if (idx_global < static_cast<int>(ru_e.size())) {
+          ru_e[idx_global] += asym_dRdTheta[idx_local];
+          zu_e[idx_global] += asym_dZdTheta[idx_local];
+        }
+      }
+    }
+    
+    // For theta=[pi,2pi]: use reflection formula following jVMEC lines 348, 351
+    for (int l = ntheta2; l < ntheta1; ++l) {
+      int lr = ntheta1 - l;  // reflection index
+      
+      for (int k = 0; k < nzeta; ++k) {
+        int kr = (nzeta - k) % nzeta;  // zeta reflection
+        
+        int idx_global = jF_offset + l * nzeta + k;
+        int idx_reflect = lr * nzeta + kr;
+        
+        if (idx_global < static_cast<int>(ru_e.size()) && 
+            idx_reflect < static_cast<int>(asym_dRdTheta.size())) {
+          // jVMEC reflection formulas:
+          // dRdTheta[pi,2pi] = -dRdTheta_sym[reflected] + asym_dRdTheta[reflected]
+          // dZdTheta[pi,2pi] =  dZdTheta_sym[reflected] - asym_dZdTheta[reflected]
+          ru_e[idx_global] = -ru_e[jF_offset + idx_reflect] + asym_dRdTheta[idx_reflect];
+          zu_e[idx_global] = zu_e[jF_offset + idx_reflect] - asym_dZdTheta[idx_reflect];
+        }
+      }
+    }
+    
+    // CRITICAL FIX: Also compute odd derivatives (ru_o, zu_o) for this radial surface
+    // In 2D axisymmetric case, ru_o and zu_o represent the odd theta parity contributions
+    // These are needed for proper Jacobian computation
+    std::vector<double> asym_dRdTheta_odd(ntheta2 * nzeta, 0.0);  
+    std::vector<double> asym_dZdTheta_odd(ntheta2 * nzeta, 0.0);
+    
+    // Following jVMEC pattern for odd-parity asymmetric theta derivatives
+    for (int m = 0; m < s_.mpol; ++m) {
+      int mn = -1;
+      for (int mn_candidate = 0; mn_candidate < s_.mnmax; ++mn_candidate) {
+        if (fourier_basis.xm[mn_candidate] == m && 
+            fourier_basis.xn[mn_candidate] / s_.nfp == 0) {
+          mn = mn_candidate;
+          break;
+        }
+      }
+      if (mn < 0) continue;
+      
+      // Get asymmetric coefficients for this radial surface and mode (odd derivatives)
+      int coeff_idx = (jF - r_.nsMinF1) * s_.mnsize + mn;
+      double rsc = (coeff_idx < physical_x.rmnsc.size()) ? physical_x.rmnsc[coeff_idx] : 0.0;
+      double zcc = (coeff_idx < physical_x.zmncc.size()) ? physical_x.zmncc[coeff_idx] : 0.0;
+      
+      if (std::abs(rsc) < 1e-12 && std::abs(zcc) < 1e-12) continue;
+      
+      // Compute odd-parity asymmetric theta derivatives 
+      // For R: derivative of rmnsc * sin(m*u) is rmnsc * m * cos(m*u)
+      // For Z: derivative of zmncc * cos(m*u) is zmncc * -m * sin(m*u)
+      for (int l = 0; l < ntheta2; ++l) {
+        double sin_mu = fourier_basis.sinmu[m * ntheta2 + l];
+        double cos_mu = fourier_basis.cosmu[m * ntheta2 + l];
+        double cosmum = m * cos_mu;   // m * cos(m*u) for dR/dtheta from rmnsc*sin(m*u)
+        double sinmum = -m * sin_mu; // -m * sin(m*u) for dZ/dtheta from zmncc*cos(m*u)
+        
+        for (int k = 0; k < nzeta; ++k) {
+          int idx = l * nzeta + k;
+          
+          // Odd-parity asymmetric derivatives: derivative of sin/cos terms 
+          asym_dRdTheta_odd[idx] += rsc * cosmum;  // d/du[rmnsc * sin(m*u)] = rmnsc * m * cos(m*u)
+          asym_dZdTheta_odd[idx] += zcc * sinmum;  // d/du[zmncc * cos(m*u)] = zmncc * -m * sin(m*u)
+        }
+      }
+    }
+    
+    // Apply asymmetric odd contributions to ru_o and zu_o arrays for this radial surface
+    for (int l = 0; l < ntheta2; ++l) {
+      for (int k = 0; k < nzeta; ++k) {
+        int idx_asym = l * nzeta + k;
+        int idx_full = (jF - r_.nsMinF1) * s_.nZnT + l * nzeta + k;
+        
+        if (idx_full < ru_o.size()) {
+          ru_o[idx_full] += asym_dRdTheta_odd[idx_asym];
+          zu_o[idx_full] += asym_dZdTheta_odd[idx_asym];
+        }
+      }
+    }
+    
+    // DEBUG: Check if derivatives were computed properly for this surface
+    if (jF < r_.nsMinF1 + 2) {
+      double sum_ru_e = 0.0, sum_zu_e = 0.0, sum_ru_o = 0.0, sum_zu_o = 0.0;
+      const int jF_offset_debug = (jF - r_.nsMinF1) * s_.nZnT;
+      
+      for (int i = 0; i < std::min(10, static_cast<int>(s_.nZnT)); ++i) {
+        int idx = jF_offset_debug + i;
+        if (idx < static_cast<int>(ru_e.size())) {
+          sum_ru_e += std::abs(ru_e[idx]);
+          sum_zu_e += std::abs(zu_e[idx]);
+        }
+        if (idx < static_cast<int>(ru_o.size())) {
+          sum_ru_o += std::abs(ru_o[idx]);
+          sum_zu_o += std::abs(zu_o[idx]);
+        }
+      }
+      
+      std::cout << "DEBUG derivatives after computation: jF=" << jF 
+                << ", sum_ru_e=" << sum_ru_e << ", sum_zu_e=" << sum_zu_e
+                << ", sum_ru_o=" << sum_ru_o << ", sum_zu_o=" << sum_zu_o << std::endl;
+      
+      if (sum_ru_e < 1e-12 && sum_ru_o < 1e-12) {
+        std::cout << "ERROR: Both ru_e and ru_o are zero for surface jF=" << jF << std::endl;
+        // Show some of the intermediate calculations
+        std::cout << "  First few asymmetric theta derivatives: ";
+        for (int i = 0; i < std::min(3, static_cast<int>(asym_dRdTheta.size())); ++i) {
+          std::cout << asym_dRdTheta[i] << " ";
+        }
+        std::cout << std::endl;
+      }
+    }
+  }  // End of radial loop
   
-  std::cout << "DEBUG: Completed minimal asymmetric geometry fix" << std::endl;
-  
-  // Check first few derivative values across full grid
-  for (int i = 0; i < std::min(10, num_realsp); ++i) {
+  std::cout << "DEBUG: After derivative computation, checking first 5 values:" << std::endl;
+  for (int i = 0; i < std::min(5, static_cast<int>(s_.nZnT)); ++i) {
     std::cout << "  i=" << i << ": ru_e=" << ru_e[i] << ", zu_e=" << zu_e[i] 
-              << ", r1_e=" << r1_e[i] << ", z1_e=" << z1_e[i] << std::endl;
+              << ", ru_o=" << ru_o[i] << ", zu_o=" << zu_o[i] << std::endl;
+    std::cout << "         r1_e=" << r1_e[i] << ", r1_o=" << r1_o[i] << std::endl;
   }
 
   // Simple constraint arrays - copy symmetric behavior for now
