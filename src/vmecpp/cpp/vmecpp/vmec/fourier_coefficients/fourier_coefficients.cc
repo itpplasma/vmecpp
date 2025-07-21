@@ -112,10 +112,18 @@ void FourierCoeffs::decomposeInto(FourierCoeffs& m_x,
           m_x.lcc[idx_fc] = lcc[idx_fc] * scal;
           if (s_.lthreed) {
             if (jF < jMaxRZ) {
-              m_x.rcs[idx_fc] = rcs[idx_fc] * scal;
-              m_x.zss[idx_fc] = zss[idx_fc] * scal;
+              // Only access these arrays if they're allocated (lasym AND lthreed)
+              if (!rcs.empty() && !m_x.rcs.empty()) {
+                m_x.rcs[idx_fc] = rcs[idx_fc] * scal;
+              }
+              if (!zss.empty() && !m_x.zss.empty()) {
+                m_x.zss[idx_fc] = zss[idx_fc] * scal;
+              }
             }
-            m_x.lss[idx_fc] = lss[idx_fc] * scal;
+            // Only access lss if allocated
+            if (!lss.empty() && !m_x.lss.empty()) {
+              m_x.lss[idx_fc] = lss[idx_fc] * scal;
+            }
           }
         }
       }  // n
@@ -173,8 +181,13 @@ double FourierCoeffs::rzNorm(bool include_offset, int nsMinHere,
             local_norm2 += zcc[idx_fc] * zcc[idx_fc];
           }
           if (s_.lthreed) {
-            local_norm2 += rcs[idx_fc] * rcs[idx_fc];
-            local_norm2 += zss[idx_fc] * zss[idx_fc];
+            // Only access these arrays if they're allocated (lasym AND lthreed)
+            if (!rcs.empty()) {
+              local_norm2 += rcs[idx_fc] * rcs[idx_fc];
+            }
+            if (!zss.empty()) {
+              local_norm2 += zss[idx_fc] * zss[idx_fc];
+            }
           }
         }
       }  // n

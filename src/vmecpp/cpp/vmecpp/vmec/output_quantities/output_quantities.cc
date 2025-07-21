@@ -1982,11 +1982,11 @@ vmecpp::SymmetryDecomposedCovariantB vmecpp::DecomposeCovariantBBySymmetry(
       }  // kl
     }  // jF
     for (int jH = 0; jH < vmec_internal_results.num_half; ++jH) {
-      for (int kl = 0; kl < s.nZnT; ++kl) {
+      for (int kl = 0; kl < vmec_internal_results.nZnT_reduced; ++kl) {
         const int source_index = jH * s.nZnT + kl;
 
-        const int k = kl / s.nThetaEff;
-        const int l = kl % s.nThetaEff;
+        const int k = kl / s.nThetaReduced;
+        const int l = kl % s.nThetaReduced;
 
         const int l_reversed = (s.nThetaEven - l) % s.nThetaEven;
         const int k_reversed = (s.nZeta - k) % s.nZeta;
@@ -3770,9 +3770,9 @@ vmecpp::ComputeThreed1GeometricMagneticQuantities(
             std::sqrt(2.0 * (vmec_internal_results.total_pressure(index_half) -
                              vmec_internal_results.presH[jH]));
         result.bmax(jH * s.nThetaReduced + l) =
-            std::max(result.bmax(jH * s.nThetaEff + l), mod_b);
+            std::max(result.bmax(jH * s.nThetaReduced + l), mod_b);
         result.bmin(jH * s.nThetaReduced + l) =
-            std::min(result.bmin(jH * s.nThetaEff + l), mod_b);
+            std::min(result.bmin(jH * s.nThetaReduced + l), mod_b);
       }  // k
     }  // l
   }  // jH
