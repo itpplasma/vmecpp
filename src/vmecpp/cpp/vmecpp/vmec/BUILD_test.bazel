@@ -1,0 +1,12 @@
+cc_binary(
+    name = "test_symmetric_quick",
+    srcs = ["test_symmetric_quick.cc"],
+    deps = [
+        "//vmecpp/vmec/vmec:vmec",
+        "//vmecpp/common/vmec_indata:vmec_indata",
+        "//util/file_io:file_io",
+    ],
+    data = [
+        "//vmecpp/test_data:circular_tokamak",
+    ],
+)

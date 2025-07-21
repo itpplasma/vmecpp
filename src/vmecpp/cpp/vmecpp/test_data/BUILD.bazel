@@ -1,6 +1,14 @@
 # SPDX-FileCopyrightText: 2024-present Proxima Fusion GmbH <info@proximafusion.com>
 #
 # SPDX-License-Identifier: MIT
+
+filegroup(
+    name = "circular_tokamak_input",
+    visibility = ["//visibility:public"],
+    srcs = [
+        "circular_tokamak.json",
+    ],
+)
 filegroup(
     name = "solovev",
     visibility = ["//visibility:public"],
