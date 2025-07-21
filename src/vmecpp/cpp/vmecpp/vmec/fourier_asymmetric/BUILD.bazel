@@ -248,3 +248,15 @@ cc_test(
     ],
     size = "large",
 )
+
+cc_test(
+    name = "detailed_jvmec_step_comparison",
+    srcs = ["detailed_jvmec_step_comparison.cc"],
+    deps = [
+        "@googletest//:gtest_main",
+        "//vmecpp/vmec/vmec:vmec",
+        "//vmecpp/common/vmec_indata:vmec_indata",
+        "@nlohmann_json//:json",
+    ],
+    size = "large",
+)

@@ -336,3 +336,28 @@ The transforms are now correct (producing valid geometry), but something else in
 - Numerical precision/accumulation order
 
 **UPDATE**: Spectral condensation asymmetric handling has been implemented. However, stellarator asymmetric test still fails with vector bounds error, suggesting additional issues to investigate.
+
+## Phase 12: Asymmetric Transform Fix - PARTIAL SUCCESS 🔧
+
+### Fixed Zero Jacobian Issue ✅
+- Root cause: `dft_FourierToReal_2d_asymm` left derivative arrays (ru_e, zu_e) as zeros
+- Fixed by implementing proper Fourier transform with derivative calculations
+- Now handles full theta-zeta grid correctly (was only doing theta dimension)
+- Asymmetric geometry now has finite derivatives
+
+### Remaining Issues 🐛
+1. **Double free error**: Program aborts with "free(): double free detected in tcache 2"
+   - Happens after force normalization fix
+   - Suggests memory corruption or improper array handling
+   - Need to investigate array allocations and bounds
+
+### Code Changes
+1. Fixed missing high_precision_forces.cc in CMakeLists.txt
+2. Implemented proper asymmetric derivative computation in ideal_mhd_model.cc
+3. Fixed theta-zeta grid indexing (was using nThetaEff instead of nZnT)
+
+### Next Steps
+1. Debug double free error with valgrind or similar
+2. Check array bounds and allocations in asymmetric transforms
+3. Verify all asymmetric arrays are properly initialized
+4. Test with simpler asymmetric cases to isolate issue

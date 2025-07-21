@@ -1,0 +1,48 @@
+!  jVMEC input for exact VMEC++ comparison
+!  This should produce identical results to VMEC++ microscopic test
+!
+&INDATA
+! Grid resolution
+NS_ARRAY = 5
+MPOL = 3
+NTOR = 0
+
+! Iteration control  
+NITER = 5
+FTOL_ARRAY = 1.0E-06
+DELT = 0.9
+TCON0 = 1.0
+
+! CRITICAL: Enable asymmetric mode
+LASYM = T
+
+! Profiles
+PCURR_TYPE = 'power_series'
+PIOTA_TYPE = 'power_series'
+AI(0) = 0.4
+AI(1) = 0.0
+AC(0) = 0.0
+AC(1) = 0.0
+AM(0) = 0.0
+AM(1) = 1.0
+AM(2) = 0.0
+
+! Boundary - SYMMETRIC baseline
+RBC(0,0) = 1.0    ! Major radius
+RBC(0,1) = 0.3    ! Minor radius
+
+ZBS(0,1) = 0.3    ! Height
+
+! Boundary - ASYMMETRIC perturbation (0.1%)
+RBS(0,1) = 0.001  ! CRITICAL: This tiny asymmetric term
+
+! Free boundary
+LFREEB = F
+MGRID_FILE = ''
+/
+
+! Expected jVMEC output to compare with VMEC++:
+! 1. Check if jVMEC gets zero Jacobian gsqrt at same grid points
+! 2. Check final force residuals match VMEC++
+! 3. Check iteration behavior matches VMEC++
+! 4. Check if jVMEC has different numerical safeguards

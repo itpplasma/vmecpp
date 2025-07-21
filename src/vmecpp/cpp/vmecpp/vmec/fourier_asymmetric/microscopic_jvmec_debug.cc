@@ -187,4 +187,89 @@ TEST_F(MicroscopicJVMECDebug, SymmetricBaselineForComparison) {
     EXPECT_TRUE(true) << "Symmetric baseline comparison completed";
 }
 
+TEST_F(MicroscopicJVMECDebug, ExactJVMECStepByStepComparison) {
+    std::cout << "\n=== EXACT STEP-BY-STEP jVMEC COMPARISON ===" << std::endl;
+    std::cout << "Testing identical configuration and looking for every tiny difference" << std::endl;
+    
+    // Use SAME configuration as previous test but with extra analysis
+    json config = {
+        {"ns_array", {5}},
+        {"nfp", 1},
+        {"mpol", 3}, 
+        {"ntor", 0},
+        {"niter", 5},
+        {"delt", 0.9},
+        {"ftol_array", {1e-06}},
+        {"tcon0", 1.0},
+        {"lasym", true},
+        {"am", {0.0, 1.0, 0.0}},
+        {"ac", {0.0, 0.0, 0.0}},
+        {"pcurr_type", "power_series"},
+        {"piota_type", "power_series"},
+        {"ai", {0.4, 0.0}},
+        {"ac", {0.0, 0.0}},
+        {"mgrid_file", ""},
+        {"rbc", {
+            {{"n", 0}, {"m", 0}, {"value", 1.0}},
+            {{"n", 0}, {"m", 1}, {"value", 0.3}}
+        }},
+        {"zbs", {
+            {{"n", 0}, {"m", 1}, {"value", 0.3}}
+        }},
+        {"rbs", {
+            {{"n", 0}, {"m", 1}, {"value", 0.001}}  // This 0.1% asymmetry is key
+        }},
+        {"zbc", {}}
+    };
+    
+    std::cout << "\n=== CONFIGURATION FOR JVMEC COMPARISON ===" << std::endl;
+    std::cout << "Simple asymmetric tokamak:" << std::endl;
+    std::cout << "- RBC(0,0) = 1.0 (major radius)" << std::endl;
+    std::cout << "- RBC(0,1) = 0.3 (minor radius)" << std::endl;
+    std::cout << "- ZBS(0,1) = 0.3 (height)" << std::endl;
+    std::cout << "- RBS(0,1) = 0.001 (0.1% ASYMMETRIC perturbation)" << std::endl;
+    std::cout << "- ns = 5, mpol = 3, ntor = 0" << std::endl;
+    std::cout << "- niter = 5 (to catch differences early)" << std::endl;
+    
+    auto indata_result = VmecINDATA::FromJson(config);
+    ASSERT_TRUE(indata_result.ok()) << "Failed to create input: " << indata_result.status();
+    
+    std::cout << "\n=== VMEC++ EXECUTION ===" << std::endl;
+    auto output = vmecpp::run(indata_result.value());
+    
+    if (output.ok()) {
+        const auto& wout = output->wout;
+        std::cout << "\n=== VMEC++ RESULTS FOR JVMEC COMPARISON ===" << std::endl;
+        std::cout << "✅ SUCCESS: VMEC++ converged!" << std::endl;
+        std::cout << "Final fsqr (R force residual): " << wout.fsqr << std::endl;
+        std::cout << "Final fsqz (Z force residual): " << wout.fsqz << std::endl;
+        std::cout << "Final fsql (Lambda force residual): " << wout.fsql << std::endl;
+        std::cout << "MHD Energy (wb): " << wout.wb << std::endl;
+        std::cout << "Volume: " << wout.volume_p << std::endl;
+        std::cout << "Iterations: " << wout.itfsq << std::endl;
+        
+        std::cout << "\n=== FOR JVMEC COMPARISON ===" << std::endl;
+        std::cout << "Run jVMEC with IDENTICAL input:" << std::endl;
+        std::cout << "- Same ns=5, mpol=3, ntor=0, niter=5" << std::endl;
+        std::cout << "- Same RBC(0,0)=1.0, RBC(0,1)=0.3" << std::endl;
+        std::cout << "- Same ZBS(0,1)=0.3" << std::endl;
+        std::cout << "- Same RBS(0,1)=0.001 (CRITICAL: this asymmetric term)" << std::endl;
+        std::cout << "- Same ftol=1e-06, tcon0=1.0, delt=0.9" << std::endl;
+        std::cout << "- Same pressure profile: pcurr_type=power_series, ai=[0.4, 0.0]" << std::endl;
+        
+        std::cout << "\n=== COMPARISON CHECKLIST ===" << std::endl;
+        std::cout << "1. Check iteration table matches (should be similar force evolution)" << std::endl;
+        std::cout << "2. Check final force residuals (fsqr, fsqz, fsql) are similar" << std::endl;
+        std::cout << "3. Check final MHD energy (wb) is similar" << std::endl;
+        std::cout << "4. Check volume is similar" << std::endl;
+        std::cout << "5. Any significant differences indicate algorithm discrepancies" << std::endl;
+        
+        EXPECT_TRUE(true) << "Test completed - compare with jVMEC manually";
+    } else {
+        std::cout << "❌ VMEC++ failed: " << output.status() << std::endl;
+        std::cout << "This is the exact difference to investigate with jVMEC!" << std::endl;
+        EXPECT_TRUE(false) << "VMEC++ should converge for simple asymmetric case";
+    }
+}
+
 } // namespace vmecpp

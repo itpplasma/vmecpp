@@ -14,4 +14,8 @@ add_subdirectory(radial_profiles)
 add_subdirectory(thread_local_storage)
 add_subdirectory(vmec)
 add_subdirectory(vmec_constants)
+
+# Add high precision forces
+set(vmecpp_sources ${vmecpp_sources} ${CMAKE_CURRENT_SOURCE_DIR}/high_precision_forces.cc)
+
 set (vmecpp_sources "${vmecpp_sources}" PARENT_SCOPE)
