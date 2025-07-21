@@ -1,0 +1,8 @@
+suffix:             'dat'
+in_coordinates:     './edge.dat'
+mode numbers:        mpol   ntor
+                     10     0
+num. parameters:     niter  nstep  iwrite(long)   ivmec
+                     100000  100   'long'         'namelist'
+                     ftol       pexp    qexp
+                     3.e-15      4.     1.

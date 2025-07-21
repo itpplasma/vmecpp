@@ -1276,16 +1276,10 @@ void IdealMhdModel::geometryFromFourier(const FourierGeometry& physical_x) {
   std::cout << "DEBUG geometryFromFourier: lasym=" << s_.lasym
             << ", lthreed=" << s_.lthreed << std::endl;
 
-  // symmetric contribution is always needed
-  if (s_.lthreed) {
-    dft_FourierToReal_3d_symm(physical_x);
-  } else {
-    dft_FourierToReal_2d_symm(physical_x);
-  }
-
   if (s_.lasym) {
-    // asymmetric contribution needed for non-symmetric equilibria
-    std::cout << "DEBUG: Processing asymmetric contribution" << std::endl;
+    // For asymmetric equilibria, use the asymmetric transform which handles BOTH
+    // symmetric and asymmetric contributions together
+    std::cout << "DEBUG: Processing asymmetric equilibrium (includes symmetric baseline)" << std::endl;
 
     // Check physical_x arrays
     std::cout << "DEBUG: physical_x.rmnsc size=" << physical_x.rmnsc.size()
@@ -1309,32 +1303,25 @@ void IdealMhdModel::geometryFromFourier(const FourierGeometry& physical_x) {
       std::cout
           << "DEBUG: After 2D asymmetric transform, checking first few values:"
           << std::endl;
-      for (int i = 0; i < std::min(10, static_cast<int>(s_.nZnT)); ++i) {
-        double r_val = m_ls_.r1e_i[i];
-        double z_val = m_ls_.z1e_i[i];
-        std::cout << "  i=" << i << ": R=" << r_val << ", Z=" << z_val;
-        if (!std::isfinite(r_val) || !std::isfinite(z_val)) {
-          std::cout << " <-- NON-FINITE!";
-        }
-        std::cout << std::endl;
+      for (int i = 0; i < std::min(10, static_cast<int>(r1_e.size())); ++i) {
+        std::cout << "  i=" << i << ": r1_e=" << r1_e[i] << ", z1_e=" << z1_e[i] 
+                  << ", ru_e=" << ru_e[i] << ", zu_e=" << zu_e[i] << std::endl;
       }
     }
 
     // symmetrize geometry components
-    std::cout << "DEBUG: Calling symrzl_geometry" << std::endl;
-    symrzl_geometry(physical_x);
-
-    // DEBUG: Check values after symmetrization
-    std::cout << "DEBUG: After symrzl_geometry, checking first few values:"
-              << std::endl;
-    for (int i = 0; i < std::min(10, static_cast<int>(s_.nZnT)); ++i) {
-      double r_val = m_ls_.r1e_i[i];
-      double z_val = m_ls_.z1e_i[i];
-      std::cout << "  i=" << i << ": R=" << r_val << ", Z=" << z_val;
-      if (!std::isfinite(r_val) || !std::isfinite(z_val)) {
-        std::cout << " <-- NON-FINITE!";
-      }
-      std::cout << std::endl;
+    // NOTE: symrzl_geometry is NOT needed for 2D since the asymmetric
+    // transform already handles stellarator symmetry internally
+    // std::cout << "DEBUG: Calling symrzl_geometry" << std::endl;
+    // symrzl_geometry(physical_x);
+  } else {
+    // For symmetric equilibria, use the standard symmetric transforms
+    std::cout << "DEBUG: Processing symmetric equilibrium" << std::endl;
+    
+    if (s_.lthreed) {
+      dft_FourierToReal_3d_symm(physical_x);
+    } else {
+      dft_FourierToReal_2d_symm(physical_x);
     }
   }  // lasym
 
@@ -3980,21 +3967,9 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
   // COMPLETE IMPLEMENTATION: Compute values AND derivatives together
   // following jVMEC pattern from FourierTransformsJava.java lines 255-333
   
-  const int num_realsp = (r_.nsMaxF1 - r_.nsMinF1) * s_.nZnT;
-
-  for (auto* v :
-       {&r1_e, &r1_o, &ru_e, &ru_o, &z1_e, &z1_o, &zu_e, &zu_o, &lu_e, &lu_o}) {
-    absl::c_fill_n(*v, num_realsp, 0);
-  }
-
-  int num_con = (r_.nsMaxFIncludingLcfs - r_.nsMinF) * s_.nThetaEff;
-  absl::c_fill_n(rCon, num_con, 0);
-  absl::c_fill_n(zCon, num_con, 0);
-
-// need to wait for other threads to have filled _i and _o arrays above
-#ifdef _OPENMP
-#pragma omp barrier
-#endif  // _OPENMP
+  // CRITICAL FIX: DO NOT zero out arrays - we need to ADD to symmetric baseline!
+  // The symmetric transform has already computed the baseline values.
+  // We only add the asymmetric contributions here.
 
   // Get basis functions for derivative computation
   FourierBasisFastPoloidal fourier_basis(&s_);
@@ -4127,15 +4102,21 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
         absl::Span<double>(surface_Z.data(), ntheta1 * nzeta),
         absl::Span<double>(surface_L.data(), ntheta1 * nzeta));
     
-    // Copy computed geometry to main arrays
+    // Copy computed geometry to main arrays - contains BOTH symmetric and asymmetric
     const int jF_geom_offset = (jF - r_.nsMinF1) * s_.nZnT;
     for (int kl = 0; kl < s_.nZnT; ++kl) {
-      r1_e[jF_geom_offset + kl] = surface_R[kl];  // Use first nZnT elements
+      r1_e[jF_geom_offset + kl] = surface_R[kl];  // Full geometry (sym + asym)
       r1_o[jF_geom_offset + kl] = 0.0;  // Odd parity starts at zero for 2D
-      z1_e[jF_geom_offset + kl] = surface_Z[kl];
+      z1_e[jF_geom_offset + kl] = surface_Z[kl];  // Full geometry (sym + asym)
       z1_o[jF_geom_offset + kl] = 0.0;
-      lu_e[jF_geom_offset + kl] = surface_L[kl];
+      lu_e[jF_geom_offset + kl] = surface_L[kl];  // Full geometry (sym + asym)
       lu_o[jF_geom_offset + kl] = 0.0;
+      
+      // DETAILED GEOMETRY DEBUGGING for first few points
+      if (jF == r_.nsMinF1 + 1 && kl <= 5) {
+        std::cout << "VMEC++ GEOMETRY: jF=" << jF << ", kl=" << kl
+                  << ", R=" << surface_R[kl] << ", Z=" << surface_Z[kl] << std::endl;
+      }
     }
     
     // STEP B: Compute derivatives using jVMEC pattern 
@@ -4167,6 +4148,13 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
                   << ", coeff_idx=" << coeff_idx << ", rsc=" << rsc << ", zcc=" << zcc << std::endl;
       }
       
+      // DETAILED COEFFICIENT DEBUGGING for jVMEC comparison
+      if (jF == r_.nsMinF1 + 1) {  // Focus on surface jF=2 (first interior surface)
+        std::cout << "VMEC++ COEFF DETAIL: jF=" << jF << ", m=" << m 
+                  << ", rmnsc[" << coeff_idx << "]=" << rsc 
+                  << ", zmncc[" << coeff_idx << "]=" << zcc << std::endl;
+      }
+      
       if (std::abs(rsc) < 1e-12 && std::abs(zcc) < 1e-12) continue;
       
       // Compute derivatives for theta=[0,pi] following jVMEC pattern
@@ -4182,6 +4170,15 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
           // Following jVMEC lines 303, 306 exactly
           asym_dRdTheta[idx] += rsc * cosmum;  // rmnsc * m * cos(m*u)
           asym_dZdTheta[idx] += zcc * sinmum;  // zmncc * -m * sin(m*u)
+          
+          // DETAILED DERIVATIVE DEBUGGING for multiple theta points
+          if (jF == r_.nsMinF1 + 1 && l <= 3 && k == 0 && m == 1) {
+            std::cout << "VMEC++ DERIV DETAIL: m=" << m << ", l=" << l << ", k=" << k
+                      << ", sin_mu=" << sin_mu << ", cos_mu=" << cos_mu
+                      << ", cosmum=" << cosmum << ", sinmum=" << sinmum
+                      << ", contrib_dRdTheta=" << (rsc * cosmum)
+                      << ", contrib_dZdTheta=" << (zcc * sinmum) << std::endl;
+          }
         }
       }
     }
@@ -4197,6 +4194,13 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
         
         if (idx_global < static_cast<int>(ru_e.size())) {
           ru_e[idx_global] += asym_dRdTheta[idx_local];
+          
+          // DETAILED FINAL DERIVATIVE DEBUGGING
+          if (jF == r_.nsMinF1 + 1 && l <= 2 && k == 0) {
+            std::cout << "VMEC++ FINAL DERIV: jF=" << jF << ", l=" << l << ", k=" << k
+                      << ", asym_dRdTheta=" << asym_dRdTheta[idx_local]
+                      << ", ru_e[" << idx_global << "]=" << ru_e[idx_global] << std::endl;
+          }
           zu_e[idx_global] += asym_dZdTheta[idx_local];
         }
       }

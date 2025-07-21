@@ -149,7 +149,61 @@ void FourierToReal2DAsymmFastPoloidal(
 
   // For 2D case (ntor=0), only n=0 modes exist
   // cosnv=1, sinnv=0 for all n=0
+  
+  // STEP 1: First compute symmetric baseline contributions
+  // Process symmetric coefficients (rmncc, zmnsc) for all theta points
+  for (int m = 0; m < sizes.mpol; ++m) {
+    // Find mode mn for (m,n=0)
+    int mn = -1;
+    for (int mn_candidate = 0; mn_candidate < sizes.mnmax; ++mn_candidate) {
+      if (fourier_basis.xm[mn_candidate] == m &&
+          fourier_basis.xn[mn_candidate] / sizes.nfp == 0) {
+        mn = mn_candidate;
+        break;
+      }
+    }
+    if (mn < 0) continue;  // mode not found
+    
+    // Get symmetric coefficients for this mode
+    double rcc = (mn < rmncc.size()) ? rmncc[mn] : 0.0;
+    double zsc = (mn < zmnsc.size()) ? zmnsc[mn] : 0.0;
+    
+    if (std::abs(rcc) < 1e-12 && std::abs(zsc) < 1e-12) continue;
+    
+    // Compute symmetric baseline for theta=[0,pi]
+    for (int l = 0; l < ntheta2; ++l) {
+      double sin_mu = fourier_basis.sinmu[m * sizes.nThetaReduced + l];
+      double cos_mu = fourier_basis.cosmu[m * sizes.nThetaReduced + l];
+      
+      for (int k = 0; k < nzeta; ++k) {
+        int idx = l * nzeta + k;
+        
+        // Symmetric contributions: R ~ cos(m*theta), Z ~ sin(m*theta)
+        r_real[idx] += rcc * cos_mu;  // rmncc * cosmu
+        z_real[idx] += zsc * sin_mu;  // zmnsc * sinmu
+      }
+    }
+  }
+  
+  // Handle stellarator symmetry for symmetric baseline in theta=[pi,2pi]
+  for (int l = ntheta2; l < ntheta1; ++l) {
+    int lr = ntheta1 - l;  // reflection index
+    
+    for (int k = 0; k < nzeta; ++k) {
+      int kr = (nzeta - k) % nzeta;  // zeta reflection
+      int idx = l * nzeta + k;
+      int idx_reflect = lr * nzeta + kr;
+      
+      if (idx >= r_real.size() || idx_reflect >= r_real.size()) continue;
+      
+      // Apply stellarator symmetry for symmetric baseline
+      r_real[idx] = r_real[idx_reflect];   // R has even parity
+      z_real[idx] = -z_real[idx_reflect];  // Z has odd parity
+      lambda_real[idx] = lambda_real[idx_reflect];  // Lambda has even parity
+    }
+  }
 
+  // STEP 2: Process asymmetric contributions
   // Process each poloidal mode m
   for (int m = 0; m < sizes.mpol; ++m) {
     // Find mode mn for (m,n=0)
@@ -163,7 +217,7 @@ void FourierToReal2DAsymmFastPoloidal(
     }
     if (mn < 0) continue;  // mode not found
 
-    // Get coefficients for this mode
+    // Get asymmetric coefficients for this mode
     double rsc = (mn < rmnsc.size()) ? rmnsc[mn] : 0.0;
     double zcc = (mn < zmncc.size()) ? zmncc[mn] : 0.0;
 

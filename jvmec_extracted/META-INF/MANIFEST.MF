@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Created-By: Maven Jar Plugin 3.2.0
+Build-Jdk-Spec: 21
+Specification-Title: jVMEC
+Specification-Version: 1.0
+Implementation-Title: jVMEC
+Implementation-Version: 1.0.0
+Build-Branch: 
+Build-Revision: 
+Build-Timestamp: 2025-07-19T08:03:21Z
+
