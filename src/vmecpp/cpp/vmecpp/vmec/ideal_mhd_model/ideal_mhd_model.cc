@@ -3967,9 +3967,12 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
   // COMPLETE IMPLEMENTATION: Compute values AND derivatives together
   // following jVMEC pattern from FourierTransformsJava.java lines 255-333
   
-  // CRITICAL FIX: DO NOT zero out arrays - we need to ADD to symmetric baseline!
-  // The symmetric transform has already computed the baseline values.
-  // We only add the asymmetric contributions here.
+  // Initialize arrays to zero - the asymmetric transform computes BOTH
+  // symmetric and asymmetric contributions together
+  const int num_realsp = (r_.nsMaxF1 - r_.nsMinF1) * s_.nThetaEff;
+  for (auto* v : {&r1_e, &r1_o, &ru_e, &ru_o, &z1_e, &z1_o, &zu_e, &zu_o}) {
+    absl::c_fill_n(*v, num_realsp, 0);
+  }
 
   // Get basis functions for derivative computation
   FourierBasisFastPoloidal fourier_basis(&s_);
@@ -4094,23 +4097,34 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
                            physical_x.zmnss.subspan(coeff_offset, coeff_size) :
                            absl::Span<const double>();
     
-    // Call 2D asymmetric transform for this radial surface
-    FourierToReal2DAsymmFastPoloidal(
+    // Create separate arrays for even and odd m-parity
+    std::vector<double> surface_R_even(ntheta1 * nzeta, 0.0);
+    std::vector<double> surface_R_odd(ntheta1 * nzeta, 0.0);
+    std::vector<double> surface_Z_even(ntheta1 * nzeta, 0.0);
+    std::vector<double> surface_Z_odd(ntheta1 * nzeta, 0.0);
+    std::vector<double> surface_L_even(ntheta1 * nzeta, 0.0);
+    std::vector<double> surface_L_odd(ntheta1 * nzeta, 0.0);
+    
+    // Call 2D asymmetric transform with proper m-parity separation
+    FourierToReal2DAsymmFastPoloidalWithParity(
         s_, rmncc_surface, rmnss_surface, rmnsc_surface, rmncs_surface,
         zmnsc_surface, zmncs_surface, zmncc_surface, zmnss_surface,
-        absl::Span<double>(surface_R.data(), ntheta1 * nzeta),
-        absl::Span<double>(surface_Z.data(), ntheta1 * nzeta),
-        absl::Span<double>(surface_L.data(), ntheta1 * nzeta));
+        absl::Span<double>(surface_R_even.data(), ntheta1 * nzeta),
+        absl::Span<double>(surface_R_odd.data(), ntheta1 * nzeta),
+        absl::Span<double>(surface_Z_even.data(), ntheta1 * nzeta),
+        absl::Span<double>(surface_Z_odd.data(), ntheta1 * nzeta),
+        absl::Span<double>(surface_L_even.data(), ntheta1 * nzeta),
+        absl::Span<double>(surface_L_odd.data(), ntheta1 * nzeta));
     
-    // Copy computed geometry to main arrays - contains BOTH symmetric and asymmetric
+    // Copy computed geometry to main arrays with proper parity separation
     const int jF_geom_offset = (jF - r_.nsMinF1) * s_.nZnT;
     for (int kl = 0; kl < s_.nZnT; ++kl) {
-      r1_e[jF_geom_offset + kl] = surface_R[kl];  // Full geometry (sym + asym)
-      r1_o[jF_geom_offset + kl] = 0.0;  // Odd parity starts at zero for 2D
-      z1_e[jF_geom_offset + kl] = surface_Z[kl];  // Full geometry (sym + asym)
-      z1_o[jF_geom_offset + kl] = 0.0;
-      lu_e[jF_geom_offset + kl] = surface_L[kl];  // Full geometry (sym + asym)
-      lu_o[jF_geom_offset + kl] = 0.0;
+      r1_e[jF_geom_offset + kl] = surface_R_even[kl];  // Even-m modes
+      r1_o[jF_geom_offset + kl] = surface_R_odd[kl];   // Odd-m modes
+      z1_e[jF_geom_offset + kl] = surface_Z_even[kl];  // Even-m modes
+      z1_o[jF_geom_offset + kl] = surface_Z_odd[kl];   // Odd-m modes
+      lu_e[jF_geom_offset + kl] = surface_L_even[kl];  // Even-m modes
+      lu_o[jF_geom_offset + kl] = surface_L_odd[kl];   // Odd-m modes
       
       // DETAILED GEOMETRY DEBUGGING for first few points
       if (jF == r_.nsMinF1 + 1 && kl <= 5) {
@@ -4119,12 +4133,67 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
       }
     }
     
-    // STEP B: Compute derivatives using jVMEC pattern 
-    // Temporary arrays for asymmetric derivatives [0, pi] only
-    std::vector<double> asym_dRdTheta(ntheta2 * nzeta, 0.0);
-    std::vector<double> asym_dZdTheta(ntheta2 * nzeta, 0.0);
+    // STEP B: Compute derivatives with proper m-parity separation
+    // We need to compute derivatives for both symmetric and asymmetric contributions
+    // and separate them by even/odd m-parity
     
-    // Compute asymmetric derivative contributions following jVMEC lines 302-306
+    // Temporary arrays for derivatives [0, 2pi]
+    std::vector<double> dRdTheta_even(ntheta1 * nzeta, 0.0);
+    std::vector<double> dRdTheta_odd(ntheta1 * nzeta, 0.0);
+    std::vector<double> dZdTheta_even(ntheta1 * nzeta, 0.0);
+    std::vector<double> dZdTheta_odd(ntheta1 * nzeta, 0.0);
+    
+    // Temporary arrays for asymmetric derivative contributions [0, pi] only
+    std::vector<double> asym_dRdTheta_even(ntheta2 * nzeta, 0.0);
+    std::vector<double> asym_dRdTheta_odd(ntheta2 * nzeta, 0.0);
+    std::vector<double> asym_dZdTheta_even(ntheta2 * nzeta, 0.0);
+    std::vector<double> asym_dZdTheta_odd(ntheta2 * nzeta, 0.0);
+    
+    // STEP B1: Compute SYMMETRIC derivatives with m-parity separation
+    for (int m = 0; m < s_.mpol; ++m) {
+      // Find mode mn for (m,n=0)
+      int mn = -1;
+      for (int mn_candidate = 0; mn_candidate < s_.mnmax; ++mn_candidate) {
+        if (fourier_basis.xm[mn_candidate] == m && 
+            fourier_basis.xn[mn_candidate] / s_.nfp == 0) {
+          mn = mn_candidate;
+          break;
+        }
+      }
+      if (mn < 0) continue;
+      
+      // Get symmetric coefficients
+      int coeff_idx = (jF - r_.nsMinF1) * s_.mnsize + mn;
+      double rcc = (coeff_idx < physical_x.rmncc.size()) ? physical_x.rmncc[coeff_idx] : 0.0;
+      double zsc = (coeff_idx < physical_x.zmnsc.size()) ? physical_x.zmnsc[coeff_idx] : 0.0;
+      
+      if (std::abs(rcc) < 1e-12 && std::abs(zsc) < 1e-12) continue;
+      
+      const bool is_even_m = (m % 2 == 0);
+      
+      // Compute symmetric derivatives for theta=[0,pi]
+      for (int l = 0; l < ntheta2; ++l) {
+        double sin_mu = fourier_basis.sinmu[m * ntheta2 + l];
+        double cos_mu = fourier_basis.cosmu[m * ntheta2 + l];
+        double cosmum = -m * sin_mu;  // d/du[cos(m*u)] = -m * sin(m*u)
+        double sinmum = m * cos_mu;   // d/du[sin(m*u)] = m * cos(m*u)
+        
+        for (int k = 0; k < nzeta; ++k) {
+          int idx = l * nzeta + k;
+          
+          // Symmetric derivatives: dR/du from cos, dZ/du from sin
+          if (is_even_m) {
+            dRdTheta_even[idx] += rcc * cosmum;  // d/du[rmncc * cos(m*u)]
+            dZdTheta_even[idx] += zsc * sinmum;  // d/du[zmnsc * sin(m*u)]
+          } else {
+            dRdTheta_odd[idx] += rcc * cosmum;
+            dZdTheta_odd[idx] += zsc * sinmum;
+          }
+        }
+      }
+    }
+    
+    // STEP B2: Compute ASYMMETRIC derivative contributions with m-parity separation
     for (int m = 0; m < s_.mpol; ++m) {
       // Find mode mn for (m,n=0) - 2D axisymmetric case
       int mn = -1;
@@ -4157,19 +4226,26 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
       
       if (std::abs(rsc) < 1e-12 && std::abs(zcc) < 1e-12) continue;
       
-      // Compute derivatives for theta=[0,pi] following jVMEC pattern
+      const bool is_even_m = (m % 2 == 0);
+      
+      // Compute asymmetric derivatives for theta=[0,pi]
       for (int l = 0; l < ntheta2; ++l) {
         double sin_mu = fourier_basis.sinmu[m * ntheta2 + l];
         double cos_mu = fourier_basis.cosmu[m * ntheta2 + l];
-        double cosmum = m * cos_mu;   // m * cos(m*u) for dR/dtheta 
-        double sinmum = -m * sin_mu;  // -m * sin(m*u) for dZ/dtheta
+        double cosmum = m * cos_mu;   // d/du[sin(m*u)] = m * cos(m*u)
+        double sinmum = -m * sin_mu;  // d/du[cos(m*u)] = -m * sin(m*u)
         
         for (int k = 0; k < nzeta; ++k) {
           int idx = l * nzeta + k;
           
-          // Following jVMEC lines 303, 306 exactly
-          asym_dRdTheta[idx] += rsc * cosmum;  // rmnsc * m * cos(m*u)
-          asym_dZdTheta[idx] += zcc * sinmum;  // zmncc * -m * sin(m*u)
+          // Asymmetric derivatives: dR/du from sin, dZ/du from cos
+          if (is_even_m) {
+            asym_dRdTheta_even[idx] += rsc * cosmum;  // d/du[rmnsc * sin(m*u)]
+            asym_dZdTheta_even[idx] += zcc * sinmum;  // d/du[zmncc * cos(m*u)]
+          } else {
+            asym_dRdTheta_odd[idx] += rsc * cosmum;
+            asym_dZdTheta_odd[idx] += zcc * sinmum;
+          }
           
           // DETAILED DERIVATIVE DEBUGGING for multiple theta points
           if (jF == r_.nsMinF1 + 1 && l <= 3 && k == 0 && m == 1) {
@@ -4183,106 +4259,49 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
       }
     }
     
-    // Copy derivatives to full arrays
-    const int jF_offset = (jF - r_.nsMinF1) * s_.nZnT;
-    
-    // For theta=[0,pi]: add asymmetric derivatives to existing symmetric ones
+    // STEP B3: Combine symmetric and asymmetric derivatives for theta=[0,pi]
     for (int l = 0; l < ntheta2; ++l) {
       for (int k = 0; k < nzeta; ++k) {
-        int idx_local = l * nzeta + k;
-        int idx_global = jF_offset + idx_local;
+        int idx = l * nzeta + k;
         
-        if (idx_global < static_cast<int>(ru_e.size())) {
-          ru_e[idx_global] += asym_dRdTheta[idx_local];
-          
-          // DETAILED FINAL DERIVATIVE DEBUGGING
-          if (jF == r_.nsMinF1 + 1 && l <= 2 && k == 0) {
-            std::cout << "VMEC++ FINAL DERIV: jF=" << jF << ", l=" << l << ", k=" << k
-                      << ", asym_dRdTheta=" << asym_dRdTheta[idx_local]
-                      << ", ru_e[" << idx_global << "]=" << ru_e[idx_global] << std::endl;
-          }
-          zu_e[idx_global] += asym_dZdTheta[idx_local];
-        }
+        // Add asymmetric to symmetric derivatives
+        dRdTheta_even[idx] += asym_dRdTheta_even[idx];
+        dRdTheta_odd[idx] += asym_dRdTheta_odd[idx];
+        dZdTheta_even[idx] += asym_dZdTheta_even[idx];
+        dZdTheta_odd[idx] += asym_dZdTheta_odd[idx];
       }
     }
     
-    // For theta=[pi,2pi]: use reflection formula following jVMEC lines 348, 351
+    // STEP B4: Apply stellarator symmetry for derivatives in theta=[pi,2pi]
     for (int l = ntheta2; l < ntheta1; ++l) {
       int lr = ntheta1 - l;  // reflection index
       
       for (int k = 0; k < nzeta; ++k) {
-        int kr = (nzeta - k) % nzeta;  // zeta reflection
-        
-        int idx_global = jF_offset + l * nzeta + k;
+        int kr = (nzeta - k) % nzeta;
+        int idx = l * nzeta + k;
         int idx_reflect = lr * nzeta + kr;
         
-        if (idx_global < static_cast<int>(ru_e.size()) && 
-            idx_reflect < static_cast<int>(asym_dRdTheta.size())) {
-          // jVMEC reflection formulas:
-          // dRdTheta[pi,2pi] = -dRdTheta_sym[reflected] + asym_dRdTheta[reflected]
-          // dZdTheta[pi,2pi] =  dZdTheta_sym[reflected] - asym_dZdTheta[reflected]
-          ru_e[idx_global] = -ru_e[jF_offset + idx_reflect] + asym_dRdTheta[idx_reflect];
-          zu_e[idx_global] = zu_e[jF_offset + idx_reflect] - asym_dZdTheta[idx_reflect];
-        }
-      }
-    }
-    
-    // CRITICAL FIX: Also compute odd derivatives (ru_o, zu_o) for this radial surface
-    // In 2D axisymmetric case, ru_o and zu_o represent the odd theta parity contributions
-    // These are needed for proper Jacobian computation
-    std::vector<double> asym_dRdTheta_odd(ntheta2 * nzeta, 0.0);  
-    std::vector<double> asym_dZdTheta_odd(ntheta2 * nzeta, 0.0);
-    
-    // Following jVMEC pattern for odd-parity asymmetric theta derivatives
-    for (int m = 0; m < s_.mpol; ++m) {
-      int mn = -1;
-      for (int mn_candidate = 0; mn_candidate < s_.mnmax; ++mn_candidate) {
-        if (fourier_basis.xm[mn_candidate] == m && 
-            fourier_basis.xn[mn_candidate] / s_.nfp == 0) {
-          mn = mn_candidate;
-          break;
-        }
-      }
-      if (mn < 0) continue;
-      
-      // Get asymmetric coefficients for this radial surface and mode (odd derivatives)
-      int coeff_idx = (jF - r_.nsMinF1) * s_.mnsize + mn;
-      double rsc = (coeff_idx < physical_x.rmnsc.size()) ? physical_x.rmnsc[coeff_idx] : 0.0;
-      double zcc = (coeff_idx < physical_x.zmncc.size()) ? physical_x.zmncc[coeff_idx] : 0.0;
-      
-      if (std::abs(rsc) < 1e-12 && std::abs(zcc) < 1e-12) continue;
-      
-      // Compute odd-parity asymmetric theta derivatives 
-      // For R: derivative of rmnsc * sin(m*u) is rmnsc * m * cos(m*u)
-      // For Z: derivative of zmncc * cos(m*u) is zmncc * -m * sin(m*u)
-      for (int l = 0; l < ntheta2; ++l) {
-        double sin_mu = fourier_basis.sinmu[m * ntheta2 + l];
-        double cos_mu = fourier_basis.cosmu[m * ntheta2 + l];
-        double cosmum = m * cos_mu;   // m * cos(m*u) for dR/dtheta from rmnsc*sin(m*u)
-        double sinmum = -m * sin_mu; // -m * sin(m*u) for dZ/dtheta from zmncc*cos(m*u)
+        // Apply reflection formulas for derivatives
+        // Even-m modes:
+        dRdTheta_even[idx] = -dRdTheta_even[idx_reflect] + asym_dRdTheta_even[idx_reflect];
+        dZdTheta_even[idx] = dZdTheta_even[idx_reflect] - asym_dZdTheta_even[idx_reflect];
         
-        for (int k = 0; k < nzeta; ++k) {
-          int idx = l * nzeta + k;
-          
-          // Odd-parity asymmetric derivatives: derivative of sin/cos terms 
-          asym_dRdTheta_odd[idx] += rsc * cosmum;  // d/du[rmnsc * sin(m*u)] = rmnsc * m * cos(m*u)
-          asym_dZdTheta_odd[idx] += zcc * sinmum;  // d/du[zmncc * cos(m*u)] = zmncc * -m * sin(m*u)
-        }
+        // Odd-m modes:
+        dRdTheta_odd[idx] = -dRdTheta_odd[idx_reflect] + asym_dRdTheta_odd[idx_reflect];
+        dZdTheta_odd[idx] = dZdTheta_odd[idx_reflect] - asym_dZdTheta_odd[idx_reflect];
       }
     }
     
-    // Apply asymmetric odd contributions to ru_o and zu_o arrays for this radial surface
-    for (int l = 0; l < ntheta2; ++l) {
-      for (int k = 0; k < nzeta; ++k) {
-        int idx_asym = l * nzeta + k;
-        int idx_full = (jF - r_.nsMinF1) * s_.nZnT + l * nzeta + k;
-        
-        if (idx_full < ru_o.size()) {
-          ru_o[idx_full] += asym_dRdTheta_odd[idx_asym];
-          zu_o[idx_full] += asym_dZdTheta_odd[idx_asym];
-        }
-      }
+    // STEP B5: Copy derivatives to main arrays
+    const int jF_offset = (jF - r_.nsMinF1) * s_.nZnT;
+    for (int kl = 0; kl < s_.nZnT; ++kl) {
+      ru_e[jF_offset + kl] = dRdTheta_even[kl];
+      ru_o[jF_offset + kl] = dRdTheta_odd[kl];
+      zu_e[jF_offset + kl] = dZdTheta_even[kl];
+      zu_o[jF_offset + kl] = dZdTheta_odd[kl];
     }
+    
+    // All derivatives (even and odd m-parity) have been computed above
     
     // DEBUG: Check if derivatives were computed properly for this surface
     if (jF < r_.nsMinF1 + 2) {
@@ -4308,11 +4327,7 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
       if (sum_ru_e < 1e-12 && sum_ru_o < 1e-12) {
         std::cout << "ERROR: Both ru_e and ru_o are zero for surface jF=" << jF << std::endl;
         // Show some of the intermediate calculations
-        std::cout << "  First few asymmetric theta derivatives: ";
-        for (int i = 0; i < std::min(3, static_cast<int>(asym_dRdTheta.size())); ++i) {
-          std::cout << asym_dRdTheta[i] << " ";
-        }
-        std::cout << std::endl;
+        std::cout << "  Check coefficient arrays and derivative computation" << std::endl;
       }
     }
   }  // End of radial loop

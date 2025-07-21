@@ -34,6 +34,17 @@ void FourierToReal2DAsymmFastPoloidal(
     absl::Span<const double> zmnss, absl::Span<double> r_real,
     absl::Span<double> z_real, absl::Span<double> lambda_real);
 
+// 2D version with m-parity separation for asymmetric equilibria
+void FourierToReal2DAsymmFastPoloidalWithParity(
+    const Sizes& sizes, absl::Span<const double> rmncc,
+    absl::Span<const double> rmnss, absl::Span<const double> rmnsc,
+    absl::Span<const double> rmncs, absl::Span<const double> zmnsc,
+    absl::Span<const double> zmncs, absl::Span<const double> zmncc,
+    absl::Span<const double> zmnss, absl::Span<double> r_even,
+    absl::Span<double> r_odd, absl::Span<double> z_even,
+    absl::Span<double> z_odd, absl::Span<double> lambda_even,
+    absl::Span<double> lambda_odd);
+
 // Symmetrize real space geometry
 // Equivalent to educational_VMEC's symrzl
 void SymmetrizeRealSpaceGeometry(const Sizes& sizes, absl::Span<double> r_real,

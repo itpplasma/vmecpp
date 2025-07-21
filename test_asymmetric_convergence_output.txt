@@ -1,0 +1,1573 @@
+[  0%] Built target absl_log_severity
+[  0%] Built target absl_raw_logging_internal
+[  0%] Built target absl_bad_variant_access
+[  0%] Built target absl_spinlock_wait
+[ 11%] Built target absl_base
+[ 11%] Built target absl_malloc_internal
+[ 11%] Built target absl_throw_delegate
+[ 11%] Built target absl_strerror
+[ 11%] Built target absl_crc_cpu_detect
+[ 11%] Built target absl_crc_internal
+[ 11%] Built target absl_strings_internal
+[ 11%] Built target absl_int128
+[ 11%] Built target absl_string_view
+[ 22%] Built target absl_strings
+[ 22%] Built target absl_str_format_internal
+[ 33%] Built target absl_crc32c
+[ 33%] Built target absl_crc_cord_state
+[ 33%] Built target absl_debugging_internal
+[ 33%] Built target absl_stacktrace
+[ 33%] Built target absl_utf8_for_code_point
+[ 33%] Built target absl_decode_rust_punycode
+[ 33%] Built target absl_demangle_rust
+[ 33%] Built target absl_demangle_internal
+[ 33%] Built target absl_symbolize
+[ 33%] Built target absl_examine_stack
+[ 33%] Built target absl_city
+[ 44%] Built target absl_low_level_hash
+[ 44%] Built target absl_bad_optional_access
+[ 44%] Built target absl_hash
+[ 44%] Built target absl_time_zone
+[ 44%] Built target absl_civil_time
+[ 55%] Built target absl_time
+[ 55%] Built target absl_log_internal_globals
+[ 55%] Built target absl_log_internal_format
+[ 55%] Built target absl_log_internal_proto
+[ 55%] Built target absl_log_internal_fnmatch
+[ 55%] Built target absl_graphcycles_internal
+[ 55%] Built target absl_kernel_timeout_internal
+[ 55%] Built target absl_synchronization
+[ 55%] Built target absl_vlog_config_internal
+[ 55%] Built target absl_log_globals
+[ 66%] Built target absl_log_entry
+[ 66%] Built target absl_log_sink
+[ 66%] Built target absl_log_internal_log_sink_set
+[ 66%] Built target absl_log_internal_nullguard
+[ 66%] Built target absl_log_internal_message
+[ 66%] Built target absl_log_internal_check_op
+[ 66%] Built target absl_log_internal_conditions
+[ 66%] Built target absl_exponential_biased
+[ 66%] Built target absl_cord_internal
+[ 66%] Built target absl_cordz_functions
+[ 66%] Built target absl_cordz_handle
+[ 66%] Built target absl_cordz_info
+[ 66%] Built target absl_cord
+[ 66%] Built target absl_status
+[ 66%] Built target absl_statusor
+[ 77%] Built target vmecpp_core
+[ 77%] Built target vmec_standalone
+[ 77%] Built target _vmecpp
+[ 77%] Built target absl_scoped_set_env
+[ 77%] Built target absl_poison
+[ 77%] Built target absl_hashtablez_sampler
+[ 88%] Built target absl_raw_hash_set
+[ 88%] Built target absl_failure_signal_handler
+[ 88%] Built target absl_leak_check
+[ 88%] Built target absl_flags_program_name
+[100%] Built target absl_flags_config
+[100%] Built target absl_flags_marshalling
+[100%] Built target absl_flags_commandlineflag_internal
+[100%] Built target absl_flags_commandlineflag
+[100%] Built target absl_flags_private_handle_accessor
+[100%] Built target absl_flags_reflection
+[100%] Built target absl_flags_internal
+[100%] Built target absl_flags_usage_internal
+[100%] Built target absl_flags_usage
+[100%] Built target absl_flags_parse
+[100%] Built target absl_die_if_null
+[100%] Built target absl_log_flags
+[100%] Built target absl_log_initialize
+[100%] Built target absl_periodic_sampler
+[100%] Built target absl_random_distributions
+[100%] Built target absl_random_seed_gen_exception
+[100%] Built target absl_random_internal_seed_material
+[100%] Built target absl_random_internal_platform
+[100%] Built target absl_random_internal_randen_hwaes_impl
+[100%] Built target absl_random_internal_randen_slow
+[100%] Built target absl_random_internal_randen_hwaes
+[100%] Built target absl_random_internal_randen
+[100%] Built target absl_random_internal_pool_urbg
+[100%] Built target absl_random_seed_sequences
+[100%] Built target absl_random_internal_distribution_test_util
+[100%] Built target absl_cordz_sample_token
+[100%] Built target absl_bad_any_cast_impl
+[100%] Built target json
+[100%] Built target getcarg
+[100%] Built target tolower
+[100%] Built target safe_open_mod
+[100%] Built target stel_kinds
+[100%] Built target stel_constants
+[100%] Built target vparams
+[100%] Built target vsvd0
+[100%] Built target vmec_input
+[100%] Built target nonzerolen
+[100%] Built target indata2json
+-- Install configuration: "Debug"
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/signature_of_eigen3_matrix_library
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/share/pkgconfig/eigen3.pc
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/SparseCore
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/Core
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/Eigenvalues
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/StdList
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/QR
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/SparseQR
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/StdDeque
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/LU
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/KLUSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/Jacobi
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/PardisoSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/SVD
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/CholmodSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/SparseCholesky
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/Eigen
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/MappedSparseMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseCompressedBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseSelfAdjointView.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseTranspose.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseSparseProductWithPruning.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseTriangularView.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseVector.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/TriangularSolver.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseCwiseUnaryOp.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseAssign.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseMatrixBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseUtil.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseDenseProduct.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseColEtree.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/ConservativeSparseSparseProduct.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseMap.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseBlock.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseDiagonalProduct.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseView.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseDot.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseCwiseBinaryOp.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseRef.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseProduct.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseRedux.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseFuzzy.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/CompressedStorage.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/AmbiVector.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparsePermutation.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCore/SparseSolverBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/StlIterators.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Select.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/ForceAlignedAccess.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Assign_MKL.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/GlobalFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/MatrixBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/ArrayWrapper.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/TriangularMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/ArrayBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Assign.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/SelfAdjointView.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/DenseBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/functors
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/functors/TernaryFunctors.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/functors/AssignmentFunctors.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/functors/StlFunctors.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/functors/UnaryFunctors.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/functors/BinaryFunctors.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/functors/NullaryFunctors.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Array.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/PartialReduxEvaluator.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/NestByValue.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Diagonal.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/CwiseUnaryView.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Ref.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Product.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/MathFunctionsImpl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/CwiseTernaryOp.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/ReturnByValue.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Replicate.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Block.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/GenericPacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/ConditionEstimator.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/MapBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/PermutationMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Solve.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/ArithmeticSequence.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/DiagonalMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/DenseStorage.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Fuzzy.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Matrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/NumTraits.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/CommaInitializer.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/PlainObjectBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Reshaped.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Visitor.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Inverse.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/GPU
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/GPU/TypeCasting.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/GPU/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/GPU/PacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/Default
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/Default/TypeCasting.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/Default/Settings.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/Default/GenericPacketMathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/Default/GenericPacketMathFunctionsFwd.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/Default/ConjHelper.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/Default/Half.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/Default/BFloat16.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/HIP
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/HIP/hcc
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/HIP/hcc/math_constants.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/ZVector
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/ZVector/Complex.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/ZVector/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/ZVector/PacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SYCL
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SYCL/SyclMemoryModel.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SYCL/TypeCasting.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SYCL/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SYCL/InteropHeaders.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SYCL/PacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AltiVec
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AltiVec/MatrixProductCommon.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AltiVec/Complex.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AltiVec/MatrixProduct.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AltiVec/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AltiVec/PacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AltiVec/MatrixProductMMA.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/MSA
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/MSA/Complex.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/MSA/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/MSA/PacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/NEON
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/NEON/Complex.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/NEON/TypeCasting.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/NEON/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/NEON/GeneralBlockPanelKernel.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/NEON/PacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/CUDA
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/CUDA/Complex.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SVE
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SVE/TypeCasting.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SVE/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SVE/PacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AVX512
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AVX512/Complex.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AVX512/TypeCasting.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AVX512/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AVX512/PacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SSE
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SSE/Complex.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SSE/TypeCasting.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SSE/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/SSE/PacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AVX
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AVX/Complex.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AVX/TypeCasting.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AVX/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/arch/AVX/PacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Transpose.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/SolveTriangular.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/SolverBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/AssignEvaluator.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/ForwardDeclarations.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/ReshapedHelper.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/ReenableStupidWarnings.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/Memory.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/StaticAssert.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/DisableStupidWarnings.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/ConfigureVectorization.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/Macros.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/Meta.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/SymbolicIndex.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/Constants.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/IndexedViewHelper.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/BlasUtil.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/XprHelper.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/NonMPL2.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/IntegralConstant.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/util/MKL_support.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Dot.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/GeneralProduct.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/TriangularSolverMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/TriangularSolverVector.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/TriangularSolverMatrix_BLAS.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrixTriangular_BLAS.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/SelfadjointRank2Update.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/GeneralBlockPanelKernel.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/TriangularMatrixMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/Parallelizer.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector_BLAS.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/GeneralMatrixVector_BLAS.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/GeneralMatrixVector.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrixTriangular.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixMatrix_BLAS.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/TriangularMatrixMatrix_BLAS.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix_BLAS.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/SelfadjointProduct.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/SelfadjointMatrixVector_BLAS.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/products/TriangularMatrixVector.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/CoreEvaluators.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/VectorBlock.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Transpositions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/BandMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Redux.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/IO.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/VectorwiseOp.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Map.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/SelfCwiseBinaryOp.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Random.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/EigenBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/CwiseNullaryOp.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/ProductEvaluators.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Swap.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Reverse.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/Stride.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/StableNorm.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/CoreIterators.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/BooleanRedux.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/IndexedView.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/NoAlias.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/DiagonalProduct.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/CwiseUnaryOp.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Core/CwiseBinaryOp.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/EigenSolver.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/RealQZ.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/ComplexSchur_LAPACKE.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/RealSchur_LAPACKE.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/ComplexEigenSolver.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/SelfAdjointEigenSolver.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/GeneralizedEigenSolver.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/GeneralizedSelfAdjointEigenSolver.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/RealSchur.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/HessenbergDecomposition.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/SelfAdjointEigenSolver_LAPACKE.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/Tridiagonalization.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Eigenvalues/ComplexSchur.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/QR
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/QR/ColPivHouseholderQR.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/QR/HouseholderQR.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/QR/ColPivHouseholderQR_LAPACKE.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/QR/CompleteOrthogonalDecomposition.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/QR/FullPivHouseholderQR.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/QR/HouseholderQR_LAPACKE.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseQR
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseQR/SparseQR.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/misc
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/misc/RealSvd2x2.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/misc/Kernel.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/misc/Image.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/misc/lapacke_mangling.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/misc/lapack.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/misc/blas.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/misc/lapacke.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/LU
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/LU/PartialPivLU.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/LU/Determinant.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/LU/InverseImpl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/LU/arch
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/LU/arch/InverseSize4.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/LU/FullPivLU.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/LU/PartialPivLU_LAPACKE.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/KLUSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/KLUSupport/KLUSupport.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Jacobi
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Jacobi/Jacobi.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/PardisoSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/PardisoSupport/PardisoSupport.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SVD
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SVD/SVDBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SVD/JacobiSVD_LAPACKE.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SVD/UpperBidiagonalization.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SVD/BDCSVD.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SVD/JacobiSVD.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/CholmodSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/CholmodSupport/CholmodSupport.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCholesky
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCholesky/SimplicialCholesky.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseCholesky/SimplicialCholesky_impl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/PaStiXSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/PaStiXSupport/PaStiXSupport.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/StlSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/StlSupport/StdDeque.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/StlSupport/StdList.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/StlSupport/StdVector.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/StlSupport/details.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SPQRSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SPQRSupport/SuiteSparseQRSupport.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/plugins
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/plugins/BlockMethods.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/plugins/ArrayCwiseBinaryOps.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/plugins/CommonCwiseUnaryOps.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/plugins/MatrixCwiseBinaryOps.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/plugins/ArrayCwiseUnaryOps.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/plugins/IndexedViewMethods.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/plugins/ReshapedMethods.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/plugins/MatrixCwiseUnaryOps.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/plugins/CommonCwiseBinaryOps.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SuperLUSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SuperLUSupport/SuperLUSupport.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Householder
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Householder/HouseholderSequence.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Householder/Householder.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Householder/BlockHouseholder.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/Scaling.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/AlignedBox.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/ParametrizedLine.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/Hyperplane.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/Umeyama.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/arch
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/arch/Geometry_SIMD.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/RotationBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/EulerAngles.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/Translation.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/Transform.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/AngleAxis.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/Homogeneous.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/Rotation2D.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/OrthoMethods.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Geometry/Quaternion.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/UmfPackSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/UmfPackSupport/UmfPackSupport.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/IterativeLinearSolvers
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/IterativeLinearSolvers/IncompleteCholesky.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/IterativeLinearSolvers/LeastSquareConjugateGradient.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/IterativeLinearSolvers/ConjugateGradient.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/IterativeLinearSolvers/BasicPreconditioners.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/IterativeLinearSolvers/IncompleteLUT.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/IterativeLinearSolvers/IterativeSolverBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/IterativeLinearSolvers/SolveWithGuess.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/IterativeLinearSolvers/BiCGSTAB.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_heap_relax_snode.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_Utils.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_pruneL.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_SupernodalMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_panel_dfs.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_panel_bmod.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_relax_snode.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLUImpl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_pivotL.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_copy_to_ucol.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_Memory.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_column_bmod.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_Structs.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_column_dfs.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_gemm_kernel.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/SparseLU/SparseLU_kernel_bmod.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/OrderingMethods
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/OrderingMethods/Eigen_Colamd.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/OrderingMethods/Ordering.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/OrderingMethods/Amd.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/MetisSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/MetisSupport/MetisSupport.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Cholesky
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Cholesky/LDLT.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Cholesky/LLT.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/src/Cholesky/LLT_LAPACKE.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/PaStiXSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/SPQRSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/QtAlignedMalloc
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/SuperLUSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/Householder
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/Geometry
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/UmfPackSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/IterativeLinearSolvers
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/StdVector
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/SparseLU
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/OrderingMethods
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/Dense
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/MetisSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/Sparse
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/Eigen/Cholesky
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/share/eigen3/cmake/Eigen3Targets.cmake
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/share/eigen3/cmake/UseEigen3.cmake
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/share/eigen3/cmake/Eigen3Config.cmake
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/share/eigen3/cmake/Eigen3ConfigVersion.cmake
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/AdolcForward
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/AlignedVector3
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/ArpackSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/AutoDiff
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/BVH
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/EulerAngles
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/FFT
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/IterativeSolvers
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/KroneckerProduct
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/LevenbergMarquardt
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/MatrixFunctions
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/MoreVectorization
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/MPRealSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/NonLinearOptimization
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/NumericalDiff
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/OpenGLSupport
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/Polynomials
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/Skyline
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/SparseExtra
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/SpecialFunctions
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/Splines
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Eigenvalues
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Eigenvalues/ArpackSelfAdjointEigenSolver.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NumericalDiff
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NumericalDiff/NumericalDiff.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/FFT
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/FFT/ei_fftw_impl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/FFT/ei_kissfft_impl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/lmpar.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/chkder.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/LevenbergMarquardt.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/r1updt.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/fdjac1.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/rwupdt.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/HybridNonLinearSolver.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/qrsolv.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/r1mpyq.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/dogleg.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/NonLinearOptimization/covar.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Polynomials
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Polynomials/PolynomialUtils.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Polynomials/PolynomialSolver.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Polynomials/Companion.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/KroneckerProduct
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/KroneckerProduct/KroneckerTensorProduct.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/AutoDiff
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/AutoDiff/AutoDiffJacobian.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/AutoDiff/AutoDiffScalar.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/AutoDiff/AutoDiffVector.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/MoreVectorization
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/MoreVectorization/MathFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/SpecialFunctionsFunctors.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/SpecialFunctionsBFloat16.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/SpecialFunctionsHalf.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch/GPU
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch/GPU/SpecialFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch/NEON
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch/NEON/BesselFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch/NEON/SpecialFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch/AVX512
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch/AVX512/BesselFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch/AVX512/SpecialFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch/AVX
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch/AVX/BesselFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/arch/AVX/SpecialFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/SpecialFunctionsArrayAPI.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/BesselFunctionsBFloat16.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/SpecialFunctionsImpl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/BesselFunctionsPacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/HipVectorCompatibility.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/SpecialFunctionsPacketMath.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/BesselFunctionsImpl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/BesselFunctionsHalf.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/BesselFunctionsFunctors.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SpecialFunctions/BesselFunctionsArrayAPI.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Skyline
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Skyline/SkylineUtil.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Skyline/SkylineProduct.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Skyline/SkylineStorage.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Skyline/SkylineMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Skyline/SkylineInplaceLU.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Skyline/SkylineMatrixBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/EulerAngles
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/EulerAngles/EulerSystem.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/EulerAngles/EulerAngles.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/MatrixFunctions
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/MatrixFunctions/MatrixSquareRoot.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/MatrixFunctions/MatrixExponential.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/MatrixFunctions/MatrixPower.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/MatrixFunctions/MatrixLogarithm.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/MatrixFunctions/StemFunction.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/MatrixFunctions/MatrixFunction.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SparseExtra
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SparseExtra/MarketIO.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SparseExtra/RandomSetter.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SparseExtra/DynamicSparseMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SparseExtra/BlockSparseMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SparseExtra/BlockOfDynamicSparseMatrix.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/SparseExtra/MatrixMarketIterator.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Splines
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Splines/Spline.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Splines/SplineFwd.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/Splines/SplineFitting.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/BVH
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/BVH/KdBVH.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/BVH/BVAlgorithms.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/IterativeSolvers
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/IterativeSolvers/Scaling.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/IterativeSolvers/MINRES.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/IterativeSolvers/IDRS.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/IterativeSolvers/GMRES.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/IterativeSolvers/DGMRES.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/IterativeSolvers/IncompleteLU.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/IterativeSolvers/IterationController.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/IterativeSolvers/ConstrainedConjGrad.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/LevenbergMarquardt
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/LevenbergMarquardt/LMpar.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/LevenbergMarquardt/LevenbergMarquardt.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/LevenbergMarquardt/LMcovar.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/LevenbergMarquardt/LMonestep.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/src/LevenbergMarquardt/LMqrsolv.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/Tensor
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/TensorSymmetry
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/ThreadPool
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/TensorSymmetry
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/TensorSymmetry/DynamicSymmetry.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/TensorSymmetry/StaticSymmetry.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/TensorSymmetry/Symmetry.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/TensorSymmetry/util
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/TensorSymmetry/util/TemplateGroupTheory.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/util
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/util/MaxSizeVector.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/util/CXX11Workarounds.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/util/EmulateArray.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/util/CXX11Meta.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/ThreadPool
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/ThreadPool/NonBlockingThreadPool.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/ThreadPool/ThreadEnvironment.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/ThreadPool/ThreadCancel.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/ThreadPool/Barrier.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/ThreadPool/ThreadLocal.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/ThreadPool/EventCount.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/ThreadPool/ThreadPoolInterface.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/ThreadPool/RunQueue.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/ThreadPool/ThreadYield.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorScanSycl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorTrace.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorEvalTo.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorConversion.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorPatch.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorLayoutSwap.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorForcedEval.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorStorage.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorConvolutionSycl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorExpr.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorRef.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorFFT.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorDeviceThreadPool.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorContractionGpu.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorContraction.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorContractionBlocking.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorForwardDeclarations.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorDevice.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorContractionSycl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorIntDiv.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorTraits.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/Tensor.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorExecutor.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorDimensionList.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorScan.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorGlobalFunctions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorMacros.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorChipping.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorInflation.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorVolumePatch.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorGenerator.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorMap.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorImagePatch.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorRandom.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorContractionMapper.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorDeviceCuda.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorMorphing.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorGpuHipCudaDefines.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorMeta.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorReductionGpu.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorStriding.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorBase.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorEvaluator.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorInitializer.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorReductionCuda.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorReduction.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorFunctors.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorBroadcasting.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorFixedSize.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorArgMax.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorShuffling.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorDimensions.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorGpuHipCudaUndefines.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorUInt128.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorCustomOp.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorIndexList.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorConvolution.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorReductionSycl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorConcatenation.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorDeviceGpu.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorContractionCuda.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorBlock.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorPadding.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorCostModel.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorIO.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorReverse.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorContractionThreadPool.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorDeviceSycl.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorDeviceDefault.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/include/eigen3/unsupported/Eigen/CXX11/src/Tensor/TensorAssign.h
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/vmecpp/cpp/./_vmecpp.cpython-313-x86_64-linux-gnu.so
+-- Up-to-date: /home/ert/code/.venv/lib/python3.13/site-packages/vmecpp/cpp/third_party/indata2json/indata2json
+need to shift theta by delta = 0.463648
+
+ NS = 17   NO. FOURIER MODES = 5   FTOLV = 1.000e-03   NITER = 1
+
+ ITER |    FSQR     FSQZ     FSQL    |    fsqr     fsqz      fsql   |   DELT   |  RAX(v=0) |    W_MHD   |   <BETA>   |  <M>  
+------+------------------------------+------------------------------+----------+-----------+------------+------------+-------
+DEBUG geometryFromFourier: lasym=1, lthreed=0DEBUG geometryFromFourier: lasym=DEBUG geometryFromFourier: lasym=
+1, lthreed=DEBUG: Processing asymmetric equilibrium (includes symmetric baseline)
+DEBUG: physical_x.rmnsc size=15
+  First few rmnsc values: DEBUG geometryFromFourier: lasym=0 0.189737 1, lthreed=00 
+DEBUG geometryFromFourier: lasym=DEBUG: Processing asymmetric equilibrium (includes symmetric baseline)
+DEBUG geometryFromFourier: lasym=1DEBUG geometryFromFourier: lasym=DEBUG: physical_x.rmnsc size=20
+, lthreed=101, lthreed=, lthreed=
+001, lthreed=0
+
+DEBUG: Processing asymmetric equilibrium (includes symmetric baseline)DEBUG: Processing asymmetric equilibrium (includes symmetric baseline)
+  First few rmnsc values: 0DEBUG: physical_x.rmnsc size=20
+0   First few rmnsc values: 0.189737 0.00954594 0 0 
+DEBUG: Calling 2D asymmetric transform
+0 0.189737 
+0.0159099 0 0 
+
+DEBUG: Calling 2D asymmetric transform
+DEBUG: Processing asymmetric equilibrium (includes symmetric baseline)
+DEBUG geometryFromFourier: lasym=DEBUG: physical_x.rmnsc size=020
+ 0 
+DEBUG: Calling 2D asymmetric transform
+DEBUG: Processing asymmetric equilibrium (includes symmetric baseline)
+1, lthreed=0
+  First few rmnsc values: 
+0 0.189737DEBUG: physical_x.rmnsc size= DEBUG: Processing asymmetric equilibrium (includes symmetric baseline)DEBUG: physical_x.rmnsc size=
+20
+20
+  First few rmnsc values: DEBUG: Processing asymmetric equilibrium (includes symmetric baseline)
+0 0.189737 0.00318198 DEBUG: physical_x.rmnsc size=DEBUG: Computing asymmetric geometry with derivatives
+20
+  First few rmnsc values: 0 0.189737   ntheta2=0.041365790.0222739, ntheta1=16 , nzeta=1
+  First few rmnsc values:  0 0 00 0DEBUG coeff access: jF=0 
+ 0
+DEBUG: Calling 2D asymmetric transform
+DEBUG: Computing asymmetric geometry with derivatives
+ DEBUG: physical_x.rmnsc size=20
+, coeff_offset=0 
+  First few rmnsc values: 0 0.189737DEBUG: Calling 2D asymmetric transform0.189737
+ 0, coeff_size=5, rmncc.size()=15
+DEBUG asymmetric coeff sizes: rmnsc=15, zmncc=15, zmnss=0
+DEBUG detailed coeff sizes: rmncc=15, rmnss=0, rmnsc=15, rmncs=0, zmnsc=15, zmncs=0, zmncc=15, zmnss=0
+DEBUG: coeff_offset=0, initial_coeff_size=5
+DEBUG: final coeff_size=5 after bounds checking
+0.0350018DEBUG: Computing asymmetric geometry with derivatives
+  ntheta2=9, ntheta1=16, nzeta=1
+  ntheta2=9, ntheta1=16, nzeta=1DEBUG coeff access: jF=
+DEBUG: Calling 2D asymmetric transform
+ DEBUG coeff access: jF=3, coeff_offset=0, coeff_size=5, rmncc.size()=20
+DEBUG asymmetric coeff sizes: rmnsc=20, zmncc=20, zmnss=0
+DEBUG detailed coeff sizes: rmncc=20, rmnss=0, rmnsc=20, rmncs=0, zmnsc=20, zmncs=0, zmncc=520, coeff_offset=0, coeff_size=5, rmncc.size()=0.028637820 , zmnss=
+00
+ DEBUG asymmetric coeff sizes: rmnsc=20, zmncc=20, zmnss=0
+0DEBUG detailed coeff sizes: rmncc= 20, rmnss=0, rmnsc=020 , rmncs=
+DEBUG: coeff_offset=DEBUG: Calling 2D asymmetric transform
+0, initial_coeff_size=5
+DEBUG: final coeff_size=5 after bounds checking
+DEBUG: Computing asymmetric geometry with derivatives
+  ntheta2=9, ntheta1=16, nzeta=1
+DEBUG coeff access: jF=13, coeff_offset=0, coeff_size=5, rmncc.size()=20
+DEBUG asymmetric coeff sizes: rmnsc=20, zmncc=20, zmnss=0DEBUG coeff: jF= 0, m=0, mn=0, coeff_idx=0, rsc=0, zcc=0
+0DEBUG coeff: jF= 
+0DEBUG: Calling 2D asymmetric transform
+DEBUG: Computing asymmetric geometry with derivatives
+  ntheta2=9, ntheta1=16, nzeta=1
+, m=1, mn=1, coeff_idx=1, rsc=DEBUG coeff: jF=3, m=0, mn=0, coeff_idx=0.1897370, zcc=, rsc=0.189737
+DEBUG coeff: jF=0, m=2, mn=2, coeff_idx=2, rsc=0, zcc=0
+
+DEBUG derivatives after computation: jF=0, sum_ru_e=0, sum_zu_e=0, zcc=00, sum_ru_o=
+DEBUG detailed coeff sizes: rmncc=20, rmnss=0, rmnsc=20, rmncs=0, zmnsc=20, zmncs=0, zmncc=20, zmnss=0
+DEBUG: coeff_offset=0, initial_coeff_size=5
+DEBUG: Computing asymmetric geometry with derivatives
+4.89164DEBUG coeff access: jF=, sum_zu_o=7, coeff_offset=4.083810, coeff_size=
+5  ntheta2=9, ntheta1=16, nzeta=1
+0, zmnsc=20, zmncs=0, zmncc=20, zmnss=0
+DEBUG coeff: jF=DEBUG: coeff_offset=30, initial_coeff_size=5
+DEBUG: final coeff_size=5 after bounds checking
+, m=1, mn=1, coeff_idx=1, rsc=0.189737, zcc=0.189737
+DEBUG: final coeff_size=DEBUG coeff access: jF=5 after bounds checking
+DEBUG coeff: jF=3, m=2, mn=2, coeff_idx=2, rsc=0.00954594, zcc=0
+DEBUG coeff access: jF=1, coeff_offset=5, coeff_size=5, rmncc.size()=15DEBUG derivatives after computation: jF=
+3DEBUG: Computing asymmetric geometry with derivatives
+  ntheta2=9, ntheta1=16, nzeta=1
+, sum_ru_e=0.280279, sum_zu_e=0, sum_ru_o=4.89164, sum_zu_o=DEBUG asymmetric coeff sizes: rmnsc=4.0838115, zmncc=15, zmnss=
+DEBUG coeff access: jF=4, coeff_offset=5, coeff_size=5, rmncc.size()=20
+DEBUG asymmetric coeff sizes: rmnsc=20, zmncc=20, zmnss=0
+DEBUG detailed coeff sizes: rmncc=20, rmnss=0, rmnsc=20, rmncs=0, zmnsc=20, zmncs=0, zmncc=20, zmnss=0
+DEBUG: coeff_offset=5, initial_coeff_size=5
+DEBUG: final coeff_size=5 after bounds checking
+0
+DEBUG detailed coeff sizes: rmncc=15, rmnss=0, rmnsc=15, rmncs=0, zmnsc=15, zmncs=0, zmncc=15, zmnss=0
+DEBUG: coeff_offset=5, initial_coeff_size=5
+DEBUG: final coeff_size=5 after bounds checking
+DEBUG coeff access: jF=1, coeff_offset=0, coeff_size=5, rmncc.size()=20
+DEBUG asymmetric coeff sizes: rmnsc=20, zmncc=20, zmnss=0
+DEBUG detailed coeff sizes: rmncc=20, rmnss=0, rmnsc=20, rmncs=0, zmnsc=20, zmncs=0, zmncc=20, zmnss=0
+DEBUG: coeff_offset=0, initial_coeff_size=DEBUG: Computing asymmetric geometry with derivatives5
+  ntheta2=9, ntheta1=16, nzeta=1
+DEBUG coeff access: jF=9, coeff_offset=0, coeff_size=5, rmncc.size()=20
+DEBUG asymmetric coeff sizes: rmnsc=20, zmncc=20, zmnss=0
+DEBUG detailed coeff sizes: rmncc=20, rmnss=0, rmnsc=20, rmncs=0, zmnsc=20, zmncs=0, zmncc=20, zmnss=0
+, rmncc.size()=VMEC++ GEOMETRY: jF=DEBUG: coeff_offset=4, kl=00, R=20, initial_coeff_size=5
+
+DEBUG: final coeff_size=DEBUG asymmetric coeff sizes: rmnsc=20, zmncc=520DEBUG coeff: jF=, zmnss=0
+011, Z=0
+VMEC++ GEOMETRY: jF= after bounds checking4, kl=1, R=
+13, m=0, mn=0, coeff_idx=0, rsc=
+DEBUG: final coeff_size=5 after bounds checking
+0, zcc=VMEC++ GEOMETRY: jF=01, kl=0, R=
+0DEBUG coeff: jF=13, m=0, Z=10, Z=DEBUG detailed coeff sizes: rmncc=, mn=1DEBUG coeff: jF=, coeff_idx=
+01, rsc=0.189737, zcc=0.189737
+
+, coeff_offset=VMEC++ GEOMETRY: jF=DEBUG coeff: jF=13, m=2, mn=2, coeff_idx=2, rsc=4, kl=2, R=0.0413657, zcc=0, Z=00
+
+0, coeff_size=5, rmncc.size()=20
+5, m=0, mn=0, coeff_idx=0, rsc=20DEBUG asymmetric coeff sizes: rmnsc=20, rmnss=0, zmncc=, rmnsc=20, rmncs=020, zmnsc=, zmnss=200
+VMEC++ GEOMETRY: jF=0, zcc=DEBUG detailed coeff sizes: rmncc=20, rmnss=0, rmnsc=20, rmncs=00, zmnsc=
+4DEBUG coeff: jF=5, m=1, mn=1, coeff_idx=, zmncs=VMEC++ GEOMETRY: jF=1, kl=01, zmncc=20, zmnss=0, R=
+DEBUG: coeff_offset=0, initial_coeff_size=5
+DEBUG: final coeff_size=5 after bounds checking
+DEBUG derivatives after computation: jF=13, sum_ru_e=1.21454, sum_zu_e=0, sum_ru_o=4.89164, sum_zu_o=4.08381
+0DEBUG coeff access: jF=14, coeff_offset=5, coeff_size=5, rmncc.size()=20
+DEBUG asymmetric coeff sizes: rmnsc=20, zmncc=20, zmnss=0
+DEBUG detailed coeff sizes: rmncc=20, rmnss=0, rmnsc=20, rmncs=0, zmnsc=20, zmncs=0, zmncc=20, zmnss=0
+DEBUG: coeff_offset=5, initial_coeff_size=5
+DEBUG: final coeff_size=5 after bounds checking
+1, rsc=0.189737, zcc=0.189737
+DEBUG coeff: jF=DEBUG coeff: jF=5, m=2, mn=2, coeff_idx=2, rsc=0.0159099, zcc=9, m=0, mn=00, coeff_idx=
+0, Z=0
+VMEC++ GEOMETRY: jF=1, kl=2, R=0, Z=DEBUG coeff: jF=0
+20, zmncs=0, zmncc=20, zmnss=0
+DEBUG derivatives after computation: jF=5, sum_ru_e=0.467132, sum_zu_e=VMEC++ GEOMETRY: jF=1, kl=30, sum_ru_o=, R=4.89164DEBUG: coeff_offset=, sum_zu_o=0, initial_coeff_size=504.08381, Z=, kl=
+10
+VMEC++ GEOMETRY: jF=1, kl=4, R=DEBUG: final coeff_size=5 after bounds checking
+
+VMEC++ GEOMETRY: jF=14, kl=0, R=0, Z=0
+, m=DEBUG coeff access: jF=30, mn=, R=0, coeff_idx=0, rsc=, rsc=DEBUG coeff: jF=7, m=000, Z=, Z=0, mn=0, coeff_idx=
+60, coeff_offset=VMEC++ GEOMETRY: jF=VMEC++ GEOMETRY: jF=4, kl=4, R=
+0, Z=1450, coeff_size=5, rmncc.size()=, rsc=20
+, kl=00DEBUG asymmetric coeff sizes: rmnsc=20, zcc=
+, zmncc=VMEC++ GEOMETRY: jF=4, kl=5, R=00, Z=VMEC++ GEOMETRY: jF=0
+1, kl=5, R=, zcc=0, Z=00
+
+20, zmnss=0
+0DEBUG detailed coeff sizes: rmncc=0
+20, rmnss=DEBUG coeff: jF=9DEBUG coeff: jF=1, m=1, mn=1, coeff_idx=10, rsc=, rmnsc=20, rmncs=0DEBUG coeff: jF=0.189737, zcc=1, m=0, mn=0, zmnsc=, coeff_idx=5, rsc=200.189737, zmncs=0, zcc=, zmncc=20, zmnss=01
+
+DEBUG coeff: jF=4, m=0, mn=0, coeff_idx=DEBUG coeff: jF=5, rsc=0
+DEBUG coeff: jF=7, m=1, mn=1, coeff_idx=1, rsc=0.189737, zcc=0.189737
+DEBUG coeff: jF=7, m=2, mn=2, coeff_idx=2, rsc=0.0222739, zcc=0
+DEBUG derivatives after computation: jF=7, sum_ru_e=0.653985, sum_zu_e=DEBUG coeff: jF=0111, m=, sum_ru_o=0, mn=0, coeff_idx=0, rsc=4.89164, m=, sum_zu_o=4.08381
+, R=0, Z=0, m=0, zcc=0
+1, zcc=DEBUG coeff access: jF=8, coeff_offset=5, coeff_size=5, rmncc.size()=20
+2VMEC++ GEOMETRY: jF=14, kl=2, R=0, Z=0
+DEBUG asymmetric coeff sizes: rmnsc=20, zmncc=20, zmnss=00DEBUG: coeff_offset=
+VMEC++ GEOMETRY: jF=140, kl=3, mn=
+2DEBUG detailed coeff sizes: rmncc=20DEBUG coeff: jF=11, m=1, mn=1, coeff_idx=1, rsc=0.189737, zcc=0.189737
+DEBUG coeff: jF=11, m=2, mn=2, coeff_idx=2, rsc=, R=0.0350018, zcc=0
+0, Z=0
+VMEC++ GEOMETRY: jF=14, kl=4, R=0, Z=0
+DEBUG derivatives after computation: jF=VMEC++ GEOMETRY: jF=14, kl=5, R=0, Z=0
+, rmnss=0, rmnsc=20, rmncs=0, zmnsc=20, zmncs=0, zmncc=20, zmnss=0
+DEBUG: coeff_offset=5, initial_coeff_size=5
+DEBUG: final coeff_size=5 after bounds checking
+DEBUG coeff: jF=14, m=0, mn=, mn=10, coeff_idx=0, coeff_idx=51, rsc=, rsc=
+, zcc=5, coeff_idx=, initial_coeff_size=52
+00, zcc=DEBUG: final coeff_size=5 after bounds checking
+, rsc=
+VMEC++ COEFF DETAIL: jF=0.00318198VMEC++ COEFF DETAIL: jF=4, m=0, zcc=1, rmnsc[0, m=5]=0
+0, zmncc[5]=0.189737, rmnsc[0
+DEBUG derivatives after computation: jF=DEBUG coeff: jF=4, m=1, mn=1, coeff_idx=16, sum_ru_e=, rsc=0.0934264, sum_zu_e=0.189737, zcc=, zcc=00.189737
+0.189737
+511VMEC++ COEFF DETAIL: jF=4, m=1, rmnsc[6]=, sum_ru_e=0.189737, zmncc[6]=0.189737
+DEBUG coeff: jF=, sum_ru_o=0
+VMEC++ COEFF DETAIL: jF=14, m=0, rmnsc[5]=0, zmncc[5]=1.027690
+, sum_zu_e=DEBUG coeff: jF=14, m=1, mn=1, coeff_idx=6, rsc=0, sum_ru_o=0.189737, zcc=4.89164, sum_zu_o=0.189737
+VMEC++ COEFF DETAIL: jF=14, m=1, rmnsc[6]=0.189737, zmncc[6]=VMEC++ DERIV DETAIL: m=0.189737
+1, l=0, k=0, sin_mu=0, cos_mu=VMEC++ DERIV DETAIL: m=1, l=0, k=0, sin_mu=1.41421, cosmum=0, cos_mu=1.41421, sinmum=1.41421, cosmum=-0, contrib_dRdTheta=1.41421, sinmum=-0, contrib_dRdTheta=90.268328, contrib_dZdTheta=VMEC++ GEOMETRY: jF=6, kl=-00.268328, contrib_dZdTheta=, m=
+02, R=, mn=2]=VMEC++ GEOMETRY: jF=, coeff_idx=2, rsc=8, kl=0, R=0.0286378, zcc=0
+4.083810, Z=0
+
+-0
+VMEC++ DERIV DETAIL: m=1, l=1, k=0, sin_mu=0.541196, cos_mu=4.891641.30656VMEC++ GEOMETRY: jF=, cosmum=6, kl=, sum_zu_o=DEBUG derivatives after computation: jF=1.30656194.08381, sum_ru_e=0, sinmum=, R=
+, Z=-0.541196DEBUG coeff access: jF=0
+0VMEC++ GEOMETRY: jF=, Z=VMEC++ DERIV DETAIL: m=1, l=10, k=008, zmncc[5
+, sin_mu=, kl=1, R=]=0
+0.840838, sum_zu_e=0.541196, cos_mu=DEBUG coeff access: jF=2, coeff_offset=51.306560, sum_ru_o=, contrib_dRdTheta=0, cosmum=124.89164, Z=, sum_zu_o=, coeff_offset=5, coeff_size=51.306560
+0.247903, contrib_dZdTheta=-0.102685
+DEBUG coeff: jF=VMEC++ DERIV DETAIL: m=1, l=2, k=VMEC++ GEOMETRY: jF=0, coeff_size=, sin_mu=18, kl=2, R=1, cos_mu=, m=1, mn=015, Z=, coeff_idx=6, rsc=, rmncc.size()=201, sinmum=
+, cosmum=4.083810.189737-0.541196
+, rmncc.size()=VMEC++ GEOMETRY: jF=206
+, kl=DEBUG coeff access: jF=101DEBUG asymmetric coeff sizes: rmnsc=200, zmncc=, coeff_offset=20, sinmum=5
+-1, coeff_size=, contrib_dRdTheta=DEBUG asymmetric coeff sizes: rmnsc=2, contrib_dRdTheta=VMEC++ GEOMETRY: jF=0.2479038, contrib_dZdTheta=, kl=3, R=20, R=-0.102685
+0, Z=0
+50.189737VMEC++ GEOMETRY: jF=, rmncc.size()=6VMEC++ DERIV DETAIL: m=1, l=2, kl=3, R=, k=, zcc=0, sin_mu=01, cos_mu=, Z=0.18973701
+, contrib_dZdTheta=VMEC++ COEFF DETAIL: jF=1, m=1, rmnsc[6]=-0.189737
+VMEC++ DERIV DETAIL: m=1, l=3, k=0, sin_mu=1.30656, cos_mu=
+0.541196, cosmum=0.541196, sinmum=-1.30656, contrib_dRdTheta=, zmnss=VMEC++ GEOMETRY: jF=6, kl=4, R=, cosmum=0, Z=01, sinmum=
+200, Z=, zmncc=0
+0.189737DEBUG detailed coeff sizes: rmncc=20, rmnss=
+0VMEC++ GEOMETRY: jF=8, kl=4, R=-1, zmncc[60, contrib_dRdTheta=0
+200.102685, contrib_dZdTheta=-0.247903
+, Z=VMEC++ GEOMETRY: jF=DEBUG coeff: jF=4, m=0, rmnsc=, zmnss=2
+0.189737DEBUG asymmetric coeff sizes: rmnsc=20, zmncc=20, zmnss=0
+20, rmncs=0, zmnsc=20, zmncs=0, zmncc=20, zmnss=0
+, contrib_dZdTheta=-0.189737
+6VMEC++ DERIV DETAIL: m=1, l=3, kl=, mn=DEBUG detailed coeff sizes: rmncc=205, rmnss=DEBUG: coeff_offset=00, rmnsc=20, R=, rmncs=
+0, zmnsc=, k=DEBUG detailed coeff sizes: rmncc=20, rmnss=00, rmnsc=20, rmncs=0, zmnsc=20, zmncs=0, zmncc=20, zmnss=, sin_mu=01.30656, cos_mu=
+0.541196020DEBUG: coeff_offset=, zmncs=0, zmncc=205, zmnss=0
+, Z=, initial_coeff_size=0
+VMEC++ GEOMETRY: jF=5
+82, coeff_idx=7, rsc=DEBUG: final coeff_size=5 after bounds checking
+0.01272795, zcc=]=, initial_coeff_size=05DEBUG coeff: jF=6
+
+DEBUG: coeff_offset=, cosmum=5, initial_coeff_size=DEBUG: final coeff_size=55 after bounds checking
+, m=0, mn=0, coeff_idx=5, rsc=0.1897370, zcc=0
+VMEC++ COEFF DETAIL: jF=6, m=0, rmnsc[5, kl=]=
+0.541196, sinmum=5-1.30656, R=, contrib_dRdTheta=DEBUG: final coeff_size=5 after bounds checking
+
+VMEC++ COEFF DETAIL: jF=4, m=2, rmnsc[7]=0.01272790, zmncc[0.102685, contrib_dZdTheta=-0.247903
+VMEC++ DERIV DETAIL: m=1, l=0, k=0, sin_mu=0, cos_mu=1.41421, cosmum=, zmncc[DEBUG coeff: jF=75]=]=1.41421140
+0, Z=0
+DEBUG coeff: jF=6, m=1, mn=1, coeff_idx=6, rsc=0.189737, zcc=0.189737
+, m=VMEC++ COEFF DETAIL: jF=6, m=1, rmnsc[02, mn=2, coeff_idx=7, rsc=6DEBUG coeff: jF=]=8
+0.04454770.189737, sinmum=VMEC++ GEOMETRY: jF=2, kl=0, R=0, Z=-0, contrib_dRdTheta=0
+VMEC++ COEFF DETAIL: jF=4, m=3, rmnsc[8]=, zmncc[0, zmncc[68]=]=0
+, zcc=, m=00, mn=
+VMEC++ COEFF DETAIL: jF=4, m=4, rmnsc[9]=0, zmncc[9]=0
+VMEC++ COEFF DETAIL: jF=14, m=2, rmnsc[7]=0.0445477, zmncc[7]=0.2683280.189737
+0VMEC++ GEOMETRY: jF=10, kl=0, R=0, Z=0
+VMEC++ GEOMETRY: jF=, coeff_idx=VMEC++ GEOMETRY: jF=510, rsc=VMEC++ DERIV DETAIL: m=, kl=1, R=010, Z=2, zcc=0
+0VMEC++ GEOMETRY: jF=
+120, l=DEBUG derivatives after computation: jF=, kl=00, k=
+, contrib_dZdTheta=, R=-0
+4, sum_ru_e=0.373706, sum_zu_e=0, sum_ru_o=4.89164VMEC++ COEFF DETAIL: jF=, sum_zu_o=VMEC++ COEFF DETAIL: jF=144.08381
+, m=3, rmnsc[8]=80, Z=00, zmncc[8]=0
+, m=VMEC++ COEFF DETAIL: jF=14, m=4, rmnsc[9]=0, zmncc[9]=0, rmnsc[5]=0
+0VMEC++ DERIV DETAIL: m=DEBUG derivatives after computation: jF=14, sum_ru_e=1VMEC++ GEOMETRY: jF=, l=, sin_mu=101.30797, kl=012, R=, kl=0, Z=1, R=0
+, cos_mu=, k=1.414210, sin_mu=, cosmum=1.41421, sinmum=0.541196, cos_mu=-0VMEC++ GEOMETRY: jF=, contrib_dRdTheta=101.30656, kl=0.268328, contrib_dZdTheta=, cosmum=3-0
+1.3065600, Z=0
+VMEC++ DERIV DETAIL: m=1, l=1, k=0VMEC++ GEOMETRY: jF=, sinmum=, sin_mu=2, kl=2, R=, zmncc[5]=0-0.541196, contrib_dRdTheta=0, Z=0.5411960.2479030
+, contrib_dZdTheta=, R=-0.102685
+, cos_mu=
+VMEC++ DERIV DETAIL: m=1, l=2, k=0, sin_mu=
+1, cos_mu=1, cosmum=, sum_zu_e=00VMEC++ GEOMETRY: jF=, sum_ru_o=, Z=4.8916412, sum_zu_o=0
+1.30656VMEC++ GEOMETRY: jF=2, kl=3, R=DEBUG coeff: jF=8, m=1, mn=1, coeff_idx=6, rsc=0, Z=0
+4.08381VMEC++ GEOMETRY: jF=2, kl=
+, kl=41, R=, R=00, Z=, Z=0.1897370
+DEBUG coeff: jF=, cosmum=1.30656VMEC++ GEOMETRY: jF=, sinmum=121, kl=5, sinmum=, m=0, mn=-0.541196, contrib_dRdTheta=20, coeff_idx=0.247903, contrib_dZdTheta=10-1, R=, rsc=-0.102685
+0, Z=0, contrib_dRdTheta=VMEC++ DERIV DETAIL: m=1, l=2, k=0, sin_mu=0.189737, contrib_dZdTheta=1-0.189737, cos_mu=
+, zcc=VMEC++ GEOMETRY: jF=0.18973710, kl=VMEC++ DERIV DETAIL: m=4, R=0, Z=0
+0
+10, cosmum=
+
+VMEC++ GEOMETRY: jF=2, kl=5, R=, zcc=VMEC++ GEOMETRY: jF=1VMEC++ GEOMETRY: jF=, l=3, k=0, sin_mu=VMEC++ COEFF DETAIL: jF=10, kl=5, R=80, Z=, m=0
+1.306561, rmnsc[6121, cos_mu=, sinmum=0DEBUG coeff: jF=15, m=0, mn=0, coeff_idx=10, rsc=
+0.541196, cosmum=0.541196, sinmum=DEBUG coeff: jF=5, m=1, mn=1, coeff_idx=11, rsc=-1.30656]=0.189737, zcc=, contrib_dRdTheta=0.189737
+DEBUG coeff: jF=0.102685100, kl=, Z=0
+0, zcc=DEBUG coeff: jF=5, m=2, m=00, mn=
+30.189737, zmncc[6]=0.189737
+DEBUG coeff: jF=15, m=1, mn=1, R=, coeff_idx=, contrib_dZdTheta=11, rsc=0.189737, zcc=00.189737-0.247903, Z=
+VMEC++ DERIV DETAIL: m=1, l=0, k=
+0, sin_mu=, mn=02, coeff_idx=
+12, rsc=-10.0159099, zcc=VMEC++ GEOMETRY: jF=12DEBUG coeff: jF=1, m=2, mn=2, coeff_idx=7, rsc=00.00318198
+, zcc=DEBUG coeff: jF=0150
+, contrib_dRdTheta=0, coeff_idx=5, rsc=DEBUG coeff: jF=0, zcc=2, m=0, mn=00, kl=
+VMEC++ COEFF DETAIL: jF=VMEC++ COEFF DETAIL: jF=10, m=0, rmnsc[5]=0, zmncc[5]=0
+DEBUG coeff: jF=10, m=1, mn=1, coeff_idx=6, rsc=0.189737, zcc=0.189737
+VMEC++ COEFF DETAIL: jF=10, m=1, rmnsc[6]=0.189737, zmncc[6]=0.189737
+VMEC++ DERIV DETAIL: m=1, l=0, k=0, sin_mu=0, cos_mu=1.41421, cosmum=1.41421, sinmum=, coeff_idx=-0, contrib_dRdTheta=0.268328, contrib_dZdTheta=-05
+VMEC++ DERIV DETAIL: m=1, l=1, k=0, sin_mu=0.541196, cos_mu=1.30656, cosmum=1.30656, sinmum=-0.541196, contrib_dRdTheta=0.1897370.247903, contrib_dZdTheta=-0.102685
+VMEC++ DERIV DETAIL: m=11, l=2, k=0, sin_mu=1, cos_mu=1, cosmum=, m=2, rmnsc[17, m=, sinmum=]=2, mn=2, coeff_idx=12, rsc=-10.0477297, contrib_dRdTheta=, cos_mu=, zcc=0.003181980
+41.41421, R=, cosmum=0, Z=1.41421, sinmum=-00, contrib_dRdTheta=
+0.268328, contrib_dZdTheta=, rsc=0.189737-0, contrib_dZdTheta=
+VMEC++ GEOMETRY: jF=-0.189737
+0, zmncc[7, contrib_dZdTheta=DEBUG: After derivative computation, checking first 5 values:]=
+-0.189737
+VMEC++ DERIV DETAIL: m=1, l=3, k=00
+VMEC++ DERIV DETAIL: m=1, l=3, k=0, sin_mu=VMEC++ DERIV DETAIL: m=1, l=1, k=0, sin_mu=120.541196, cos_mu=1.30656, kl=, cosmum=VMEC++ COEFF DETAIL: jF=  i=0: ru_e=0.027, zu_e=0, ru_o=0.268328, zu_o=0.536656
+         r1_e=1.143, r1_o=1.306560.804984, sinmum=
+  i=1: ru_e=-0.00636396, zu_e=0, ru_o=-0.0601513, zu_o=0.393121
+         r1_e=1.14727, r1_o=0.846393
+  i=2: ru_e=-0.036, zu_e=0, ru_o=-0.379473, zu_o=0.189737
+         r1_e=1.1385, r1_o=0.758947
+  i=3: ru_e=-0.0445477, zu_e=0, ru_o=-0.641024, zu_o=1.30656-0.0425334
+, cos_mu=         r1_e=0.5411961.12182, cosmum=-0.541196, contrib_dRdTheta=, r1_o=0.5411960.555957
+, sin_mu=51, zcc=DEBUG: After derivative computation, checking first 5 values:, R=  i=4: ru_e=0
+, sinmum=VMEC++ COEFF DETAIL: jF=2, m=0, rmnsc[5]=-1.30656, contrib_dRdTheta=0, zmncc[5]=0.1026850, contrib_dZdTheta=
+, m=DEBUG coeff: jF=2, m=1, mn=1, coeff_idx=6, rsc=30.189737-0.027, rmnsc[, zcc=, zu_e=0, ru_o=0.189737
+0.2479038]=
+-0.247903VMEC++ COEFF DETAIL: jF=2, m=1, rmnsc[6]=1.30656
+-0.804984  i=0: ru_e=, zu_o=0.117, zu_e=-0.268328
+0         r1_e=1.107, r1_o=0.268328
+, cos_mu=0.189737, Z=, zmncc[6]=0
+, contrib_dZdTheta=DEBUG: After 2D asymmetric transform, checking first few values:
+0, zmncc[8]=0
+VMEC++ COEFF DETAIL: jF=1, m=4, rmnsc[9]=  i=0: r1_e=0.1897370, zmncc[91.143
+VMEC++ DERIV DETAIL: m=1, l=0, k=0, sin_mu=-0.1026850, cos_mu=1.41421, cosmum=
+0.541196DEBUG coeff: jF=0, z1_e=VMEC++ DERIV DETAIL: m=, ru_o=1, l=2, k=0, sin_mu=DEBUG coeff: jF=10.26832812, cos_mu=0, zu_o=]=0.536656
+0, cosmum=60.541196, sinmum=-1.30656, contrib_dRdTheta=
+1, ru_e=, cosmum=1.414210.027, zu_e=, m=, sinmum=0
+10, mn=0, coeff_idx=-0, sinmum=, contrib_dRdTheta=0.1026850.268328DEBUG derivatives after computation: jF=, contrib_dZdTheta=, m=1, sum_ru_e=2, mn=-02
+         r1_e=, coeff_idx=0.09342644.953  i=1, r1_o=, sum_zu_e=: r1_e=0.804984
+, contrib_dZdTheta=1.147270, sum_ru_o=-14.89164VMEC++ DERIV DETAIL: m=1, l=1, k=, sum_zu_o=0, sin_mu=4.08381
+  i=7, contrib_dRdTheta=10.189737, contrib_dZdTheta=: ru_e=-0.189737
+, z1_e=, rsc=-0.2479030, ru_e=
+0.0190919, zcc=00.541196, cos_mu=1.30656, cosmum=1.30656, sinmum=-0.541196, contrib_dRdTheta=0.247903, contrib_dZdTheta=-0.102685
+DEBUG coeff: jF=
+VMEC++ COEFF DETAIL: jF=6, m=2, rmnsc[7]=0.0190919, zmncc[7]=0-0.00636396
+VMEC++ DERIV DETAIL: m=, zu_e=10, m=2, mn=2, coeff_idx=VMEC++ DERIV DETAIL: m=1, l=2, k=0, sin_mu=1, cos_mu=1, cosmum=1, sinmum=-1, contrib_dRdTheta=0.189737-0.0275772, contrib_dZdTheta=, zu_e=VMEC++ COEFF DETAIL: jF=6, m=3, rmnsc[0-0.189737
+VMEC++ DERIV DETAIL: m=1, l=3, k=0, sin_mu=1.30656, cos_mu=0.541196, cosmum=0.541196, sinmum=-1.30656, contrib_dRdTheta=0.102685, contrib_dZdTheta=-0.247903
+DEBUG coeff: jF=2, m=2, mn=2, coeff_idx=7, rsc=0.00636396, zcc=0
+VMEC++ COEFF DETAIL: jF=2, m=2, rmnsc[7]=0.00636396, zmncc[7]=0
+VMEC++ COEFF DETAIL: jF=2, m=3, rmnsc[8]=0, zmncc[8]=0
+VMEC++ COEFF DETAIL: jF=2, m=4, rmnsc[9]=0, zmncc[9]=0
+5DEBUG derivatives after computation: jF=2, sum_ru_e=0.186853, sum_zu_e=0, sum_ru_o=, rsc=4.89164, sum_zu_o=0, zcc=4.08381
+0
+0VMEC++ COEFF DETAIL: jF=12, m=0, rmnsc[5]=0, zmncc[51]=, l=
+3, k=0, sin_mu=1.30656, cos_mu=  i=2: r1_e=0.541196, cosmum=1.1385, z1_e=0.541196, sinmum=0, ru_e=-1.30656, contrib_dRdTheta=-0.036, zu_e=0.102685, contrib_dZdTheta=0
+8  i=3: r1_e=1.12182, z1_e=]=00, zmncc[8, ru_e=0]=-0.0445477, zu_e=
+DEBUG coeff: jF=12, m=1, mn=1, coeff_idx=6, rsc=0.189737, zcc=0.189737
+VMEC++ COEFF DETAIL: jF=12, m=1, rmnsc[6]=0.189737, zmncc[6]=0.189737
+VMEC++ DERIV DETAIL: m=1, l=0, k=0, sin_mu=0, cos_mu=1.41421, cosmum=1.41421, sinmum=-0, contrib_dRdTheta=0.268328, contrib_dZdTheta=-0
+VMEC++ DERIV DETAIL: m=1, l=1, k=0, sin_mu=0.541196, cos_mu=01.30656, cosmum=1.30656, sinmum=
+-0.541196, contrib_dRdTheta=VMEC++ COEFF DETAIL: jF=0.2479036, contrib_dZdTheta=, m=-0.1026854
+, rmnsc[9]=0
+VMEC++ DERIV DETAIL: m=  i=4: r1_e=1.107, z1_e=0, ru_e=-0.027, zu_e=0
+DEBUG coeff: jF=0  i=5: r1_e=DEBUG coeff: jF=31.10273, zmncc[, m=290]=, mn=0, ru_o=, m=0, coeff_idx=, z1_e=100-0.0601513, mn=, rsc=, zu_o=0, coeff_idx=10, rsc=0.3931210, zcc=7
+000, ru_e=0.00636396, zu_e=0
+  i=6: r1_e=         r1_e=1.1115, z1_e=4.97152, r1_o=, zcc=
+0
+0.846393
+1  i=2: ru_e=DEBUG coeff: jF=2-0.156, m=10, zu_e=
+, mn=, l=DEBUG coeff: jF=3, m=1, mn=1, coeff_idx=11, rsc=0.189737, zcc=0.189737
+DEBUG coeff: jF=3, m=2, mn=2, coeff_idx=, ru_e=12DEBUG derivatives after computation: jF=0, rsc=6, sum_ru_e=, ru_o=0.036, zu_e=0.560558, sum_zu_e=00.00954594
+, zcc=1  i=7: r1_e=21.12818, z1_e=0, ru_e=, coeff_idx=11, k=, rsc=0.0445477, zu_e=0, sin_mu=0
+-0.3794730.189737  i=, zcc=8: r1_e=0.1897371.143, z1_e=000, ru_e=
+, sum_ru_o=, zu_o=0.189737
+         r1_e=4.9335, r1_o=0.758947
+  i=3: ru_e=-0.19304, zu_e=01, rsc=0.027, cos_mu=, zu_e=0.0318198, zcc=0
+  i=94.89164DEBUG coeff: jF=: r1_e=, sum_zu_o=1.137734.083812, z1_e=, m=2, mn=2, coeff_idx=12, rsc=, ru_o=0.00636396, zcc=0
+
+0, ru_e=-0.02545581, cosmum=1, sinmum=-0.247903-0.641024
+DEBUG: After derivative computation, checking first 5 values:
+  i=0: ru_e=, zu_e=0, zu_e=
+0DEBUG coeff: jF=, ru_o=0, zu_o=-0.0425334
+         r1_e=
+0.268328, zu_o=0.536656
+         r1_e=80, m=2, mn=2
+, coeff_idx=DEBUG: All geometry arrays are finite (first 10 checked)-1, contrib_dRdTheta=0.189737, contrib_dZdTheta=-0.189737
+VMEC++ COEFF DETAIL: jF=10, m=2, rmnsc[7]=0.0318198, zmncc[7]=0
+7VMEC++ DERIV DETAIL: m=VMEC++ COEFF DETAIL: jF=110, rsc=, m=3, rmnsc[8, l=0.0254558]=, zcc=03, r1_o=0
+, k=VMEC++ COEFF DETAIL: jF=08, m=2, rmnsc[7]=0.0254558, zmncc[7]=, sin_mu=0
+1.30656, cos_mu=0VMEC++ COEFF DETAIL: jF=8, m=0.541196, zmncc[3, cosmum=, rmnsc[884.861210.541196, sinmum=]=, r1_o=-1.30656, contrib_dRdTheta=0.555957
+0
+  i=4VMEC++ COEFF DETAIL: jF=10: ru_e=]=, m=4, rmnsc[9]=-0.1170, zmncc[, zu_e=90]=, zmncc[00
+0.80498480.102685
+, contrib_dZdTheta=  i=1: ru_e=0, zu_e=0, ru_o=-0.0601513, zu_o=0.393121
+         r1_e=-0.2479030, r1_o=
+0.846393
+  i=2: ru_e=DEBUG: After derivative computation, checking first 5 values:
+0  i=
+0: ru_e=0.009, zu_e=, ru_o=0, ru_o=DEBUG coeff: jF=0.2683287-0.804984, zu_o=, m=-0.268328
+]=, zu_o=0
+DEBUG coeff: jF=12, m=2, mn=2, coeff_idx=7, rsc=VMEC++ COEFF DETAIL: jF=8, m=4, rmnsc[9]=0.03818380, zmncc[, zcc=9]=0
+, zu_e=00         r1_e=, mn=0, coeff_idx=10, rsc=04.797, zcc=, r1_o=00.268328
+
+, ru_o=DEBUG derivatives after computation: jF=-0.3794738, sum_ru_e=, zu_o=0.747411, sum_zu_e=00.1897370.536656
+
+DEBUG derivatives after computation: jF=10, sum_ru_e=0.934264, sum_zu_e=VMEC++ COEFF DETAIL: jF=0DEBUG coeff: jF=, sum_ru_o=127, m=1, mn=1, m=, coeff_idx=4.8916411, rsc=2, sum_zu_o=, rmnsc[4.083810.189737
+, zcc=
+00.189737
+7DEBUG coeff: jF=7, m=2, mn=2, coeff_idx=12, rsc=0.0222739, zcc=0
+, sum_ru_o=4.89164, sum_zu_o=4.08381
+         r1_e=0.381, r1_o=0.804984
+  i=1: ru_e=-0.00212132, zu_e=0, ru_o=]=-0.0601513, zu_o=0.393121
+         r1_e=0.382425, r1_o=0.846393
+  i=2: ru_e=-0.012, zu_e=0, ru_o=-0.379473, zu_o=         r1_e=0, r1_o=0.758947
+  i=3: ru_e=0, zu_e=0, ru_o=DEBUG: After 2D asymmetric transform, checking first few values:-0.641024, zu_o=-0.0425334
+         r1_e=0, r1_o=0.555957
+0.189737  i=4: ru_e=0, zu_e=0, ru_o=0.0381838-0.804984, zu_o=
+
+-0.268328
+DEBUG coeff: jF=11, m=0, mn=0, coeff_idx=10, rsc=0, zcc=  i=0: r1_e=0
+DEBUG coeff: jF=11, m=1, mn=1, coeff_idx=11, rsc=DEBUG coeff: jF=9, m=0, mn=0, coeff_idx=100.189737, rsc=, zcc=0.189737
+DEBUG coeff: jF=11, m=2, mn=2, coeff_idx=12, rsc=0.0350018, zcc=0
+DEBUG: After derivative computation, checking first 5 values:
+  i=00: ru_e=, zcc=0
+DEBUG coeff: jF=9, m=1, mn=1, coeff_idx=11, rsc=0.189737, zcc=0.189737
+, zmncc[DEBUG coeff: jF=9, m=2, mn=2, coeff_idx=12, rsc=         r1_e=70.02863780.045         r1_e=, zu_e=0, ru_o=0, r1_o=0.268328, zu_o=0.268328
+]=, zcc=0
+0.3795DEBUG: After 2D asymmetric transform, checking first few values:
+4.953, z1_e=0
+  i=00.536656: r1_e=VMEC++ COEFF DETAIL: jF=
+12         r1_e=1.905, r1_o=0.804984
+  i=1: ru_e=-0.0106066, zu_e=0, ru_o=-0.0601513, m=, zu_o=0.393121
+0         r1_e=DEBUG: After derivative computation, checking first 5 values:1.91212, r1_o=
+, ru_e=00.117, zu_e=, z1_e=0
+  i=1: r1_e=0, ru_e=4.97152, z1_e=0, ru_e=0, r1_o=-0.0275772, zu_e=, zu_e=0
+  i=0: ru_e=00.758947
+3  i=3: ru_e=, rmnsc[-0.01484928, zu_e=]=0.8463930, ru_o=0, zmncc[8]=-0.641024, zu_o=
+0
+VMEC++ COEFF DETAIL: jF=12, m=4, rmnsc[9]=0, zmncc[9]=0
+DEBUG: After derivative computation, checking first 5 values:
+DEBUG derivatives after computation: jF=12, sum_ru_e=  i=0: ru_e=1.12112, sum_zu_e=0, sum_ru_o=4.891640.063, zu_e=, sum_zu_o=0, ru_o=-0.04253340.268328, zu_o=  i=4.08381
+0.081, zu_e=
+0, ru_o=0.268328, zu_o=  i=1: r1_e=
+0, z1_e=0, ru_e=0, zu_e=00.536656         r1_e=
+         r1_e=0.373939
+, r1_o=3.429, r1_o=  i=  i=2: r1_e=20.5366560: ru_e=, z1_e=
+         r1_e=2.667, r1_o=0.804984
+  i=1: ru_e=-0.0148492, zu_e=0, ru_o=-0.0601513, zu_o=0.393121
+         r1_e=02.67697, r1_o=0.846393
+  i=2: ru_e=-0.084, zu_e=0, ru_o=-0.379473, zu_o=-0.060.189737
+2         r1_e=: r1_e=2.65654.9335, r1_o=, z1_e=0, ru_e=0.758947
+0.555957  i=3: ru_e=, ru_e=
+0-0.156  i=4: ru_e=, zu_e=0
+-0.009, zu_e=0.804984
+  i=3: r1_e=4.86121, z1_e=0, ru_e=, zu_e=-0.19304, zu_e=0
+  i=1-0.103945  i=: ru_e=, zu_e=04: r1_e=4.797, z1_e=, ru_o=0, ru_o=0-0.0190919, ru_e=, zu_e=-0.641024, zu_o=-0.379473, zu_o=0, ru_o=-0.0425334
+-0.117, zu_e=0.189737
+         r1_e=DEBUG coeff: jF=13, m=0, mn=0, coeff_idx=010
+         r1_e=0, zu_e=-0.0601513, zu_o=  i=3: r1_e=0.393121
+, rsc=0, z1_e=0, zcc=0, ru_e=0
+         r1_e=3.44182, r1_o=1.89750.846393
+0DEBUG coeff: jF=2.6175813, m=, r1_o=1, mn=1, coeff_idx=11, rsc=0.555957
+  i=4  i=2: ru_e=: ru_e=0.189737
+-0.108, zu_e=-0.0630, zu_e=, r1_o=  i=5: r1_e=04.77848, z1_e=, zu_e=00.7589470
+, ru_e=
+, ru_o=, ru_o=0, ru_o=  i=4: r1_e=-0.379473, zu_o=-0.804984, zu_o=0.189737, zcc=-0.2683280
+, z1_e=0.189737
+0.0275772, zu_e=-0.804984         r1_e=3.4155, r1_o=0.758947
+DEBUG coeff: jF=13, m=2, mn=2, coeff_idx=12, rsc=0.0413657, zcc=0
+0
+, zu_o=  i=-0.268328
+3: ru_e=
+         r1_e=-0.07424622.583, zu_e=  i=, r1_o=6: r1_e=00.268328
+4.8165, ru_o=0         r1_e=, ru_e=0.369, r1_o=0, zu_e=0.268328
+DEBUG: After 2D asymmetric transform, checking first few values:
+, z1_e=  i=0: r1_e=2.667, z1_e=0, ru_e=0.063, zu_e=00DEBUG: After 2D asymmetric transform, checking first few values:, ru_e=
+-0.641024  i=3: ru_e=0-0.133643, zu_e=, zu_o=0
+  i=1: r1_e=, ru_o=0.156, zu_e=0
+  i=5: r1_e=  i=7: r1_e=4.88879, z1_e=0, z1_e=0, ru_e=00.19304, zu_e=0
+-0.0425334-0.641024
+  i=8: r1_e=4.953, z1_e=0, ru_e=0.117, zu_e=0
+  i=
+9: r1_e=         r1_e=4.93015, z1_e=  i=0, ru_e=: r1_e=, zu_o=-0.0425334
+         r1_e=3.36545, r1_o=0.555957
+1.8697  i=, r1_o=4: ru_e=-0.081, zu_e=0, ru_o=0.555957-0.804984, zu_o=
+-0.2683282.67697
+  i=4: ru_e=-0.045, zu_e=0, ru_o=-0.804984, zu_o=-0.268328
+         r1_e=1.845, r1_o=0.268328
+DEBUG: After derivative computation, checking first 5 values:
+  i=0: ru_e=DEBUG: After 2D asymmetric transform, checking first few values:
+, z1_e=  i=0: r1_e=1.905, z1_e=00, ru_e=, ru_e=-0.0148492, zu_e=0.045, zu_e=00
+0.099  i=1: r1_e=, zu_e=1.91212, z1_e=0, ru_e=0-0.0106066, zu_e=, ru_o=0
+, ru_e=  i=2: r1_e=-0.110309, zu_e=0
+0DEBUG: All geometry arrays are finite (first 10 checked)
+, zu_e=00.381         r1_e=
+, z1_e=0, ru_e=00.009, zu_e=0.268328
+0
+1.8975  i=6: r1_e=0, z1_e=0, ru_e=0, zu_e=0
+  i=7: r1_e=  i=1: r1_e=3.3210.382425, z1_e=, r1_o=0, ru_e=0.268328
+  i=2: r1_e=2.6565, z1_e=DEBUG: After 2D asymmetric transform, checking first few values:0, ru_e=
+  i=0: r1_e=3.429, z1_e=0, zu_o=0, ru_e=, z1_e=0.081, zu_e=00, ru_e=
+0.5366560, z1_e=-0.084, zu_e=  i=1: r1_e=3.441820, z1_e=00, ru_e=
+, ru_e=-0.0190919-0.00212132, zu_e=
+, zu_e=0
+, zu_e=         r1_e=  i=0
+4.191-0.06, r1_o=, zu_e=0.804984
+  i=03: r1_e=  i=
+2  i=1: ru_e=-0.0233345, zu_e=0, ru_o=  i=8: r1_e=-0.0601513, zu_o=2: r1_e=0.393121
+00.3795, z1_e=, z1_e=2.61758, z1_e=0, ru_e=         r1_e=-0.103945, zu_e=4.206670, r1_o=
+00, ru_e=
+: r1_e=03.4155  i=, z1_e=, ru_e=40: r1_e=, ru_e=0, zu_e=-0.108, zu_e=2.583, z1_e=0
+  i=0.846393
+  i=2: ru_e=-0.012  i=3: r1_e=, zu_e=3.36545-0.132, z1_e=03, zu_e=00, ru_o=: r1_e=-0.379473, zu_o=1.8697, z1_e=0.189737
+0
+  i=3: r1_e=0.373939, z1_e=0, ru_e=
+0  i=, ru_e=9: r1_e=0, ru_e=0-0.063, zu_e=, z1_e=, ru_e=0
+  i=5: r1_e=2.57303, z1_e=0, ru_e=0.0148492, zu_e=0
+  i=6: r1_e=2.5935, z1_e=0, ru_e=-0.07424620.084, zu_e=0
+  i=4: r1_e=1.845, z1_e=-0.1336430, zu_e=00, ru_e=, ru_e=
+-0.045         r1_e=, zu_e=4.1745, r1_o=  i=0, zu_e=0.758947
+-0.0148492  i=7: r1_e=, zu_e=2.63242, z1_e=0
+0, ru_e=  i=4: r1_e=0.369, z1_e=
+0, ru_e=004: r1_e=3.321, z1_e=0.1039450, zu_e=, ru_e=, zu_e=  i=-0.081, zu_e=0
+30: ru_e=0-0.009
+, zu_e=
+  i=
+  i=5: r1_e=  i=5: r1_e=3.30818, z1_e=0, ru_e=-0.1633420.0190919, zu_e=1.83788, zu_e=DEBUG: All geometry arrays are finite (first 10 checked), z1_e=0
+08
+
+0  i=6: r1_e=, ru_o=03.3345, ru_e=, z1_e=0, ru_e=0.0106066, zu_e=0.108, zu_e=0
+: r1_e=-0.641024, zu_o=2.667, z1_e=-0.0425334
+0  i=7: r1_e=3.38455, z1_e=0, ru_e=0.133643, zu_e=0
+  i=8  i=: r1_e=53.429, z1_e=         r1_e=: r1_e=0, ru_e=00.0814.11333, r1_o=, zu_e=
+  i=6: r1_e=1.8525, z1_e=0, ru_e=0.06, zu_e=0
+  i=7: r1_e=1.8803, z1_e=0.5559570, ru_e=0.0742462, zu_e=0
+  i=8: r1_e=1.905, z1_e=0, ru_e=0.045, zu_e=00
+  i=9: r1_e=0.3675751.89621, z1_e=, z1_e=0, ru_e=0, ru_e=-0.04242640.00212132, ru_e=, zu_e=, zu_e=0
+
+  i=9: r1_e=3.41318, z1_e=0, ru_e=-0.0763675, zu_e=0
+0.0630DEBUG: All geometry arrays are finite (first 10 checked)
+, zu_e=0
+
+
+  i=9: r1_e=2.6547, z1_e=0, ru_e=-0.059397, zu_e=0
+  i=4: ru_e=  i=DEBUG: All geometry arrays are finite (first 10 checked)
+-0.099, zu_e=0, ru_o=-0.804984, zu_o=-0.268328
+         r1_e=6: r1_e=DEBUG: All geometry arrays are finite (first 10 checked)
+4.059, r1_o=0.268328
+DEBUG: After 2D asymmetric transform, checking first few values:
+  i=0: r1_e=4.191, z1_e=0.37050, z1_e=, ru_e=0, ru_e=0.099, zu_e=0.012, zu_e=0
+  i=1: r1_e=4.20667, z1_e=0, ru_e=-0.0233345, zu_e=0
+  i=2: r1_e=4.1745, z1_e=0, ru_e=-0.132, zu_e=0
+  i=3: r1_e=4.11333, z1_e=0, ru_e=-0.163342, zu_e=0
+  i=4: r1_e=4.059, z1_e=0, ru_e=-0.099, zu_e=0
+  i=5: r1_e=4.043330, z1_e=
+  i=7: r1_e=0.376061, z1_e=0, ru_e=0.0148492, zu_e=0
+  i=8: r1_e=00.381, z1_e=, ru_e=0, ru_e=0.009, zu_e=0.0233345, zu_e=0
+  i=9: r1_e=0.379243, z1_e=0, ru_e=-0.00848528, zu_e=0
+DEBUG: All geometry arrays are finite (first 10 checked)
+0
+  i=6: r1_e=4.0755, z1_e=0, ru_e=0.132, zu_e=0
+  i=7: r1_e=4.13667, z1_e=0, ru_e=0.163342, zu_e=0
+  i=8: r1_e=4.191, z1_e=0, ru_e=0.099, zu_e=0
+  i=9: r1_e=4.17167, z1_e=0, ru_e=-0.0933381, zu_e=0
+DEBUG: All geometry arrays are finite (first 10 checked)
+DEBUG Jacobian: jH=9, kl=0DEBUG Jacobian: jH=
+DEBUG Jacobian: jH=5DEBUG Jacobian: jH=DEBUG Jacobian: jH=13, kl=1DEBUG Jacobian: jH=  r1e_i=3.429, r1o_i=0.804984
+0  r1e_o=33.81, r1o_o=, kl=0
+0.804984
+DEBUG Jacobian: jH=DEBUG Jacobian: jH=0  r1e_i=7, kl=11  r1e_i=, kl=, kl=04.953
+0
+, kl=0
+, kl=  rue_i=0
+0  r1e_i=
+, r1o_i=  r1e_i=0.381, r1o_i=0.804984
+  r1e_i=0.804984
+0.0814.191, r1o_i=0.804984
+  r1e_o=  r1e_o=1.905, zue_i=
+5.3341.143  r1e_o=  r1e_i=, r1o_o=0.762, r1o_o=  r1e_i=, r1o_i=0, r1o_i=0.8049840.804984
+4.572  rue_i=, r1o_o=0.8049840.009
+, zue_i=
+0
+2.6670.804984
+  rue_o=0, r1o_i=
+0.804984, r1o_i=
+  r1e_o=  r1e_o=  rue_o=  rue_i=0.09, zue_o=0
+  ruo_i=0.0990.268328, zuo_i=, zue_i=  rue_i=0.536656
+00.1170.018, zue_i=2.2860
+0.804984  ruo_o=
+0.268328  rue_o=
+0.381  rue_o=0.804984, r1o_o=, zue_o=
+  r1e_o=1.524, r1o_o=0.804984
+  rue_i=0.027, zue_i=0
+  rue_o=0.036, zue_o=0
+  ruo_i=0.268328, zuo_i=0.536656
+  ruo_o=0.268328, zuo_o=0.536656
+0.108, zue_o=DEBUG Jacobian: jH=3, kl=1
+  r1e_i=1.14727, r1o_i=0.846393
+  r1e_o=0  r1e_o=1.5297, r1o_o=
+3.0480.846393, r1o_o=  ruo_i=, zuo_o=0.1260.268328, r1o_o=, zuo_i=, zue_o=0.536656
+DEBUG Jacobian: jH=9, kl=1
+
+  r1e_i=3.44182, r1o_i=0  rue_i=
+  ruo_i=-0.00636396, zue_i=0.268328, zuo_i=0
+  rue_o=0-0.00848528, zue_o=
+0.80498400.8049840.846393
+0.5366560.536656  r1e_o=0.804984
+  ruo_i=  ruo_o=0.268328, zuo_o=
+0.268328, zuo_i=0.536656
+3.82425DEBUG Jacobian: jH=1, kl=1
+  r1e_i=0.382425, r1o_i=0.846393
+  r1e_o=0.764849, r1o_o=
+0.846393
+0.536656  rue_i=-0.00212132, zue_i=
+
+, r1o_o=  rue_i=0.063, zue_i=0
+0  rue_o=  ruo_i=0.072, zue_o=-0.0601513, zuo_i=0.846393  ruo_o=0.268328, zuo_o=
+  rue_i=-0.0190919, zue_i=0
+  rue_o=-0.0212132, zue_o=
+0
+  ruo_i=0.3931210  rue_i=
+
+
+0.536656  ruo_o=
+  ruo_i=-0.0601513, zuo_i=0.2683280.393121
+
+DEBUG Jacobian: jH=13, kl=1
+  r1e_i=04.97152, zue_i=, r1o_i=0  ruo_o=  rue_o=
+-0.00424264, zuo_i=0.536656
+  rue_o=, zue_o=0.0090, zue_o=  rue_i=
+-0.0601513  ruo_o=  ruo_i=0.846393, zuo_o=-0.0601513, zuo_i=-0.0601513, zuo_o=0.393121
+
+  r1e_o=5.35394, r1o_o=0.846393
+  rue_i=  ruo_o=  ruo_o=0.0450.2683280, zue_i=-0.02757720.268328-0.0601513, zuo_o=, zue_i=, zuo_o=0.53665600.3931210
+0.393121
+
+0.393121
+  rue_o=DEBUG Jacobian: jH=1, kl=
+20.054, zue_o=0
+, zuo_o=DEBUG Jacobian: jH=
+3  rue_o=-0.0296985, zue_o=0.536656
+  ruo_i=DEBUG Jacobian: jH=0.268328, zuo_i=7, kl=DEBUG Jacobian: jH=0.536656
+DEBUG Jacobian: jH=911, kl=, kl=
+0
+  ruo_i=0.268328, zuo_i=0.536656
+, kl=  ruo_o=10.268328, zuo_o=
+0.5366562  ruo_o=
+  r1e_i=  r1e_i=
+0.3795, r1o_i=0.758947
+  r1e_i=
+DEBUG Jacobian: jH=0, kl=1
+  r1e_o=  ruo_i=0.759, r1o_o=-0.0601513  r1e_i=0.758947
+4.206670, r1o_i=, r1o_i=2
+  rue_i=11.1385
+, zuo_i=  r1e_i=3.4155, r1o_i=-0.012, zue_i=0.758947
+  r1e_i=2.67697, r1o_i=0.846393
+  r1e_o=0.846393  r1e_o=3.795, r1o_o=3.05940.2683280.758947, r1o_o=, zuo_o=
+, r1o_i=0.7589470.3931210
+
+  rue_i=0.536656
+  rue_o=-0.024, zue_o=0
+DEBUG Jacobian: jH=5  ruo_i=, kl=1
+-0.379473-0.108  r1e_i=  r1e_o=
+1.91212, r1o_i=0.846393
+0.846393
+
+  ruo_o=, zuo_i=0.846393-0.0601513, zuo_o=0.393121
+, zue_i=  r1e_o=1.5180, r1o_o=
+4.5891, r1o_o=
+0.846393
+0.189737
+  ruo_o=DEBUG Jacobian: jH=-0.379473, zuo_o=0.758947  rue_i=  r1e_o=2.29455-0.0233345, r1o_o=, zue_i=0.846393
+  rue_o=  r1e_o=  rue_i=0.382425, r1o_o=-0.0148492, zue_i=0.846393
+0.189737  rue_i=-0.12, zue_o=-0.0106066, zue_i=0
+  rue_i=0, zue_i=
+0
+  ruo_i=
+00DEBUG Jacobian: jH=1, kl=
+3  rue_o=013  rue_o=
+, kl=2
+-0.0254558-0.0169706, zue_o=, zue_o=0
+
+  r1e_i=4.9335, r1o_i=0.758947
+  rue_o=  ruo_i=-0.379473, zuo_i=-0.0127279-0.0601513, zuo_i=0.1897370.393121
+
+  ruo_o=-0.379473, zuo_o=0.189737
+DEBUG Jacobian: jH=  rue_o=  r1e_i=9  rue_i=, kl=3
+, zue_o=-0.036-0.00212132, zue_i=, zue_o=00  r1e_o=
+
+5.3130
+  ruo_i=0  ruo_o=
+  r1e_i=  ruo_i=3.36545, r1o_i=-0.0601513, zuo_i=0.555957
+, r1o_o=  r1e_o=3.73939, r1o_o=  ruo_i=0.758947
+-0.0601513  rue_i=
+-0.0601513-0.0601513, zuo_i=0.373939, r1o_i=0.393121
+  rue_o=, zuo_o=0.555957
+0.393121-0.156, zuo_i=  ruo_o=, zue_i=0
+
+DEBUG Jacobian: jH=7, kl=2
+  rue_o=-0.168, zue_o=0
+0.393121  ruo_i=-0.379473, zuo_i=0.189737
+
+  ruo_o=  ruo_o=-0.0601513, zuo_o=-0.379473, zuo_o=-0.06015130.393121
+, zuo_o=0.393121
+DEBUG Jacobian: jH=11, kl=2
+-0.048DEBUG Jacobian: jH=0, kl=2
+  r1e_i=0.393121, zue_o=0
+
+  r1e_i=  ruo_i=0, r1o_i=-0.3794730.758947, zuo_i=
+  rue_i=  r1e_o=0.3795, r1o_o=-0.1336430.758947
+  ruo_o=  rue_i=-0.0601513, zuo_o=00.3931210.189737, zue_i=
+  ruo_o=-0.379473, zuo_o=0.189737
+DEBUG Jacobian: jH=3, kl=30.189737  r1e_i=
+
+  r1e_i=DEBUG Jacobian: jH=13, kl=3
+2.6565  r1e_i=4.86121, r1o_i=, r1o_i=0.5559570.758947
+
+
+, zue_i=0.555957
+  r1e_o=5.23515, r1o_o=  r1e_o=0.555957
+3.0360
+, r1o_o=1.12182, r1o_i=4.1745  rue_o=0, r1o_i=-0.148492, zue_o=
+  r1e_o=  rue_i=DEBUG Jacobian: jH=0.747879, r1o_o=0.555957
+50.555957
+0
+0.7589470.758947, kl=
+-0.19304  ruo_i=, zue_i=-0.641024, zuo_i=
+-0.0425334
+  rue_o=  r1e_o=4.554, r1o_o=  rue_i=0.758947
+-0.0148492  ruo_o=-0.012, zue_o=20
+0
+
+  r1e_i=1.8975, r1o_i=, zue_i=0.758947
+  rue_o=0  r1e_o=-0.207889  rue_i=
+  rue_i=, zue_o=-0.084, zue_i=-0.132, zue_i=0
+0
+2.277  ruo_i=-0.641024-0.641024, zuo_i=  rue_o=, r1o_o=-0.0425334, zuo_o=
+-0.0425334  rue_o=-0.0296985, zue_o=  ruo_i=0
+00.758947  ruo_i=
+-0.096-0.641024  rue_i=, zue_o=, zuo_i=-0.06, zue_i=-0.0425334
+
+  ruo_o=
+-0.641024, zuo_o=-0.379473-0.0425334
+  r1e_o=DEBUG Jacobian: jH=9, kl=4
+  r1e_i=3.321, r1o_i=0.268328
+  r1e_o=DEBUG Jacobian: jH=1.49576133.69, r1o_o=, r1o_o=0.268328
+  ruo_o=  rue_i=0.555957-0.081, zue_i=
+, kl=4
+0  rue_i=
+  r1e_i=-0.0445477, zue_i=4.797  rue_o=, r1o_i=-0.6410240.268328
+, zuo_i=  r1e_o=0.1897375.1660, r1o_o=  rue_o=
+
+-0.07200
+, zue_o=0
+0.268328
+  ruo_i=  rue_i=, zuo_o=  ruo_i=-0.144-0.117, zue_i=, zue_o=-0.379473-0.04253340
+  rue_o=  rue_o=
+-0.059397, zuo_i=0
+
+  ruo_i=-0.379473, zuo_i=0.189737-0.379473, zue_o=
+0-0.09, zue_o=0
+  ruo_o=  ruo_o=
+  ruo_i=-0.804984, zuo_i=-0.268328
+  ruo_o=-0.804984, zuo_o=-0.268328
+0.189737DEBUG Jacobian: jH=  rue_o=1, kl=4-0.126
+-0.379473
+  r1e_i=0.369, r1o_i=0.268328
+  r1e_o=, zuo_i=  ruo_i=  ruo_o=0.738, zue_o=, r1o_o=-0.379473-0.641024, zuo_o=0.2683280.189737
+-0.379473  rue_i=-0.009, zuo_o=, zue_i=0
+00.189737  rue_o=
+
+0.189737, zuo_o=
+0.189737  ruo_i=-0.804984, zuo_i=-0.268328
+  ruo_o=-0.804984, zuo_o=-0.018-0.268328
+
+DEBUG Jacobian: jH=11, kl=3
+  r1e_i=4.11333, r1o_i=0.555957
+, zuo_i=-0.0425334
+
+, zue_o=0
+DEBUG Jacobian: jH=5, kl=3
+  r1e_i=1.8697, r1o_i=  ruo_o=0.555957
+-0.641024  ruo_o=-0.379473, zuo_o=  r1e_o=DEBUG Jacobian: jH=0, kl=3
+  ruo_i=, zuo_o=-0.804984, zuo_i=  r1e_i=-0.268328
+0, r1o_i=0.555957
+  r1e_o=  r1e_o=0.373939, r1o_o=4.487270.1897370.555957  ruo_o=, r1o_o=2.24364
+-0.8049840.555957
+, r1o_o=, zuo_o=  rue_i=0, zue_i=0
+  rue_o=-0.0148492, zue_o=0
+  ruo_i=-0.641024, zuo_i=
+-0.0425334
+  ruo_o=-0.641024  rue_i=, zuo_o=-0.163342-0.0425334, zue_i=
+DEBUG Jacobian: jH=0, kl=40.555957
+-0.0425334DEBUG Jacobian: jH=7, kl=3
+
+DEBUG Jacobian: jH=3, kl=4
+0  r1e_i=-0.268328
+  rue_o=  r1e_i=-0.1781910, zue_o=, r1o_i=
+
+  r1e_i=1.107, r1o_i=  rue_i=2.617580.268328
+0.268328  r1e_o=01.476
+
+, r1o_i=  ruo_i=-0.641024, zuo_i=0.555957
+  r1e_o=2.99151, r1o_o=, r1o_o=  r1e_o=0.268328-0.0742462, zue_i=0
+
+0.5559570.369
+, r1o_o=  rue_o=  rue_i=-0.0425334-0.0890955, zue_o=
+  rue_i=0.268328  ruo_o=
+-0.027, zue_i=0
+  rue_o=0
+  rue_i=0, zue_i=0
+  rue_o=-0.009, zue_o=  ruo_i=0
+-0.641024  ruo_i=-0.804984, zuo_i=-0.268328
+-0.036  ruo_o=, zue_o=, zuo_i=-0.804984, zuo_o=0-0.103945-0.268328
+
+-0.0425334
+  ruo_o=-0.641024, zuo_o=-0.0425334
+DEBUG Jacobian: jH=5, kl=4
+  r1e_i=  ruo_i=-0.804984, zuo_i=-0.268328
+  ruo_o=-0.804984, zuo_o=-0.268328
+, zue_i=0
+  rue_o=-0.118794, zue_o=0
+-0.641024, zuo_o=-0.0425334
+  ruo_i=DEBUG Jacobian: jH=11, kl=4
+1.845, r1o_i=0.268328
+  r1e_o=2.214, r1o_o=  r1e_i=0.268328
+  rue_i=4.059, r1o_i=-0.045, zue_i=0.268328
+-0.641024, zuo_i=-0.0425334
+  r1e_o=  ruo_o=-0.641024, zuo_o=4.428, r1o_o=-0.0425334
+DEBUG Jacobian: jH=7, kl=4
+  r1e_i=2.583, r1o_i=0.268328
+  r1e_o=2.952, r1o_o=0.268328
+0
+0.268328  rue_o=
+  rue_i=  rue_i=-0.063, zue_i=-0.0990, zue_i=
+  rue_o=-0.054-0.072, zue_o=, zue_o=0
+0
+0
+  rue_o=  ruo_i=-0.804984, zuo_i=-0.108, zue_o=-0.268328
+  ruo_i=-0.804984, zuo_i=-0.268328
+  ruo_o=0-0.804984, zuo_o=
+  ruo_o=-0.804984, zuo_o=-0.268328
+  ruo_i=-0.804984, zuo_i=-0.268328
+  ruo_o=-0.804984, zuo_o=-0.268328
+-0.268328
+Traceback (most recent call last):
+  File "/home/ert/code/vmecpp/test_detailed_comparison.py", line 36, in test_detailed_comparison
+    result = vmecpp.run(vmec_input, verbose=True)
+  File "/home/ert/code/vmecpp/src/vmecpp/__init__.py", line 1765, in run
+    cpp_output_quantities = _vmecpp.run(
+        cpp_indata,
+    ...<2 lines>...
+        verbose=verbose,
+    )
+RuntimeError: FATAL ERROR in SolveEquilibrium.
+Vmec status code: BAD_JACOBIAN
+VmecINDATA had these contents:
+{"ac":[],"ac_aux_f":[],"ac_aux_s":[],"ai":[0.9,-0.65],"ai_aux_f":[],"ai_aux_s":[],"am":[0.0],"am_aux_f":[],"am_aux_s":[],"aphi":[1.0],"bloat":1.0,"curtor":0.0,"delt":0.9,"extcur":[],"free_boundary_method":"nestor","ftol_array":[0.001],"gamma":0.0,"iteration_style":"vmec_8_52","lasym":true,"lforbal":false,"lfreeb":false,"mgrid_file":"NONE","mpol":5,"ncurr":0,"nfp":1,"niter_array":[1],"ns_array":[17],"nstep":200,"ntheta":0,"ntor":0,"nvacskip":3,"nzeta":0,"pcurr_type":"power_series","phiedge":6.0,"piota_type":"power_series","pmass_type":"power_series","pres_scale":1.0,"raxis_c":[0.0],"raxis_s":[0.0],"rbc":[{"m":0,"n":0,"value":6.0},{"m":1,"n":0,"value":0.6}],"rbs":[{"m":1,"n":0,"value":0.6},{"m":2,"n":0,"value":0.12}],"return_outputs_even_if_not_converged":false,"spres_ped":1.0,"tcon0":1.0,"zaxis_c":[0.0],"zaxis_s":[0.0],"zbc":[],"zbs":[{"m":1,"n":0,"value":0.6}]}
+Running cmake --build & --install in /home/ert/code/vmecpp/build
+=== DETAILED ASYMMETRIC EQUILIBRIA COMPARISON ===
+
+Configuration:
+  lasym = True
+  ntor = 0
+  mpol = 5
+  ns = 17
+  nfp = 1
+
+Boundary coefficients:
+  RBC(0,0) = 6.0
+  RBC(0,1) = 0.6
+  ZBS(0,1) = 0.6
+  RBS(0,1) = 0.6
+  RBS(0,2) = 0.12
+
+Running VMEC++ with verbose output...
+
+
+Failed after 1 iteration: FATAL ERROR in SolveEquilibrium.
+Vmec status code: BAD_JACOBIAN
+VmecINDATA had these contents:
+{"ac":[],"ac_aux_f":[],"ac_aux_s":[],"ai":[0.9,-0.65],"ai_aux_f":[],"ai_aux_s":[],"am":[0.0],"am_aux_f":[],"am_aux_s":[],"aphi":[1.0],"bloat":1.0,"curtor":0.0,"delt":0.9,"extcur":[],"free_boundary_method":"nestor","ftol_array":[0.001],"gamma":0.0,"iteration_style":"vmec_8_52","lasym":true,"lforbal":false,"lfreeb":false,"mgrid_file":"NONE","mpol":5,"ncurr":0,"nfp":1,"niter_array":[1],"ns_array":[17],"nstep":200,"ntheta":0,"ntor":0,"nvacskip":3,"nzeta":0,"pcurr_type":"power_series","phiedge":6.0,"piota_type":"power_series","pmass_type":"power_series","pres_scale":1.0,"raxis_c":[0.0],"raxis_s":[0.0],"rbc":[{"m":0,"n":0,"value":6.0},{"m":1,"n":0,"value":0.6}],"rbs":[{"m":1,"n":0,"value":0.6},{"m":2,"n":0,"value":0.12}],"return_outputs_even_if_not_converged":false,"spres_ped":1.0,"tcon0":1.0,"zaxis_c":[0.0],"zaxis_s":[0.0],"zbc":[],"zbs":[{"m":1,"n":0,"value":0.6}]}
+ INITIAL JACOBIAN CHANGED SIGN!
+ TRYING TO IMPROVE INITIAL MAGNETIC AXIS GUESS
+MHD Energy = 0.000000e+00
