@@ -4376,6 +4376,17 @@ void IdealMhdModel::dft_ForcesToFourier_3d_asymm(FourierForces& m_physical_f) {
 void IdealMhdModel::dft_ForcesToFourier_2d_asymm(FourierForces& m_physical_f) {
   // Apply asymmetric 2D transform from real space to Fourier forces
   std::cout << "DEBUG: dft_ForcesToFourier_2d_asymm started" << std::endl;
+  
+  // DEBUG: Check array sizes
+  std::cout << "DEBUG Fourier array sizes:" << std::endl;
+  std::cout << "  frcc.size() = " << m_physical_f.frcc.size() << std::endl;
+  std::cout << "  frss.size() = " << m_physical_f.frss.size() << std::endl;
+  std::cout << "  frsc.size() = " << m_physical_f.frsc.size() << std::endl;
+  std::cout << "  frcs.size() = " << m_physical_f.frcs.size() << std::endl;
+  std::cout << "  fzcc.size() = " << m_physical_f.fzcc.size() << std::endl;
+  std::cout << "  s_.mnmax = " << s_.mnmax << std::endl;
+  std::cout << "  s_.lasym = " << s_.lasym << std::endl;
+  std::cout << "  s_.lthreed = " << s_.lthreed << std::endl;
 
   // DEBUG: Check input forces for NaN
   bool found_nan_in_forces = false;
@@ -4395,6 +4406,13 @@ void IdealMhdModel::dft_ForcesToFourier_2d_asymm(FourierForces& m_physical_f) {
               << " checked)" << std::endl;
   }
 
+  // For 2D asymmetric (ntor=0, lasym=true), only certain arrays are allocated:
+  // Allocated: frcc, frsc, fzsc, fzcc, flsc, flcc
+  // Not allocated: frss, frcs, fzcs, fzss, flcs, flss (these require lthreed=true)
+  
+  // Create empty spans for unallocated arrays to avoid bounds errors
+  absl::Span<double> empty_span;
+  
   RealToFourier2DAsymmFastPoloidal(
       s_,
       absl::Span<const double>(armn_e.data(),
@@ -4404,17 +4422,17 @@ void IdealMhdModel::dft_ForcesToFourier_2d_asymm(FourierForces& m_physical_f) {
       absl::Span<const double>(blmn_e.data(),
                                s_.nZnT * (r_.nsMaxF - r_.nsMinF)),
       absl::Span<double>(m_physical_f.frcc.data(), m_physical_f.frcc.size()),
-      absl::Span<double>(m_physical_f.frss.data(), m_physical_f.frss.size()),
+      s_.lthreed ? absl::Span<double>(m_physical_f.frss.data(), m_physical_f.frss.size()) : empty_span,
       absl::Span<double>(m_physical_f.frsc.data(), m_physical_f.frsc.size()),
-      absl::Span<double>(m_physical_f.frcs.data(), m_physical_f.frcs.size()),
+      (s_.lasym && s_.lthreed) ? absl::Span<double>(m_physical_f.frcs.data(), m_physical_f.frcs.size()) : empty_span,
       absl::Span<double>(m_physical_f.fzsc.data(), m_physical_f.fzsc.size()),
-      absl::Span<double>(m_physical_f.fzcs.data(), m_physical_f.fzcs.size()),
+      s_.lthreed ? absl::Span<double>(m_physical_f.fzcs.data(), m_physical_f.fzcs.size()) : empty_span,
       absl::Span<double>(m_physical_f.fzcc.data(), m_physical_f.fzcc.size()),
-      absl::Span<double>(m_physical_f.fzss.data(), m_physical_f.fzss.size()),
+      (s_.lasym && s_.lthreed) ? absl::Span<double>(m_physical_f.fzss.data(), m_physical_f.fzss.size()) : empty_span,
       absl::Span<double>(m_physical_f.flsc.data(), m_physical_f.flsc.size()),
-      absl::Span<double>(m_physical_f.flcs.data(), m_physical_f.flcs.size()),
+      s_.lthreed ? absl::Span<double>(m_physical_f.flcs.data(), m_physical_f.flcs.size()) : empty_span,
       absl::Span<double>(m_physical_f.flcc.data(), m_physical_f.flcc.size()),
-      absl::Span<double>(m_physical_f.flss.data(), m_physical_f.flss.size()));
+      (s_.lasym && s_.lthreed) ? absl::Span<double>(m_physical_f.flss.data(), m_physical_f.flss.size()) : empty_span);
 
   // DEBUG: Check output Fourier forces for NaN
   bool found_nan_fourier_forces = false;

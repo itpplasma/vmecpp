@@ -528,19 +528,19 @@ void RealToFourier2DAsymmFastPoloidal(
 
   // const double PI = 3.14159265358979323846;  // unused
 
-  // Initialize output arrays
-  std::fill(rmncc.begin(), rmncc.end(), 0.0);
-  std::fill(rmnss.begin(), rmnss.end(), 0.0);
-  std::fill(rmnsc.begin(), rmnsc.end(), 0.0);
-  std::fill(rmncs.begin(), rmncs.end(), 0.0);
-  std::fill(zmnsc.begin(), zmnsc.end(), 0.0);
-  std::fill(zmncs.begin(), zmncs.end(), 0.0);
-  std::fill(zmncc.begin(), zmncc.end(), 0.0);
-  std::fill(zmnss.begin(), zmnss.end(), 0.0);
-  std::fill(lmnsc.begin(), lmnsc.end(), 0.0);
-  std::fill(lmncs.begin(), lmncs.end(), 0.0);
-  std::fill(lmncc.begin(), lmncc.end(), 0.0);
-  std::fill(lmnss.begin(), lmnss.end(), 0.0);
+  // Initialize output arrays (only if they're allocated)
+  if (!rmncc.empty()) std::fill(rmncc.begin(), rmncc.end(), 0.0);
+  if (!rmnss.empty()) std::fill(rmnss.begin(), rmnss.end(), 0.0);
+  if (!rmnsc.empty()) std::fill(rmnsc.begin(), rmnsc.end(), 0.0);
+  if (!rmncs.empty()) std::fill(rmncs.begin(), rmncs.end(), 0.0);
+  if (!zmnsc.empty()) std::fill(zmnsc.begin(), zmnsc.end(), 0.0);
+  if (!zmncs.empty()) std::fill(zmncs.begin(), zmncs.end(), 0.0);
+  if (!zmncc.empty()) std::fill(zmncc.begin(), zmncc.end(), 0.0);
+  if (!zmnss.empty()) std::fill(zmnss.begin(), zmnss.end(), 0.0);
+  if (!lmnsc.empty()) std::fill(lmnsc.begin(), lmnsc.end(), 0.0);
+  if (!lmncs.empty()) std::fill(lmncs.begin(), lmncs.end(), 0.0);
+  if (!lmncc.empty()) std::fill(lmncc.begin(), lmncc.end(), 0.0);
+  if (!lmnss.empty()) std::fill(lmnss.begin(), lmnss.end(), 0.0);
 
   // Create FourierBasisFastPoloidal to get proper mode indexing
   FourierBasisFastPoloidal fourier_basis(&sizes);
@@ -588,11 +588,11 @@ void RealToFourier2DAsymmFastPoloidal(
     // Normalize by grid size (for asymmetric case, use reduced theta range)
     double norm_factor = 1.0 / (sizes.nZeta * sizes.nThetaReduced);
 
-    // Store coefficients with standard DFT normalization only
-    rmncc[mn] = sum_rmncc * norm_factor;
-    rmnsc[mn] = sum_rmnsc * norm_factor;
-    zmnsc[mn] = sum_zmnsc * norm_factor;
-    zmncc[mn] = sum_zmncc * norm_factor;
+    // Store coefficients with standard DFT normalization only (if arrays are allocated)
+    if (!rmncc.empty()) rmncc[mn] = sum_rmncc * norm_factor;
+    if (!rmnsc.empty()) rmnsc[mn] = sum_rmnsc * norm_factor;
+    if (!zmnsc.empty()) zmnsc[mn] = sum_zmnsc * norm_factor;
+    if (!zmncc.empty()) zmncc[mn] = sum_zmncc * norm_factor;
   }
 }
 
@@ -643,8 +643,9 @@ void SymmetrizeForces(const Sizes& sizes, absl::Span<double> force_r,
 
   // Process the full theta interval [0, π] to decompose forces
   for (int i = 0; i < sizes.nThetaReduced; ++i) {
-    // Map theta to pi-theta: ir = ntheta1 + 2 - i
-    int ir = sizes.nThetaReduced + (sizes.nThetaReduced - 1 - i);
+    // Map theta to pi-theta using jVMEC's reflection formula
+    // ireflect = (ntheta1 - i) % ntheta1 for theta -> pi-theta mapping
+    int ir = (sizes.nThetaEff - i) % sizes.nThetaEff;
 
     for (int k = 0; k < sizes.nZeta; ++k) {
       int idx = i * sizes.nZeta + k;
@@ -673,7 +674,8 @@ void SymmetrizeForces(const Sizes& sizes, absl::Span<double> force_r,
 
   // Fill the extended interval [π, 2π] with the symmetrized values
   for (int i = sizes.nThetaReduced; i < sizes.nThetaEff; ++i) {
-    int ir = sizes.nThetaReduced + (sizes.nThetaReduced - 1 - i);
+    // Use jVMEC's reflection formula to avoid negative indices
+    int ir = (sizes.nThetaEff - i) % sizes.nThetaEff;
 
     for (int k = 0; k < sizes.nZeta; ++k) {
       int idx = i * sizes.nZeta + k;
