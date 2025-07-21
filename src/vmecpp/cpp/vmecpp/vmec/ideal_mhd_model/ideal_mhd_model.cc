@@ -21,6 +21,7 @@
 #include "vmecpp/vmec/fourier_asymmetric/fourier_asymmetric.h"
 #include "vmecpp/vmec/fourier_geometry/fourier_geometry.h"
 #include "vmecpp/vmec/handover_storage/handover_storage.h"
+#include "vmecpp/vmec/high_precision_forces.h"
 #include "vmecpp/vmec/radial_partitioning/radial_partitioning.h"
 #include "vmecpp/vmec/radial_profiles/radial_profiles.h"
 #include "vmecpp/vmec/vmec_constants/vmec_algorithm_constants.h"
@@ -2671,13 +2672,14 @@ void IdealMhdModel::computeMHDForces() {
         continue;
       }
 
-      // A_R force
-      armn_e[idx_f] =
-          (zup_o[kl] - m_ls_.zup_i[kl]) / m_fc_.deltaS +
-          0.5 * (taup_o[kl] + m_ls_.taup_i[kl]) -
-          0.5 * (gbvbv_o[kl] + m_ls_.gbvbv_i[kl]) * r1_e[idx_g] -
-          0.5 * (gbvbv_o[kl] * sqrtSHo + m_ls_.gbvbv_i[kl] * sqrtSHi) *
-              r1_o[idx_g];
+      // A_R force (using high-precision calculation for tight tolerance convergence)
+      armn_e[idx_f] = CalculateHighPrecisionRadialForce(
+          zup_o[kl], m_ls_.zup_i[kl],
+          taup_o[kl], m_ls_.taup_i[kl],
+          gbvbv_o[kl], m_ls_.gbvbv_i[kl],
+          r1_e[idx_g], r1_o[idx_g],
+          m_fc_.deltaS,
+          sqrtSHo, sqrtSHi);
 
       // DEBUG: Check if computed force is NaN
       if (kl < 3 && jF == r_.nsMinF && !std::isfinite(armn_e[idx_f])) {
@@ -2723,7 +2725,9 @@ void IdealMhdModel::computeMHDForces() {
                   << kl << ", jF=" << jF << std::endl;
         azmn_e[idx_f] = 0.0;
       } else {
-        azmn_e[idx_f] = -(rup_o[kl] - m_ls_.rup_i[kl]) / m_fc_.deltaS;
+        // A_Z force (using high-precision calculation for tight tolerance convergence)
+        azmn_e[idx_f] = CalculateHighPrecisionVerticalForce(
+            rup_o[kl], m_ls_.rup_i[kl], m_fc_.deltaS);
       }
 
       // DEBUG: Check if computed A_Z force is NaN

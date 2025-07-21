@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2024-present Proxima Fusion GmbH <info@proximafusion.com>
+#
+# SPDX-License-Identifier: MIT
+
+cc_library(
+    name = "high_precision_forces",
+    srcs = ["high_precision_forces.cc"],
+    hdrs = ["high_precision_forces.h"],
+    visibility = ["//visibility:public"],
+)
+
+cc_test(
+    name = "high_precision_forces_test",
+    srcs = ["high_precision_forces_test.cc"],
+    deps = [
+        ":high_precision_forces",
+        "@googletest//:gtest_main",
+    ],
+    size = "small",
+)

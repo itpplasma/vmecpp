@@ -20,6 +20,7 @@ cc_library(
         "//vmecpp/vmec/handover_storage:handover_storage",
         "//vmecpp/vmec/radial_partitioning:radial_partitioning",
         "//vmecpp/vmec/vmec_constants:vmec_constants",
+        "//vmecpp/vmec:high_precision_forces",
         "//vmecpp/free_boundary/free_boundary_base:free_boundary_base",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/log:check",
