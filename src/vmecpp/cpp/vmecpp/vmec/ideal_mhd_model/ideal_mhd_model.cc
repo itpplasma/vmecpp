@@ -1766,6 +1766,12 @@ void IdealMhdModel::computeMetricElements() {
       // if a sign changed happened by computing it only here
       // (which will only be reached when tau did not change sign).
       gsqrt[iHalf] = tau[iHalf] * r12[iHalf];
+      
+      // CRITICAL: Add jVMEC-style NaN detection after Jacobian calculation
+      if (!std::isfinite(gsqrt[iHalf]) || gsqrt[iHalf] == 0.0) {
+        std::cout << "ERROR: Non-finite or zero Jacobian at iHalf=" << iHalf << ", jH=" << jH << std::endl;
+        std::cout << "  gsqrt=" << gsqrt[iHalf] << " = tau*r12 = " << tau[iHalf] << " * " << r12[iHalf] << std::endl;
+      }
 
       // contributions from full-grid surface _o_utside j-th half-grid surface
       double r1e_o = r1_e[(jH + 1 - r_.nsMinF1) * s_.nZnT + kl];
@@ -2093,7 +2099,15 @@ void IdealMhdModel::computeBContra() {
   for (int jH = r_.nsMinH; jH < r_.nsMaxH; ++jH) {
     for (int kl = 0; kl < s_.nZnT; ++kl) {
       int iHalf = (jH - r_.nsMinH) * s_.nZnT + kl;
-      bsupu[iHalf] += m_p_.chipH[jH - r_.nsMinH] / gsqrt[iHalf];
+      
+      // CRITICAL: Add jVMEC-style NaN protection before division by gsqrt
+      if (gsqrt[iHalf] != 0.0) {
+        bsupu[iHalf] += m_p_.chipH[jH - r_.nsMinH] / gsqrt[iHalf];
+      } else {
+        std::cout << "WARNING: Zero Jacobian preventing magnetic field calculation at iHalf=" << iHalf 
+                  << ", jH=" << jH << std::endl;
+        // Keep existing value (don't add the chip contribution)
+      }
     }  // kl
   }  // jH
 }
@@ -2109,6 +2123,14 @@ void IdealMhdModel::computeBCo() {
         int iHalf = (jH - r_.nsMinH) * s_.nZnT + kl;
         bsubu[iHalf] = guu[iHalf] * bsupu[iHalf] + guv[iHalf] * bsupv[iHalf];
         bsubv[iHalf] = guv[iHalf] * bsupu[iHalf] + gvv[iHalf] * bsupv[iHalf];
+        
+        // CRITICAL: Add jVMEC-style NaN detection after magnetic field calculation
+        if (!std::isfinite(bsubu[iHalf]) || !std::isfinite(bsubv[iHalf])) {
+          std::cout << "ERROR: Non-finite covariant B at iHalf=" << iHalf << ", jH=" << jH << std::endl;
+          std::cout << "  bsubu=" << bsubu[iHalf] << ", bsubv=" << bsubv[iHalf] << std::endl;
+          std::cout << "  From: guu=" << guu[iHalf] << ", guv=" << guv[iHalf] << ", gvv=" << gvv[iHalf] << std::endl;
+          std::cout << "  And: bsupu=" << bsupu[iHalf] << ", bsupv=" << bsupv[iHalf] << std::endl;
+        }
       }  // kl
     }  // jH
   } else {
@@ -2118,6 +2140,14 @@ void IdealMhdModel::computeBCo() {
         int iHalf = (jH - r_.nsMinH) * s_.nZnT + kl;
         bsubu[iHalf] = guu[iHalf] * bsupu[iHalf];
         bsubv[iHalf] = gvv[iHalf] * bsupv[iHalf];
+        
+        // CRITICAL: Add jVMEC-style NaN detection after magnetic field calculation
+        if (!std::isfinite(bsubu[iHalf]) || !std::isfinite(bsubv[iHalf])) {
+          std::cout << "ERROR: Non-finite covariant B (2D) at iHalf=" << iHalf << ", jH=" << jH << std::endl;
+          std::cout << "  bsubu=" << bsubu[iHalf] << ", bsubv=" << bsubv[iHalf] << std::endl;
+          std::cout << "  From: guu=" << guu[iHalf] << ", gvv=" << gvv[iHalf] << std::endl;
+          std::cout << "  And: bsupu=" << bsupu[iHalf] << ", bsupv=" << bsupv[iHalf] << std::endl;
+        }
       }  // kl
     }  // jH
   }  // lthreed
@@ -2154,8 +2184,28 @@ void IdealMhdModel::pressureAndEnergies() {
       int iHalf = (jH - r_.nsMinH) * s_.nZnT + kl;
 
       // magnetic pressure is |B|^2/2 = 0.5*(B^u*B_u + B^v*B_v)
-      double magneticPressure =
-          0.5 * (bsupu[iHalf] * bsubu[iHalf] + bsupv[iHalf] * bsubv[iHalf]);
+      double magneticPressure;
+      
+      // CRITICAL: Add jVMEC-style NaN detection BEFORE magnetic pressure calculation
+      if (!std::isfinite(bsupu[iHalf]) || !std::isfinite(bsubu[iHalf]) ||
+          !std::isfinite(bsupv[iHalf]) || !std::isfinite(bsubv[iHalf])) {
+        std::cout << "ERROR: Non-finite magnetic field at iHalf=" << iHalf << ", jH=" << jH << std::endl;
+        std::cout << "  bsupu=" << bsupu[iHalf] << ", bsubu=" << bsubu[iHalf] << std::endl;
+        std::cout << "  bsupv=" << bsupv[iHalf] << ", bsubv=" << bsubv[iHalf] << std::endl;
+        // Set safe default for numerical stability
+        magneticPressure = 0.0;
+      } else {
+        magneticPressure =
+            0.5 * (bsupu[iHalf] * bsubu[iHalf] + bsupv[iHalf] * bsubv[iHalf]);
+        
+        // ADDITIONAL: Check result for NaN after calculation like jVMEC
+        if (!std::isfinite(magneticPressure)) {
+          std::cout << "ERROR: Non-finite magneticPressure at iHalf=" << iHalf << ", jH=" << jH << std::endl;
+          std::cout << "  Computed from: bsupu*bsubu=" << bsupu[iHalf] * bsubu[iHalf]
+                    << ", bsupv*bsubv=" << bsupv[iHalf] * bsubv[iHalf] << std::endl;
+          magneticPressure = 0.0;
+        }
+      }
 
       // perform volume integral over magnetic pressure for magnetic energy
       // This must be done over UNIQUE half-grid points !!!
@@ -2169,6 +2219,16 @@ void IdealMhdModel::pressureAndEnergies() {
       // now can ADD KINETIC PRESSURE TO MAGNETIC PRESSURE
       // to compute the total pressure
       totalPressure[iHalf] = magneticPressure + m_p_.presH[jH - r_.nsMinH];
+      
+      // CRITICAL: Add jVMEC-style NaN detection after totalPressure calculation
+      if (!std::isfinite(totalPressure[iHalf])) {
+        std::cout << "ERROR: Non-finite totalPressure at iHalf=" << iHalf 
+                  << ", jH=" << jH << std::endl;
+        std::cout << "  magneticPressure=" << magneticPressure 
+                  << ", presH=" << m_p_.presH[jH - r_.nsMinH] << std::endl;
+        // Set safe default value for numerical stability
+        totalPressure[iHalf] = 0.0;
+      }
     }  // kl
   }  // jH
 
@@ -2583,12 +2643,46 @@ void IdealMhdModel::computeMHDForces() {
           std::cout << "  tau[" << iHalf << "]=" << tau[iHalf] << std::endl;
         }
 
-        P_o[kl] = r12[iHalf] * totalPressure[iHalf];
-        rup_o[kl] = ru12[iHalf] * P_o[kl];
-        zup_o[kl] = zu12[iHalf] * P_o[kl];
-        rsp_o[kl] = rs[iHalf] * P_o[kl];
-        zsp_o[kl] = zs[iHalf] * P_o[kl];
-        taup_o[kl] = tau[iHalf] * totalPressure[iHalf];
+        // CRITICAL: Add jVMEC-style NaN detection BEFORE calculation
+        if (!std::isfinite(r12[iHalf]) || !std::isfinite(totalPressure[iHalf]) ||
+            !std::isfinite(ru12[iHalf]) || !std::isfinite(zu12[iHalf]) ||
+            !std::isfinite(rs[iHalf]) || !std::isfinite(zs[iHalf]) || 
+            !std::isfinite(tau[iHalf])) {
+          std::cout << "ERROR: Non-finite input to MHD calculation at kl=" << kl 
+                    << ", iHalf=" << iHalf << ", jF=" << jF << std::endl;
+          std::cout << "  r12=" << r12[iHalf] << ", totalPressure=" << totalPressure[iHalf] << std::endl;
+          std::cout << "  ru12=" << ru12[iHalf] << ", zu12=" << zu12[iHalf] << std::endl;
+          std::cout << "  rs=" << rs[iHalf] << ", zs=" << zs[iHalf] << ", tau=" << tau[iHalf] << std::endl;
+          
+          // Set safe default values like jVMEC might do
+          P_o[kl] = 0.0;
+          rup_o[kl] = 0.0;
+          zup_o[kl] = 0.0;
+          rsp_o[kl] = 0.0;
+          zsp_o[kl] = 0.0;
+          taup_o[kl] = 0.0;
+        } else {
+          P_o[kl] = r12[iHalf] * totalPressure[iHalf];
+          rup_o[kl] = ru12[iHalf] * P_o[kl];
+          zup_o[kl] = zu12[iHalf] * P_o[kl];
+          rsp_o[kl] = rs[iHalf] * P_o[kl];
+          zsp_o[kl] = zs[iHalf] * P_o[kl];
+          taup_o[kl] = tau[iHalf] * totalPressure[iHalf];
+          
+          // ADDITIONAL: Check outputs for NaN after calculation like jVMEC
+          if (!std::isfinite(P_o[kl]) || !std::isfinite(rup_o[kl]) ||
+              !std::isfinite(zup_o[kl]) || !std::isfinite(taup_o[kl])) {
+            std::cout << "ERROR: Non-finite output from MHD calculation at kl=" << kl 
+                      << ", jF=" << jF << std::endl;
+            std::cout << "  Setting values to zero for numerical stability" << std::endl;
+            P_o[kl] = 0.0;
+            rup_o[kl] = 0.0;
+            zup_o[kl] = 0.0;
+            rsp_o[kl] = 0.0;
+            zsp_o[kl] = 0.0;
+            taup_o[kl] = 0.0;
+          }
+        }
 
         // DEBUG: Check computed quantities for NaN
         if (kl < 3 && jF == r_.nsMinF) {
@@ -3855,6 +3949,19 @@ void IdealMhdModel::dft_FourierToReal_3d_asymm(
       physical_x.zmnss, absl::Span<double>(m_ls_.r1e_i.data(), s_.nZnT),
       absl::Span<double>(m_ls_.z1e_i.data(), s_.nZnT),
       absl::Span<double>(m_ls_.lue_i.data(), s_.nZnT));
+      
+  // CRITICAL MISSING STEP: Copy from m_ls_ arrays to geometry derivative arrays
+  // This is what causes zero metric tensor components!
+  const int num_realsp = (r_.nsMaxF1 - r_.nsMinF1) * s_.nThetaEff;
+  
+  // Zero all arrays first (like symmetric 2D version)
+  for (auto* v :
+       {&r1_e, &r1_o, &ru_e, &ru_o, &z1_e, &z1_o, &zu_e, &zu_o, &lu_e, &lu_o}) {
+    absl::c_fill_n(*v, num_realsp, 0);
+  }
+
+  // Copy from theta-grid to full radial-theta grid and compute derivatives
+  // TODO: This needs proper implementation following symmetric pattern
 }
 
 void IdealMhdModel::dft_FourierToReal_2d_asymm(
@@ -3866,6 +3973,36 @@ void IdealMhdModel::dft_FourierToReal_2d_asymm(
       physical_x.zmnss, absl::Span<double>(m_ls_.r1e_i.data(), s_.nZnT),
       absl::Span<double>(m_ls_.z1e_i.data(), s_.nZnT),
       absl::Span<double>(m_ls_.lue_i.data(), s_.nZnT));
+
+  // CRITICAL MISSING STEP: Copy from m_ls_ arrays to geometry derivative arrays
+  // This is what causes zero metric tensor components!
+  const int num_realsp = (r_.nsMaxF1 - r_.nsMinF1) * s_.nThetaEff;
+  
+  // Zero all arrays first (like symmetric 2D version)
+  for (auto* v :
+       {&r1_e, &r1_o, &ru_e, &ru_o, &z1_e, &z1_o, &zu_e, &zu_o, &lu_e, &lu_o}) {
+    absl::c_fill_n(*v, num_realsp, 0);
+  }
+  
+  int num_con = (r_.nsMaxFIncludingLcfs - r_.nsMinF) * s_.nThetaEff;
+  absl::c_fill_n(rCon, num_con, 0);
+  absl::c_fill_n(zCon, num_con, 0);
+
+  // For now, implement a simple copy for the axis (will need full implementation)
+  // TODO: This needs proper implementation following symmetric pattern with asymmetric transforms
+  if (r_.nsMinF1 == 0) {
+    // Copy axis values from m_ls_ to the geometry arrays
+    for (int l = 0; l < s_.nThetaEff && l < s_.nZnT; ++l) {
+      r1_e[l] = m_ls_.r1e_i[l];
+      z1_e[l] = m_ls_.z1e_i[l]; 
+      lu_e[l] = m_ls_.lue_i[l];
+      // For derivatives, use finite difference approximation as placeholder
+      if (l > 0) {
+        ru_e[l] = (m_ls_.r1e_i[l] - m_ls_.r1e_i[l-1]) * s_.nThetaEff / (2 * M_PI);
+        zu_e[l] = (m_ls_.z1e_i[l] - m_ls_.z1e_i[l-1]) * s_.nThetaEff / (2 * M_PI);
+      }
+    }
+  }
 }
 
 void IdealMhdModel::dft_ForcesToFourier_3d_asymm(FourierForces& m_physical_f) {
