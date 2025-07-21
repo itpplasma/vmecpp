@@ -166,3 +166,14 @@ cc_test(
     ],
     size = "large",
 )
+
+cc_test(
+    name = "test_convergence_sensitivity",
+    srcs = ["test_convergence_sensitivity.cc"],
+    deps = [
+        "@googletest//:gtest_main",
+        "//vmecpp/vmec/vmec:vmec",
+        "//vmecpp/common/vmec_indata:vmec_indata",
+    ],
+    size = "large",
+)
