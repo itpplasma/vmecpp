@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Debug symmetric mode convergence"""
+"""Debug symmetric mode convergence."""
+
 import vmecpp
 
-vmec_input = vmecpp.VmecInput.from_file('src/vmecpp/cpp/vmecpp/test_data/circular_tokamak.json')
+vmec_input = vmecpp.VmecInput.from_file(
+    "src/vmecpp/cpp/vmecpp/test_data/circular_tokamak.json"
+)
 print(f"Testing circular tokamak with LASYM={vmec_input.lasym}")
 
 try:

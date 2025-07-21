@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-"""Test M=1 constraint debug output"""
+"""Test M=1 constraint debug output."""
+
+import os
+import sys
 
 import vmecpp
-import sys
-import os
 
 # Redirect stderr to capture debug output
-os.environ['VMECPP_VERBOSE'] = '1'
+os.environ["VMECPP_VERBOSE"] = "1"
 
 # Load the circular tokamak (symmetric) input
-vmec_input = vmecpp.VmecInput.from_file('../benchmark_vmec/vmec_repos/VMEC2000/python/tests/input.circular_tokamak')
+vmec_input = vmecpp.VmecInput.from_file(
+    "../benchmark_vmec/vmec_repos/VMEC2000/python/tests/input.circular_tokamak"
+)
 
 print(f"Input LASYM = {vmec_input.lasym}")
 print(f"Input RBC(1,0) = {vmec_input.rbc[1,0]}")

@@ -189,3 +189,38 @@ cc_test(
     ],
     size = "large",
 )
+
+cc_test(
+    name = "asymmetric_debug_comparison",
+    srcs = ["asymmetric_debug_comparison.cc"],
+    deps = [
+        "@googletest//:gtest_main",
+        "//vmecpp/vmec/vmec:vmec",
+        "//vmecpp/common/vmec_indata:vmec_indata",
+    ],
+    size = "small",
+)
+
+cc_test(
+    name = "detailed_jvmec_comparison",
+    srcs = ["detailed_jvmec_comparison.cc"],
+    deps = [
+        ":fourier_asymmetric",
+        "@googletest//:gtest_main",
+        "//vmecpp/common/sizes:sizes",
+        "@abseil-cpp//absl/types:span",
+    ],
+    size = "small",
+)
+
+cc_test(
+    name = "roundtrip_test",
+    srcs = ["roundtrip_test.cc"],
+    deps = [
+        ":fourier_asymmetric",
+        "@googletest//:gtest_main",
+        "//vmecpp/common/sizes:sizes",
+        "@abseil-cpp//absl/types:span",
+    ],
+    size = "small",
+)

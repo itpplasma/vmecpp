@@ -1,0 +1,15 @@
+VMEC++ Debug Output Comparison
+Test: benchmark_replication
+Timestamp: 2025-07-21 12:07:26
+Configuration: Circular Tokamak (LASYM=F)
+MPOL=8, NTOR=0, NFP=1
+NS_ARRAY: 10 17 
+FTOL_ARRAY: 1.000000e-30 1.000000e-20 
+NITER_ARRAY: 500 1000 
+
+=== DETAILED ITERATION LOG ===
+VMEC++ initialization successful
+Starting equilibrium solve...
+
+=== CONVERGENCE FAILED ===
+Final result: INTERNAL: VMEC++ did not converge

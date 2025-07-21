@@ -26,8 +26,8 @@ CMake Warning (dev) at build/_deps/eigen-src/test/CMakeLists.txt:368 (find_packa
 
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
--- Could NOT find GoogleHash (missing: GOOGLEHASH_INCLUDES GOOGLEHASH_COMPILE) 
--- Could NOT find Adolc (missing: ADOLC_INCLUDES ADOLC_LIBRARIES) 
+-- Could NOT find GoogleHash (missing: GOOGLEHASH_INCLUDES GOOGLEHASH_COMPILE)
+-- Could NOT find Adolc (missing: ADOLC_INCLUDES ADOLC_LIBRARIES)
 -- Could NOT find MPREAL (missing: MPREAL_INCLUDES MPREAL_VERSION_OK MPREAL_WORKS) (Required is at least version "1.0.0")
 CMake Warning (dev) at build/_deps/eigen-src/unsupported/test/CMakeLists.txt:293 (find_package):
   Policy CMP0146 is not set: The FindCUDA module is removed.  Run "cmake
@@ -42,12 +42,12 @@ This warning is for project developers.  Use -Wno-dev to suppress it.
 -- ************************************************************
 -- ***    Eigen's unit tests configuration summary          ***
 -- ************************************************************
--- 
+--
 -- Build type:        Release
 -- Build site:        mailuefterl
 -- Build string:      linux-6.15.7-arch1-1-g++-15.1.1-sse2-64bit
--- Enabled backends:  CHOLMOD,  UMFPACK,  KLU,  SuperLU,  SPQR,  Boost.Multiprecision,  fftw, 
--- Disabled backends: PaStiX,  METIS,  Qt4 support,  GoogleHash,  Adolc,  MPFR C++,  OpenGL, 
+-- Enabled backends:  CHOLMOD,  UMFPACK,  KLU,  SuperLU,  SPQR,  Boost.Multiprecision,  fftw,
+-- Disabled backends: PaStiX,  METIS,  Qt4 support,  GoogleHash,  Adolc,  MPFR C++,  OpenGL,
 -- Default order:     Column-major
 -- Maximal matrix/vector size: 320
 -- SSE2:              Using architecture defaults
@@ -70,16 +70,16 @@ This warning is for project developers.  Use -Wno-dev to suppress it.
 -- SYCL:              OFF
 -- CUDA:              OFF
 -- HIP:               OFF
--- 
+--
 CXX:               /usr/bin/g++
  CXX_VERSION:       g++ (GCC) 15.1.1 20250425
  CXX_FLAGS:         -fPIC -Wall -Wextra -std=c++03 -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Wenum-conversion -Wc++11-extensions -Wdouble-promotion -Wshadow -Wno-psabi -Wno-variadic-macros -Wno-long-long -fno-check-new -fno-common -fstrict-aliasing -ansi
  Sparse lib flags:   ;/usr/lib/libcholmod.so;/usr/lib/libamd.so;/usr/lib/libcolamd.so;/usr/lib/libcamd.so;/usr/lib/libccolamd.so;/usr/lib/libmetis.so;eigen_blas;eigen_lapack;/usr/lib/libumfpack.so;/usr/lib/libcolamd.so;/usr/lib/libamd.so;/usr/lib/libcholmod.so;eigen_blas;/usr/lib/libklu.so;/usr/lib/libcolamd.so;/usr/lib/libamd.so;/usr/lib/libbtf.so;eigen_blas;/usr/lib/libsuperlu.so;eigen_blas;/usr/lib/libspqr.so;/usr/lib/libcholmod.so;/usr/lib/libcholmod.so;/usr/lib/libamd.so;/usr/lib/libcolamd.so;/usr/lib/libcamd.so;/usr/lib/libccolamd.so;/usr/lib/libmetis.so;eigen_lapack;eigen_blas
 
 -- ************************************************************
--- 
+--
 -- Configured Eigen 3.4.0
--- 
+--
 -- Available targets (use: cmake --build . --target TARGET):
 -- ---------+--------------------------------------------------------------
 -- Target   |   Description
@@ -99,7 +99,7 @@ CXX:               /usr/bin/g++
 -- blas     | Build BLAS library (not the same thing as Eigen)
 -- uninstall| Remove files installed by the install target
 -- ---------+--------------------------------------------------------------
--- 
+--
 -- Using the multi-header code from /home/ert/code/vmecpp/build/_deps/nlohmann_json-src/include/
 -- Detected platform: Linux
 CMake Deprecation Warning at build/_deps/pybind11-src/CMakeLists.txt:13 (cmake_minimum_required):
@@ -111,7 +111,7 @@ CMake Deprecation Warning at build/_deps/pybind11-src/CMakeLists.txt:13 (cmake_m
   to work with policies introduced by <max> or earlier.
 
 
--- pybind11 v2.13.6 
+-- pybind11 v2.13.6
 CMake Warning (dev) at CMakeLists.txt:138 (install):
   Policy CMP0177 is not set: install() DESTINATION paths are normalized.  Run
   "cmake --help-policy CMP0177" for policy details.  Use the cmake_policy
@@ -775,7 +775,7 @@ MHD Energy = 172.39494071067568
 
  NS = 10   NO. FOURIER MODES = 8   FTOLV = 1.000e-30   NITER = 500
 
- ITER |    FSQR     FSQZ     FSQL    |    fsqr     fsqz      fsql   |   DELT   |  RAX(v=0) |    W_MHD   |   <BETA>   |  <M>  
+ ITER |    FSQR     FSQZ     FSQL    |    fsqr     fsqz      fsql   |   DELT   |  RAX(v=0) |    W_MHD   |   <BETA>   |  <M>
 ------+------------------------------+------------------------------+----------+-----------+------------+------------+-------
  INITIAL JACOBIAN CHANGED SIGN!
  TRYING TO IMPROVE INITIAL MAGNETIC AXIS GUESS
@@ -786,7 +786,7 @@ MHD Energy = 6.806159e+03
 
  NS = 17   NO. FOURIER MODES = 8   FTOLV = 1.000e-20   NITER = 1000
 
- ITER |    FSQR     FSQZ     FSQL    |    fsqr     fsqz      fsql   |   DELT   |  RAX(v=0) |    W_MHD   |   <BETA>   |  <M>  
+ ITER |    FSQR     FSQZ     FSQL    |    fsqr     fsqz      fsql   |   DELT   |  RAX(v=0) |    W_MHD   |   <BETA>   |  <M>
 ------+------------------------------+------------------------------+----------+-----------+------------+------------+-------
     2 | 3.94e-03  1.55e-03  1.22e-06 | 1.47e-08  4.83e-09  6.99e-07 | 9.00e-01 | 6.132e+00 | 6.8059e+03 | 0.0000e+00 | 1.000
   200 | 1.64e-11  1.30e-11  1.26e-12 | 1.48e-16  1.30e-16  5.29e-14 | 9.00e-01 | 6.132e+00 | 6.8059e+03 | 0.0000e+00 | 1.000

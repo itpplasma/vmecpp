@@ -388,7 +388,8 @@ void RealToFourier3DAsymmFastPoloidal(
     double sum_rmncc = 0.0, sum_rmnss = 0.0, sum_rmnsc = 0.0, sum_rmncs = 0.0;
     double sum_zmnsc = 0.0, sum_zmncs = 0.0, sum_zmncc = 0.0, sum_zmnss = 0.0;
 
-    for (int i = 0; i < sizes.nThetaEff; ++i) {
+    // For asymmetric case, integrate only over [0,π] range like jVMEC tomnspa
+    for (int i = 0; i < sizes.nThetaReduced; ++i) {
       for (int k = 0; k < sizes.nZeta; ++k) {
         int idx = i * sizes.nZeta + k;
         if (idx >= static_cast<int>(r_real.size())) continue;
@@ -437,9 +438,8 @@ void RealToFourier3DAsymmFastPoloidal(
       }
     }
 
-    // Normalize by grid size (standard discrete Fourier transform
-    // normalization)
-    double norm_factor = 1.0 / (sizes.nZeta * sizes.nThetaEff);
+    // Normalize by grid size (for asymmetric case, use reduced theta range)
+    double norm_factor = 1.0 / (sizes.nZeta * sizes.nThetaReduced);
 
     // DEBUG: Show normalization factors
     std::cout << "DEBUG RealToFourier3D: mn=" << mn
@@ -510,7 +510,8 @@ void RealToFourier2DAsymmFastPoloidal(
     double sum_rmncc = 0.0, sum_rmnsc = 0.0;
     double sum_zmnsc = 0.0, sum_zmncc = 0.0;
 
-    for (int i = 0; i < sizes.nThetaEff; ++i) {
+    // For asymmetric case, integrate only over [0,π] range like jVMEC tomnspa
+    for (int i = 0; i < sizes.nThetaReduced; ++i) {
       for (int k = 0; k < sizes.nZeta; ++k) {
         int idx = i * sizes.nZeta + k;
         if (idx >= static_cast<int>(r_real.size())) continue;
@@ -530,9 +531,8 @@ void RealToFourier2DAsymmFastPoloidal(
       }
     }
 
-    // Normalize by grid size (standard discrete Fourier transform
-    // normalization)
-    double norm_factor = 1.0 / (sizes.nZeta * sizes.nThetaEff);
+    // Normalize by grid size (for asymmetric case, use reduced theta range)
+    double norm_factor = 1.0 / (sizes.nZeta * sizes.nThetaReduced);
 
     // Store coefficients with standard DFT normalization only
     rmncc[mn] = sum_rmncc * norm_factor;

@@ -1,0 +1,10 @@
+VMEC++ Debug Output Comparison
+Test: asymmetric_test
+Timestamp: 2025-07-21 12:07:26
+Configuration: Circular Tokamak (LASYM=T)
+MPOL=8, NTOR=0, NFP=1
+NS_ARRAY: 17 
+FTOL_ARRAY: 1.000000e-20 
+NITER_ARRAY: 100 
+
+=== DETAILED ITERATION LOG ===
