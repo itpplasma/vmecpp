@@ -53,6 +53,11 @@ VmecINDATAPyWrapper::VmecINDATAPyWrapper(const VmecINDATA& indata)
       ac_aux_f(ToEigenVector(indata.ac_aux_f)),
       curtor(indata.curtor),
       bloat(indata.bloat),
+      bcrit(indata.bcrit),
+      pt_type(indata.pt_type),
+      at(ToEigenVector(indata.at)),
+      ph_type(indata.ph_type),
+      ah(ToEigenVector(indata.ah)),
       lfreeb(indata.lfreeb),
       mgrid_file(indata.mgrid_file),
       extcur(ToEigenVector(indata.extcur)),
@@ -108,6 +113,11 @@ VmecINDATAPyWrapper::operator VmecINDATA() const {
   indata.ac_aux_f.assign(ac_aux_f.begin(), ac_aux_f.end());
   indata.curtor = curtor;
   indata.bloat = bloat;
+  indata.bcrit = bcrit;
+  indata.pt_type = pt_type;
+  indata.at.assign(at.begin(), at.end());
+  indata.ph_type = ph_type;
+  indata.ah.assign(ah.begin(), ah.end());
   indata.lfreeb = lfreeb;
   indata.mgrid_file = mgrid_file;
   indata.extcur.assign(extcur.begin(), extcur.end());

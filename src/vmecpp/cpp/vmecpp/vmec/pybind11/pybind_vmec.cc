@@ -149,8 +149,15 @@ PYBIND11_MODULE(_vmecpp, m) {
   pyindata.def_readwrite("curtor", &VmecINDATAPyWrapper::curtor)
       .def_readwrite("bloat", &VmecINDATAPyWrapper::bloat)
 
-      // free-boundary parameters
-      .def_readwrite("lfreeb", &VmecINDATAPyWrapper::lfreeb)
+      // anisotropy parameters (ANIMEC)
+      .def_readwrite("bcrit", &VmecINDATAPyWrapper::bcrit)
+      .def_readwrite("pt_type", &VmecINDATAPyWrapper::pt_type);
+  DefEigenProperty(pyindata, "at", &VmecINDATAPyWrapper::at);
+  pyindata.def_readwrite("ph_type", &VmecINDATAPyWrapper::ph_type);
+  DefEigenProperty(pyindata, "ah", &VmecINDATAPyWrapper::ah);
+
+  // free-boundary parameters
+  pyindata.def_readwrite("lfreeb", &VmecINDATAPyWrapper::lfreeb)
       .def_readwrite("mgrid_file", &VmecINDATAPyWrapper::mgrid_file);
   DefEigenProperty(pyindata, "extcur", &VmecINDATAPyWrapper::extcur);
   pyindata.def_readwrite("nvacskip", &VmecINDATAPyWrapper::nvacskip)

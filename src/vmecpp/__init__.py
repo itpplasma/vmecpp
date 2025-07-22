@@ -218,6 +218,21 @@ class VmecInput(BaseModelWithNumpy):
     bloat: float
     """Bloating factor (for constrained toroidal current)"""
 
+    bcrit: float
+    """Critical field strength (bcrit) for hot particle confinement (ANIMEC)"""
+
+    pt_type: str
+    """Parametrization of temperature profile (TPERP/TPAR)"""
+
+    at: jt.Float[np.ndarray, "at_len"]
+    """Temperature profile coefficients"""
+
+    ph_type: str
+    """Parametrization of hot particle pressure profile (PHOT/PTHERMAL)"""
+
+    ah: jt.Float[np.ndarray, "ah_len"]
+    """Hot particle pressure profile coefficients"""
+
     lfreeb: bool
     """Flag to indicate free-boundary.
 

@@ -164,6 +164,24 @@ class VmecINDATA {
   double bloat;
 
   // ---------------------------------
+  // anisotropy parameters (ANIMEC)
+
+  // critical field strength (bcrit) for hot particle confinement
+  double bcrit;
+
+  // parametrization of temperature profile (TPERP/TPAR)
+  std::string pt_type;
+
+  // [atLen] temperature profile coefficients
+  std::vector<double> at;
+
+  // parametrization of hot particle pressure profile (PHOT/PTHERMAL)
+  std::string ph_type;
+
+  // [ahLen] hot particle pressure profile coefficients
+  std::vector<double> ah;
+
+  // ---------------------------------
   // free-boundary parameters
 
   // flag to indicate free-boundary

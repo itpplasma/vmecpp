@@ -54,6 +54,12 @@ class VmecINDATAPyWrapper {
   Eigen::VectorXd ac_aux_f;
   double curtor;
   double bloat;
+  // anisotropy parameters (ANIMEC)
+  double bcrit;
+  std::string pt_type;
+  Eigen::VectorXd at;
+  std::string ph_type;
+  Eigen::VectorXd ah;
   bool lfreeb;
   std::string mgrid_file;
   Eigen::VectorXd extcur;

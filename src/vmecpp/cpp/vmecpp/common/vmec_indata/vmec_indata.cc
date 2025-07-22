@@ -131,6 +131,13 @@ VmecINDATA::VmecINDATA() {
   curtor = 0.0;
   bloat = 1.0;
 
+  // anisotropy parameters (ANIMEC)
+  bcrit = 1.0;
+  pt_type = "power_series";
+  at = {1.0};  // Default: isotropic (TPERP/TPAR = 1)
+  ph_type = "power_series";
+  // ah left empty - no hot particle pressure by default
+
   // free-boundary parameters
   lfreeb = false;
   mgrid_file = "NONE";  // default from Fortran VMEC via indata2json
@@ -187,6 +194,9 @@ absl::Status VmecINDATA::WriteTo(H5::H5File& file) const {
   WriteH5Dataset(pcurr_type, "/indata/pcurr_type", file);
   WriteH5Dataset(curtor, "/indata/curtor", file);
   WriteH5Dataset(bloat, "/indata/bloat", file);
+  WriteH5Dataset(bcrit, "/indata/bcrit", file);
+  WriteH5Dataset(pt_type, "/indata/pt_type", file);
+  WriteH5Dataset(ph_type, "/indata/ph_type", file);
   WriteH5Dataset(lfreeb, "/indata/lfreeb", file);
   WriteH5Dataset(mgrid_file, "/indata/mgrid_file", file);
   WriteH5Dataset(nvacskip, "/indata/nvacskip", file);
@@ -216,6 +226,8 @@ absl::Status VmecINDATA::WriteTo(H5::H5File& file) const {
   WriteH5Dataset(ac, "/indata/ac", file);
   WriteH5Dataset(ac_aux_s, "/indata/ac_aux_s", file);
   WriteH5Dataset(ac_aux_f, "/indata/ac_aux_f", file);
+  WriteH5Dataset(at, "/indata/at", file);
+  WriteH5Dataset(ah, "/indata/ah", file);
   WriteH5Dataset(extcur, "/indata/extcur", file);
   WriteH5Dataset(aphi, "/indata/aphi", file);
   WriteH5Dataset(raxis_c, "/indata/raxis_c", file);
@@ -267,6 +279,9 @@ absl::Status VmecINDATA::LoadInto(VmecINDATA& m_indata, H5::H5File& from_file) {
   ReadH5Dataset(m_indata.pcurr_type, "/indata/pcurr_type", from_file);
   ReadH5Dataset(m_indata.curtor, "/indata/curtor", from_file);
   ReadH5Dataset(m_indata.bloat, "/indata/bloat", from_file);
+  ReadH5Dataset(m_indata.bcrit, "/indata/bcrit", from_file);
+  ReadH5Dataset(m_indata.pt_type, "/indata/pt_type", from_file);
+  ReadH5Dataset(m_indata.ph_type, "/indata/ph_type", from_file);
   ReadH5Dataset(m_indata.lfreeb, "/indata/lfreeb", from_file);
   ReadH5Dataset(m_indata.mgrid_file, "/indata/mgrid_file", from_file);
   ReadH5Dataset(m_indata.nvacskip, "/indata/nvacskip", from_file);
@@ -324,6 +339,8 @@ absl::Status VmecINDATA::LoadInto(VmecINDATA& m_indata, H5::H5File& from_file) {
   ReadH5Dataset(m_indata.ac, "/indata/ac", from_file);
   ReadH5Dataset(m_indata.ac_aux_s, "/indata/ac_aux_s", from_file);
   ReadH5Dataset(m_indata.ac_aux_f, "/indata/ac_aux_f", from_file);
+  ReadH5Dataset(m_indata.at, "/indata/at", from_file);
+  ReadH5Dataset(m_indata.ah, "/indata/ah", from_file);
   ReadH5Dataset(m_indata.extcur, "/indata/extcur", from_file);
   ReadH5Dataset(m_indata.aphi, "/indata/aphi", from_file);
   ReadH5Dataset(m_indata.raxis_c, "/indata/raxis_c", from_file);
@@ -643,6 +660,44 @@ absl::StatusOr<VmecINDATA> VmecINDATA::FromJson(
   }
   if (maybe_bloat->has_value()) {
     vmec_indata.bloat = maybe_bloat->value();
+  }
+
+  // -----------------------------------------------
+  
+  auto maybe_bcrit = JsonReadDouble(j, "bcrit");
+  if (!maybe_bcrit.ok()) {
+    return maybe_bcrit.status();
+  }
+  if (maybe_bcrit->has_value()) {
+    vmec_indata.bcrit = maybe_bcrit->value();
+  }
+  auto maybe_pt_type = JsonReadString(j, "pt_type");
+  if (!maybe_pt_type.ok()) {
+    return maybe_pt_type.status();
+  }
+  if (maybe_pt_type->has_value()) {
+    vmec_indata.pt_type = maybe_pt_type->value();
+  }
+  auto maybe_at = JsonReadVectorDouble(j, "at");
+  if (!maybe_at.ok()) {
+    return maybe_at.status();
+  }
+  if (maybe_at->has_value()) {
+    vmec_indata.at = maybe_at->value();
+  }
+  auto maybe_ph_type = JsonReadString(j, "ph_type");
+  if (!maybe_ph_type.ok()) {
+    return maybe_ph_type.status();
+  }
+  if (maybe_ph_type->has_value()) {
+    vmec_indata.ph_type = maybe_ph_type->value();
+  }
+  auto maybe_ah = JsonReadVectorDouble(j, "ah");
+  if (!maybe_ah.ok()) {
+    return maybe_ah.status();
+  }
+  if (maybe_ah->has_value()) {
+    vmec_indata.ah = maybe_ah->value();
   }
 
   // -----------------------------------------------
@@ -1016,6 +1071,13 @@ absl::StatusOr<std::string> VmecINDATA::ToJson() const {
   output["ac_aux_f"] = ac_aux_f;
   output["curtor"] = curtor;
   output["bloat"] = bloat;
+
+  // Anisotropy Parameters
+  output["bcrit"] = bcrit;
+  output["pt_type"] = pt_type;
+  output["at"] = at;
+  output["ph_type"] = ph_type;
+  output["ah"] = ah;
 
   // Free-Boundary Parameters
   output["lfreeb"] = lfreeb;
