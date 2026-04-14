@@ -4,6 +4,7 @@ import contextlib
 import importlib.metadata
 import logging
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -15,6 +16,8 @@ import jaxtyping as jt
 import numpy as np
 
 logger = logging.getLogger(__name__)
+
+_UNSUPPORTED_INDATA_FIELDS = ("PT_TYPE", "PH_TYPE", "BCRIT", "AT", "AH")
 
 
 def package_root() -> Path:
@@ -129,6 +132,7 @@ def indata_to_json(
         # We work in a temporary directory in which we copy the input so that paths are always short.
         local_input_file = original_input_file.name
         shutil.copyfile(original_input_file, local_input_file)
+        _strip_unsupported_indata_fields(Path(local_input_file))
 
         if use_mgrid_file_absolute_path:
             command = [
@@ -165,6 +169,47 @@ def indata_to_json(
         # otherwise copy output to desired output override
         shutil.copyfile(i2j_output_file, output_override)
         return output_override
+
+
+def _strip_unsupported_indata_fields(input_file: Path) -> None:
+    """Remove ANIMEC-only namelist entries that the bundled indata2json cannot parse."""
+
+    unsupported_pattern = re.compile(
+        r"^\s*(?:" + "|".join(_UNSUPPORTED_INDATA_FIELDS) + r")\b",
+        flags=re.IGNORECASE,
+    )
+
+    kept_lines: list[str] = []
+    stripped_fields: set[str] = set()
+    skip_continuation = False
+    for line in input_file.read_text().splitlines(keepends=True):
+        stripped_line = line.lstrip()
+        if skip_continuation:
+            if stripped_line.startswith("!") or not stripped_line.strip():
+                kept_lines.append(line)
+                continue
+            if "=" not in line:
+                continue
+            skip_continuation = False
+
+        if stripped_line.startswith("!") or not stripped_line.strip():
+            kept_lines.append(line)
+            continue
+
+        match = unsupported_pattern.match(line)
+        if match is None:
+            kept_lines.append(line)
+            continue
+
+        stripped_fields.add(match.group(0).strip().upper())
+        skip_continuation = True
+
+    if stripped_fields:
+        logger.warning(
+            "Stripping unsupported INDATA fields before indata2json conversion: %s",
+            ", ".join(sorted(stripped_fields)),
+        )
+        input_file.write_text("".join(kept_lines))
 
 
 # adapted from https://github.com/jonathanschilling/indata2json/blob/4274976/json2indata

@@ -167,6 +167,33 @@ def test_asymmetric_tokamak_input_io():
     assert vmec_input.zaxis_c[0] == pytest.approx(0.0)
 
 
+def test_run_asymmetric_tokamak():
+    vmec_input = vmecpp.VmecInput.from_file(TEST_DATA_DIR / "input.up_down_asymmetric_tokamak")
+    cpp_indata = vmec_input._to_cpp_vmecindata()
+
+    assert cpp_indata.lasym
+    assert cpp_indata.rbs.shape == (vmec_input.mpol, 2 * vmec_input.ntor + 1)
+    assert cpp_indata.zbc.shape == (vmec_input.mpol, 2 * vmec_input.ntor + 1)
+
+
+def test_indata_to_json_strips_unsupported_animec_fields(tmp_path: Path):
+    input_file = tmp_path / "input.with_pt_type"
+    input_contents = (TEST_DATA_DIR / "input.cma").read_text()
+    input_contents = input_contents.replace(
+        "  PMASS_TYPE = \"power_series\"\n",
+        "  PMASS_TYPE = \"power_series\"\n"
+        "  PT_TYPE = 'power_series'\n"
+        "  AT = 1.0 0.0 0.0 0.0\n"
+        "  0.0 0.0 0.0 0.0\n",
+        1,
+    )
+    input_file.write_text(input_contents)
+
+    vmec_input = vmecpp.VmecInput.from_file(input_file)
+
+    assert vmec_input.pmass_type == "power_series"
+
+
 _MISSING_FORTRAN_VARIABLES = [
     "lrecon__logical__",
     "lmove_axis__logical__",
