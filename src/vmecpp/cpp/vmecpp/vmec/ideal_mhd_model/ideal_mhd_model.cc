@@ -22,6 +22,7 @@
 #include "vmecpp/vmec/handover_storage/handover_storage.h"
 #include "vmecpp/vmec/ideal_mhd_model/bco_kernel.h"
 #include "vmecpp/vmec/ideal_mhd_model/bcontra_kernel.h"
+#include "vmecpp/vmec/ideal_mhd_model/constraint_force_kernel.h"
 #include "vmecpp/vmec/ideal_mhd_model/jacobian_kernel.h"
 #include "vmecpp/vmec/ideal_mhd_model/lambda_force_kernel.h"
 #include "vmecpp/vmec/ideal_mhd_model/metric_kernel.h"
@@ -420,7 +421,8 @@ absl::StatusOr<bool> IdealMhdModel::update(
     bool& m_need_restart, int& m_last_preconditioner_update,
     int& m_last_full_update_nestor, FlowControl& m_fc, const int iter1,
     const int iter2, const VmecCheckpoint& checkpoint,
-    const int iterations_before_checkpointing, bool verbose) {
+    const int iterations_before_checkpointing, bool verbose,
+    bool always_fix_m1_gauge) {
   // An axis re-guess after a bad Jacobian can repopulate high geometry modes
   // directly, bypassing the force mask; clear them on the state each iteration.
   if (s_.mpolGeometry < s_.mpol || s_.ntorGeometry < s_.ntor) {
@@ -812,7 +814,9 @@ absl::StatusOr<bool> IdealMhdModel::update(
   m_decomposed_f.m1Constraint(1.0 / std::numbers::sqrt2);
 
   // v8.50: ADD iter2<2 so reset=<WOUT_FILE> works
-  if (m_fc.fsqz < 1.0e-6 || iter2 < 2) {
+  const bool fix_m1_gauge =
+      always_fix_m1_gauge || m_fc.fsqz < 1.0e-6 || iter2 < 2;
+  if (fix_m1_gauge) {
     // ensure that the m=1 constraint is satisfied exactly
     // --> the corresponding m=1 coeffs of R,Z are constrained to be zero
     //     and thus must not be "forced" (by the time evol using gc) away from
@@ -2065,21 +2069,12 @@ absl::Status IdealMhdModel::constraintForceMultiplier() {
 }
 
 void IdealMhdModel::effectiveConstraintForce() {
-  // gConEff
-
-  // no constraint on axis --> has no poloidal angle
-  int jMin = 0;
-  if (r_.nsMinF == 0) {
-    jMin = 1;
-  }
-
-  for (int jF = std::max(jMin, r_.nsMinF); jF < r_.nsMaxFIncludingLcfs; ++jF) {
-    for (int kl = 0; kl < s_.nZnT; ++kl) {
-      int idx_kl = (jF - r_.nsMinF) * s_.nZnT + kl;
-      gConEff[idx_kl] = (rCon[idx_kl] - rCon0[idx_kl]) * ruFull[idx_kl] +
-                        (zCon[idx_kl] - zCon0[idx_kl]) * zuFull[idx_kl];
-    }  // kl
-  }  // jF
+  // gConEff via the shared kernel (constraint_force_kernel.h), also used by the
+  // Enzyme autodiff path.
+  ComputeEffectiveConstraintForce(rCon.data(), rCon0.data(), zCon.data(),
+                                  zCon0.data(), ruFull.data(), zuFull.data(),
+                                  s_.nZnT, r_.nsMinF, r_.nsMaxFIncludingLcfs,
+                                  gConEff.data());
 }
 
 // perform Fourier-space bandpass filtering of constraint force
@@ -2110,24 +2105,15 @@ void IdealMhdModel::assembleTotalForces() {
     }
   }
 
-  for (int jF = r_.nsMinF; jF < r_.nsMaxF; ++jF) {
-    for (int kl = 0; kl < s_.nZnT; ++kl) {
-      int idx_kl = (jF - r_.nsMinF) * s_.nZnT + kl;
-
-      double brcon = (rCon[idx_kl] - rCon0[idx_kl]) * gCon[idx_kl];
-      double bzcon = (zCon[idx_kl] - zCon0[idx_kl]) * gCon[idx_kl];
-
-      brmn_e[idx_kl] += brcon;
-      bzmn_e[idx_kl] += bzcon;
-      brmn_o[idx_kl] += brcon * m_p_.sqrtSF[jF - r_.nsMinF1];
-      bzmn_o[idx_kl] += bzcon * m_p_.sqrtSF[jF - r_.nsMinF1];
-
-      frcon_e[idx_kl] = ruFull[idx_kl] * gCon[idx_kl];
-      fzcon_e[idx_kl] = zuFull[idx_kl] * gCon[idx_kl];
-      frcon_o[idx_kl] = frcon_e[idx_kl] * m_p_.sqrtSF[jF - r_.nsMinF1];
-      fzcon_o[idx_kl] = fzcon_e[idx_kl] * m_p_.sqrtSF[jF - r_.nsMinF1];
-    }
-  }
+  // add the bandpass-filtered constraint force to the MHD R/Z forces and write
+  // the constraint outputs via the shared kernel (constraint_force_kernel.h),
+  // also used by the Enzyme autodiff path.
+  AddConstraintForces(rCon.data(), rCon0.data(), zCon.data(), zCon0.data(),
+                      ruFull.data(), zuFull.data(), gCon.data(),
+                      m_p_.sqrtSF.data(), s_.nZnT, r_.nsMinF, r_.nsMinF1,
+                      r_.nsMaxF, brmn_e.data(), brmn_o.data(), bzmn_e.data(),
+                      bzmn_o.data(), frcon_e.data(), frcon_o.data(),
+                      fzcon_e.data(), fzcon_o.data());
 }
 
 void IdealMhdModel::forcesToFourier(FourierForces& m_physical_f) {
