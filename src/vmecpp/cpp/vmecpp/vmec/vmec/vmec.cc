@@ -79,24 +79,6 @@ absl::Status CheckInitialState(const vmecpp::HotRestartState& initial_state,
     return absl::InvalidArgumentError(absl::StrCat(msg_start, "ntor", msg_end));
   }
 
-  // check for having only a single element in `ns_array`, `ftol_array`, and
-  // `niter_array`, since we don't support hot-restarting with multiple
-  // multi-grid steps
-  if (indata.ns_array.size() != 1ull) {
-    return absl::InvalidArgumentError(
-        "Only ns array with a single element is supported when hot-restarting");
-  }
-  if (indata.ftol_array.size() != 1ull) {
-    return absl::InvalidArgumentError(
-        "Only ftol array with a single element is supported when "
-        "hot-restarting");
-  }
-  if (indata.niter_array.size() != 1ull) {
-    return absl::InvalidArgumentError(
-        "Only niter array with a single element is supported when "
-        "hot-restarting");
-  }
-
   // check for matching `ns`
   if (initial_state.indata.ns_array[initial_state.indata.ns_array.size() - 1] !=
       indata.ns_array[0]) {
@@ -447,6 +429,7 @@ bool Vmec::InitializeRadial(
   fc_.ijacob = 0;
   fc_.restart_reason = RestartReason::NO_RESTART;
   fc_.res0 = -1;
+  fc_.res1 = -1;
   m_delt0 = indata_.delt;
 
   // INITIALIZE MESH-DEPENDENT SCALARS
@@ -641,7 +624,8 @@ bool Vmec::InitializeRadial(
     // TODO(jons): lreset .and. .not.linter?
     // If xc is overwritten by interp() anyway, why bother to initialize it in
     // profil3d()?
-    if (initial_state.has_value()) {
+    if (initial_state.has_value() && ns_old == 0) {
+      // ns_old == 0 means we hot restart only on the very first multigrid step
       for (int thread_id = 0; thread_id < num_threads_; ++thread_id) {
         if (indata_.lfreeb) {
           // free-boundary hot restart: use all flux surfaces from initial state
@@ -980,9 +964,34 @@ absl::StatusOr<Vmec::SolveEqLoopStatus> Vmec::SolveEquilibriumLoop(
 
       // res0 is the best force residual we got so far
       fc_.res0 = std::min(fc_.res0, fc_.fsq);
+
+      // PARVMEC additionally tracks the invariant residual minimum res1. Keep
+      // it (and its inputs) off the vmec_8_52 path so the default control stays
+      // byte-for-byte unchanged.
+      if (indata_.iteration_style == IterationStyle::PARVMEC) {
+        const double fsq_invariant = fc_.fsqr + fc_.fsqz + fc_.fsql;
+        if (iter2 == iter1_ || fc_.res1 == -1) {
+          fc_.res1 = fsq_invariant;
+        }
+        fc_.res1 = std::min(fc_.res1, fsq_invariant);
+      }
     }
 
-    if (fc_.fsq <= fc_.res0 && (iter2 - iter1_) > 10) {
+    if (indata_.iteration_style == IterationStyle::PARVMEC) {
+      // PARVMEC control: store when both residual minima improve; revert via
+      // BAD_PROGRESS (delt0r /= 1.03, no ijacob) when either exceeds 1e4 * its
+      // minimum after 10 steps.
+      const double fsq_invariant = fc_.fsqr + fc_.fsqz + fc_.fsql;
+      if (fc_.fsq <= fc_.res0 && fsq_invariant <= fc_.res1) {
+        RestartIteration(fc_.delt0r, thread_id);
+      } else if ((iter2 - iter1_) > 10 && (fc_.fsq > 1.0e4 * fc_.res0 ||
+                                           fsq_invariant > 1.0e4 * fc_.res1)) {
+#ifdef _OPENMP
+#pragma omp single
+#endif  // _OPENMP
+        fc_.restart_reason = RestartReason::BAD_PROGRESS;
+      }
+    } else if (fc_.fsq <= fc_.res0 && (iter2 - iter1_) > 10) {
       // Store current state (restart_reason=NO_RESTART)
       // --> was able to reduce force consistenly over at least 10 iterations
       RestartIteration(fc_.delt0r, thread_id);
