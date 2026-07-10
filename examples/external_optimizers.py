@@ -7,21 +7,32 @@
 VMEC's equilibrium is the stationary point of its augmented functional (MHD
 energy plus the spectral-condensation and lambda constraints). The gradient of
 that functional in the decomposed internal basis is the raw, unpreconditioned
-force exposed by ``VmecModel.evaluate(precondition=False)`` (see
-``tests/test_internal_gradient.py``). Finding the equilibrium is therefore the
-root problem F(x) = 0, which any gradient/Hessian-based solver can attack while
-reusing VMEC++'s forward model.
+force exposed by ``VmecModel.evaluate(precondition=False)``. Finding the
+equilibrium is therefore the root problem F(x) = 0, which gradient- and
+Hessian-based solvers can attack while reusing VMEC++'s forward model, its
+preconditioner (``apply_preconditioner``, VMEC's approximate inverse Hessian),
+and its Hessian-vector product (``hessian_vector_product``, a directional
+derivative of the analytic force computed inside VMEC++).
 
-This module wires that residual to two solvers and is used both by the benchmark
-``main`` below and by ``tests/test_external_optimizers.py``:
+This module wires that residual to several solvers and is shared by the
+benchmark ``main`` below and by the tests:
 
-* native-style preconditioned descent (heavy-ball on the preconditioned search
-  direction, i.e. VMEC's own update), and
-* Jacobian-free Newton-Krylov (matrix-free Hessian information).
+* preconditioned descent (VMEC's own update direction),
+* Jacobian-free Newton-Krylov, plain and preconditioned, and
+* a true Newton-Krylov driven by VMEC++'s own Hessian-vector product.
 
-Both converge to the same equilibrium as the native solver. Quasi-Newton
-root-finders without a preconditioner diverge on this stiff system, which is why
-VMEC's preconditioner matters; exposing it as an operator is a follow-up.
+All converge to the same equilibrium as the native solver. Force evaluations are
+counted inside VMEC++ (``force_eval_count``) so the comparison is fair across
+methods, including the evaluations hidden in Hessian-vector products.
+
+Interpretation: what separates the methods is how they couple DOFs of
+neighbouring flux surfaces. Plain JFNK does not -- it treats every degree of
+freedom as independent, so it cannot damp the radial stiffness that lets a
+surface cross its neighbour between iterations (BAD_JACOBIAN restarts in the
+native solver). It still converges, but slowly. VMEC's couples each surface to
+its jF +/- 1 neighbours; applying it -- as the inner Krylov preconditioner, or
+refreshed every step in the HVP Newton -- is what rescues conditioning and cuts
+the cost by an order of magnitude.
 """
 
 from __future__ import annotations
@@ -32,12 +43,16 @@ from pathlib import Path
 
 import numpy as np
 from scipy.optimize import newton_krylov
-from scipy.sparse.linalg import LinearOperator
+from scipy.sparse.linalg import LinearOperator, gmres
 
+import vmecpp
 from vmecpp.cpp import _vmecpp  # type: ignore[import]
 
 DEFAULT_INPUT = (
-    Path(__file__).resolve().parents[1] / "examples" / "data" / "solovev.json"
+    Path(__file__).resolve().parents[1]
+    / "examples"
+    / "data"
+    / "cth_like_fixed_bdy.json"
 )
 
 
@@ -83,6 +98,7 @@ def residual(model):
 class Result:
     name: str
     force_evals: int
+    outer_iters: int
     seconds: float
     residual_norm: float
     energy: float
@@ -95,6 +111,42 @@ def reference_equilibrium(input_path: Path = DEFAULT_INPUT, ns: int = 11):
     return np.asarray(model.get_state(), float), model.mhd_energy
 
 
+def _finish(model, name, x, outer_iters, t0):
+    model.set_state(np.ascontiguousarray(x))
+    model.evaluate(2, 2, False)
+    return x, Result(
+        name,
+        model.force_eval_count,
+        outer_iters,
+        time.perf_counter() - t0,
+        float(np.linalg.norm(np.asarray(model.get_forces(), float))),
+        model.mhd_energy,
+    )
+
+
+def solve_vmecpp(input_path=DEFAULT_INPUT, ns=11):
+    """Native VMEC++ solve through the public API; reports the iteration count.
+
+    Unlike the other variants this drives the ordinary ``vmecpp.run`` path rather
+    than the low-level ``VmecModel`` primitives, so the reported residual/energy
+    are the public wout diagnostics (invariant force residuals and total MHD
+    energy) rather than the raw internal-basis force this module counts elsewhere.
+    """
+    vmec_input = vmecpp.VmecInput.from_file(input_path)
+    vmec_input.ns_array = np.asarray([ns], dtype=vmec_input.ns_array.dtype)
+    t0 = time.perf_counter()
+    output = vmecpp.run(vmec_input, verbose=False)
+    wout = output.wout
+    return output, Result(
+        name="VMEC++ (native, vmecpp.run)",
+        force_evals=wout.niter,
+        outer_iters=wout.niter,
+        seconds=time.perf_counter() - t0,
+        residual_norm=float(np.sqrt(wout.fsqt[-1])),
+        energy=wout.wb + wout.wp,
+    )
+
+
 def solve_preconditioned_descent(
     input_path=DEFAULT_INPUT, ns=11, tol=1e-9, delt=0.9, momentum=0.5, max_iter=20000
 ):
@@ -102,91 +154,127 @@ def solve_preconditioned_descent(
     F = residual(model)
     x = np.asarray(model.get_state(), float).copy()
     v = np.zeros_like(x)
-    evals = 0
+    model.reset_force_eval_count()
+    it = 0
     t0 = time.perf_counter()
     for _ in range(max_iter):
         if np.linalg.norm(F(x)) < tol:
             break
-        evals += 1
+        it += 1
         model.set_state(np.ascontiguousarray(x))
         model.evaluate(2, 2, True)  # preconditioned search direction
         fprec = np.asarray(model.get_forces(), float)
         v = momentum * v + delt * fprec
         x = x + delt * v
-    model.set_state(np.ascontiguousarray(x))
-    model.evaluate(2, 2, False)
-    return x, Result(
-        "preconditioned descent",
-        evals,
-        time.perf_counter() - t0,
-        float(np.linalg.norm(np.asarray(model.get_forces(), float))),
-        model.mhd_energy,
-    )
+    return _finish(model, "preconditioned descent", x, it, t0)
 
 
 def solve_newton_krylov(
-    input_path=DEFAULT_INPUT, ns=11, tol=1e-9, max_iter=300, preconditioned=False
+    input_path=DEFAULT_INPUT, ns=11, tol=1e-9, max_iter=2500, preconditioned=False
 ):
     model = make_model(input_path, ns)
     F = residual(model)
-    n = [0]
-
-    def counted(x):
-        n[0] += 1
-        return F(x)
-
     x0 = np.asarray(model.get_state(), float)
     inner_m = None
+    model.reset_force_eval_count()
     if preconditioned:
         # Assemble VMEC's preconditioner at x0 and use it, frozen, as the inner
-        # Krylov preconditioner. M^-1 approximates the inverse Hessian and is
-        # state-invariant once assembled.
+        # Krylov preconditioner. M^-1 approximates the inverse Hessian; it is a
+        # radial tridiagonal (Thomas) solve per Fourier mode, so it couples each
+        # flux surface to its jF +/- 1 neighbours -- the coupling the plain
+        # branch lacks.
         model.evaluate(2, 2, True)
         n_dof = x0.size
-
-        def precond_matvec(b):
-            return np.asarray(
+        inner_m = LinearOperator(  # type: ignore[call-overload]
+            (n_dof, n_dof),
+            matvec=lambda b: np.asarray(  # type: ignore[call-overload]
                 model.apply_preconditioner(np.ascontiguousarray(b)), float
-            )
-
-        inner_m = LinearOperator((n_dof, n_dof), matvec=precond_matvec)  # type: ignore
+            ),
+        )
     t0 = time.perf_counter()
     x = newton_krylov(
-        counted, x0, f_tol=tol, maxiter=max_iter, method="lgmres", inner_M=inner_m
+        F, x0, f_tol=tol, maxiter=max_iter, method="lgmres", inner_M=inner_m
     )
-    model.set_state(np.ascontiguousarray(x))
-    model.evaluate(2, 2, False)
     name = (
         "Newton-Krylov (preconditioned)" if preconditioned else "Newton-Krylov (JFNK)"
     )
-    return x, Result(
-        name,
-        n[0],
-        time.perf_counter() - t0,
-        float(np.linalg.norm(np.asarray(model.get_forces(), float))),
-        model.mhd_energy,
-    )
+    return _finish(model, name, x, 0, t0)
 
 
 def solve_newton_krylov_preconditioned(input_path=DEFAULT_INPUT, ns=11, tol=1e-9):
     return solve_newton_krylov(input_path, ns, tol, preconditioned=True)
 
 
+def solve_newton_hvp(
+    input_path=DEFAULT_INPUT, ns=11, tol=1e-9, max_newton=80, inner_tol=1e-3
+):
+    """Globalized Newton-Krylov using VMEC++'s own Hessian-vector product.
+
+    Each Newton step solves H dx = -F with GMRES, where H v is hessian_vector_product
+    (the analytic force's directional derivative computed inside VMEC++) and the inner
+    solve is preconditioned by M^-1. A backtracking line search on ||F|| globalizes the
+    step, which is required on stiff 3D cases where the full Newton step overshoots.
+    """
+    model = make_model(input_path, ns)
+    F = residual(model)
+    x = np.asarray(model.get_state(), float).copy()
+    n_dof = x.size
+    model.reset_force_eval_count()
+    t0 = time.perf_counter()
+    it = 0
+    for _ in range(max_newton):
+        fk = F(x)
+        norm0 = np.linalg.norm(fk)
+        if norm0 < tol:
+            break
+        it += 1
+        model.set_state(np.ascontiguousarray(x))
+        model.evaluate(2, 2, True)  # assemble M at the current iterate
+        h_op = LinearOperator(  # type: ignore[call-overload]
+            (n_dof, n_dof),
+            matvec=lambda v: np.asarray(  # type: ignore[call-overload]
+                model.hessian_vector_product(np.ascontiguousarray(v)), float
+            ),
+        )
+        m_op = LinearOperator(  # type: ignore[call-overload]
+            (n_dof, n_dof),
+            matvec=lambda b: np.asarray(  # type: ignore[call-overload]
+                model.apply_preconditioner(np.ascontiguousarray(b)), float
+            ),
+        )
+        dx, _ = gmres(h_op, -fk, M=m_op, rtol=inner_tol, maxiter=100)
+        # Backtracking line search: accept the largest step that reduces ||F||.
+        alpha = 1.0
+        for _ in range(30):
+            if np.linalg.norm(F(x + alpha * dx)) < norm0:
+                break
+            alpha *= 0.5
+        else:
+            break  # no decrease found; stop
+        x = x + alpha * dx
+    return _finish(model, "Newton (VMEC++ HVP + M^-1)", x, it, t0)
+
+
+ALL_SOLVERS = (
+    solve_vmecpp,
+    solve_preconditioned_descent,
+    solve_newton_krylov_preconditioned,
+    solve_newton_krylov,
+    solve_newton_hvp,
+)
+
+
 def main():
     _, w_star = reference_equilibrium()
     print(f"reference equilibrium (native solve): W = {w_star:.8e}\n")
-    rows = [
-        solve_preconditioned_descent()[1],
-        solve_newton_krylov()[1],
-        solve_newton_krylov_preconditioned()[1],
-    ]
     print(
-        f"{'optimizer':32s} {'F-evals':>8s} {'time[s]':>8s} "
+        f"{'optimizer':32s} {'F-evals':>8s} {'iters':>6s} {'time[s]':>8s} "
         f"{'||F||':>10s} {'dW vs ref':>10s}"
     )
-    for r in rows:
+    for solver in ALL_SOLVERS:
+        r = solver()[1]
         print(
-            f"{r.name:32s} {r.force_evals:8d} {r.seconds:8.2f} "
+            f"{r.name:32s} {r.force_evals:8d} {r.outer_iters:6d} {r.seconds:8.2f} "
             f"{r.residual_norm:10.1e} {abs(r.energy - w_star):10.1e}"
         )
 
