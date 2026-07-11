@@ -346,6 +346,25 @@ class Vmec {
   // sum of the vacuum team, which is the response matrix.
   Eigen::VectorXd vacuum_reduce_slots_;
 
+  // shared scratch for the BIEST free-boundary solver; see Biest class docs
+  Eigen::VectorXd biestCoilBrShare;
+  Eigen::VectorXd biestCoilBpShare;
+  Eigen::VectorXd biestCoilBzShare;
+  Eigen::VectorXd biestBPlasmaShare;
+
+
+  // diagnostic dual-run mode (see DualSolver): shadow solver method from
+  // VMECPP_FB_SHADOW, dump path from VMECPP_FB_DUAL_DUMP, and the shadow
+  // solver's output buffers
+  std::optional<FreeBoundaryMethod> fb_shadow_method_;
+  std::string fb_dual_dump_path_;
+  Eigen::VectorXd shadowBsqVac_;
+  Eigen::VectorXd shadowVacuumBR_;
+  Eigen::VectorXd shadowVacuumBPhi_;
+  Eigen::VectorXd shadowVacuumBZ_;
+  double shadowBSubUVac_ = 0.0;
+  double shadowBSubVVac_ = 0.0;
+
  private:
   enum class SolveEqLoopStatus : std::uint8_t {
     NORMAL_TERMINATION,
