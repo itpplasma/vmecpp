@@ -11,6 +11,7 @@
 
 #include <Eigen/Dense>
 #include <filesystem>
+#include <numbers>
 #include <optional>
 #include <string>
 #include <type_traits>  // std::is_same_v
@@ -761,7 +762,7 @@ class VmecModel {
       throw std::runtime_error(
           "aspect is undefined for zero volume or cross-section");
     }
-    return volume_abs / (2.0 * std::sqrt(2.0) * std::pow(cross_abs, 1.5));
+    return volume_abs / (2.0 * std::numbers::sqrt2 * std::pow(cross_abs, 1.5));
   }
 
   // Half-grid field harmonics SIMSOPT's QuasisymmetryRatioResidual consumes
@@ -1000,9 +1001,9 @@ class VmecModel {
 
         const double d_aspect =
             std::copysign(1.0, volume) * d_volume /
-                (2.0 * std::sqrt(2.0) * std::pow(cross_abs, 1.5)) -
+                (2.0 * std::numbers::sqrt2 * std::pow(cross_abs, 1.5)) -
             1.5 * volume_abs * std::copysign(1.0, cross) * d_cross /
-                (2.0 * std::sqrt(2.0) * std::pow(cross_abs, 2.5));
+                (2.0 * std::numbers::sqrt2 * std::pow(cross_abs, 2.5));
         g += aspect_b * d_aspect;
       }
       dj[i] = g;
