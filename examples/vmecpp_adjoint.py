@@ -35,6 +35,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
+from scipy.optimize import root
 from scipy.sparse.linalg import LinearOperator, gmres
 
 from vmecpp.cpp import _vmecpp  # type: ignore
@@ -173,7 +174,8 @@ def _safeguarded_interior_solve(model, x_template, interior, residual, tol, max_
 def solve_interior(model, x0, interior, boundary, x_boundary, tol=1e-10, max_newton=80):
     """Converge the interior to force balance with the boundary held fixed.
 
-    The hand-written Newton-GMRES loop keeps VMEC's preconditioner synchronized with
+    SciPy's Newton-Krylov solver handles the usual equilibrium solve. For stiff updates,
+    the safeguarded Newton-GMRES fallback keeps the preconditioner synchronized with
     every iterate and uses an explicit residual-decreasing line search.
     """
     x_template = np.asarray(x0, float).copy()
@@ -184,6 +186,40 @@ def solve_interior(model, x0, interior, boundary, x_boundary, tol=1e-10, max_new
         x[interior] = xi
         return _raw_force(model, x)[interior]
 
+    initial_xi = x_template[interior].copy()
+    initial_residual = residual(initial_xi)
+    if np.max(np.abs(initial_residual)) <= tol:
+        return x_template
+
+    preconditioner = _VmecPreconditioner(model, x_template, interior)
+    preconditioner.update(initial_xi, initial_residual)
+    try:
+        solution = root(
+            residual,
+            initial_xi,
+            method="krylov",
+            options={
+                "fatol": tol,
+                "line_search": "armijo",
+                "maxiter": max_newton,
+                "jac_options": {
+                    "method": "lgmres",
+                    "inner_M": preconditioner,
+                    "inner_rtol": 1e-4,
+                    "inner_maxiter": 300,
+                },
+            },
+        )
+    except ValueError:
+        solution = None
+
+    if (
+        solution is not None
+        and solution.success
+        and np.max(np.abs(solution.fun)) <= tol
+    ):
+        x_template[interior] = solution.x
+        return x_template
     return _safeguarded_interior_solve(
         model, x_template, interior, residual, tol, max_newton
     )
