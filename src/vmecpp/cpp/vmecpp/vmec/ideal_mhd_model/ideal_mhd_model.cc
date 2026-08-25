@@ -2700,7 +2700,12 @@ void IdealMhdModel::exactQsFieldTangent(const double* geomP,
   LocalForceComposition comp = makeLocalForceComposition(geom_stride);
   const int nForce = comp.force_stride;
   const int nH = (r_.nsMaxH - r_.nsMinH) * s_.nZnT;
-  const int nWork = 15 * nH + 30 * s_.nZnT + 4 * nForce + 2 * (s_.ntor + 1);
+  // The force-density composition includes the same constraint scratch as
+  // exactForceDensityTangent.  Keep this allocation in lockstep with that
+  // path: the QS field tangent reads intermediates from the JVP work buffer,
+  // but the JVP still evaluates the complete constrained force composition.
+  const int nWork = 15 * nH + 30 * s_.nZnT + 4 * nForce + 4 * (s_.ntor + 1) +
+                    s_.nZnT + s_.nThetaReduced;
   std::vector<double> work(nWork, 0.0);
   std::vector<double> dwork(nWork, 0.0);
   std::vector<double> force(20 * nForce, 0.0);

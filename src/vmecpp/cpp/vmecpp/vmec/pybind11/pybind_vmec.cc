@@ -730,6 +730,40 @@ class VmecModel {
   double fsql1() const { return vmec_->fc_.fsql1; }
   double mhd_energy() const { return vmec_->h_.mhdEnergy; }
 
+  // Aspect ratio of the current LCFS geometry, using the same cross-section
+  // and volume quadratures as output_quantities.cc. This is exposed alongside
+  // qs_harmonics() so an external objective can form and independently check
+  // the aspect cotangent without rerunning post-processing.
+  double aspect() const {
+    const vmecpp::IdealMhdModel& m = *vmec_->m_[0];
+    const vmecpp::Sizes& s = vmec_->s_;
+    // The model stores only its local radial partition.  The LCFS is therefore
+    // the final surface in the geometry buffers, rather than necessarily at
+    // the global ``(ns - 1)`` offset used by output post-processing.
+    if (m.r1_e.size() < s.nZnT) {
+      throw std::runtime_error("aspect is undefined for missing LCFS geometry");
+    }
+    const int lcfs_offset = static_cast<int>(m.r1_e.size()) - s.nZnT;
+    double cross = 0.0;
+    double volume = 0.0;
+    for (int kl = 0; kl < s.nZnT; ++kl) {
+      const int l = kl % s.nThetaEff;
+      const int idx = lcfs_offset + kl;
+      const double r = m.r1_e[idx] + m.r1_o[idx];
+      const double zu = m.zu_e[idx] + m.zu_o[idx];
+      const double weight = s.wInt[l];
+      cross += r * zu * weight;
+      volume += r * r * zu * weight;
+    }
+    const double cross_abs = std::abs(cross);
+    const double volume_abs = std::abs(volume);
+    if (cross_abs == 0.0 || volume_abs == 0.0) {
+      throw std::runtime_error(
+          "aspect is undefined for zero volume or cross-section");
+    }
+    return volume_abs / (2.0 * std::sqrt(2.0) * std::pow(cross_abs, 1.5));
+  }
+
   // Half-grid field harmonics SIMSOPT's QuasisymmetryRatioResidual consumes
   // (gmnc, bmnc, bsub{u,v}mnc, bsup{u,v}mnc), computed from the current state
   // by the flat-buffer ComputeQsHarmonics kernel (no Eigen heap temporaries).
@@ -800,14 +834,15 @@ class VmecModel {
   }
 
 #ifdef VMECPP_ENABLE_ENZYME
-  // Exact dQS/dx (objective-state gradient) for a quasisymmetry objective whose
-  // derivative w.r.t. the QS harmonics is supplied in harm_bar (six
-  // (mnmax_nyq, nsH) blocks: gmnc, bmnc, bsubumnc, bsubvmnc, bsupumnc,
-  // bsupvmnc). Every link is analytic except geometry->fields: the analytic
-  // harmonics adjoint gives the field cotangent, and one Enzyme forward pass
-  // per state DOF gives the field tangent (exactQsFieldTangent); their
-  // contraction is the gradient component. No finite differences. State
-  // restored on return.
+  // Exact dJ/dx for a QS objective. The required harmonic cotangents are the
+  // six (mnmax_nyq, nsH) blocks in harm_bar. Optional ``buco`` and ``bvco``
+  // blocks (length nsH) add cotangents for the Boozer current profiles used by
+  // SIMSOPT's QuasisymmetryRatioResidual. An optional scalar ``aspect`` block
+  // adds the aspect-ratio cotangent. ``iotas`` is accepted for completeness:
+  // the current fixed-profile model has no state dependence through iota, so
+  // that cotangent contributes zero. Every link is analytic except the
+  // geometry->fields map, for which one Enzyme forward pass per state DOF gives
+  // the exact field tangent. No finite differences. State restored on return.
   Eigen::VectorXd ExactQsObjectiveStateGradient(const py::dict& harm_bar) {
     RequireLforbalDisabledForExactDerivatives();
     vmecpp::IdealMhdModel& m = *vmec_->m_[0];
@@ -827,11 +862,39 @@ class VmecModel {
       std::copy(a.data(), a.data() + nh, v.begin());
       return v;
     };
+    auto optional_block = [&](const char* k, int expected_size) {
+      std::vector<double> v(expected_size, 0.0);
+      if (!harm_bar.contains(k)) return v;
+      auto a = harm_bar[k]
+                   .cast<py::array_t<double, py::array::c_style |
+                                                 py::array::forcecast>>();
+      if (static_cast<int>(a.size()) != expected_size)
+        throw std::runtime_error(std::string("qs harm_bar block '") + k +
+                                 "' has wrong size");
+      std::copy(a.data(), a.data() + expected_size, v.begin());
+      return v;
+    };
     const std::vector<double> gmnc_b = block("gmnc"), bmnc_b = block("bmnc"),
                               bsubu_b = block("bsubumnc"),
                               bsubv_b = block("bsubvmnc"),
                               bsupu_b = block("bsupumnc"),
                               bsupv_b = block("bsupvmnc");
+    const std::vector<double> buco_b = optional_block("buco", nsH);
+    const std::vector<double> bvco_b = optional_block("bvco", nsH);
+    // Iota is an input profile in this fixed-profile state model. Validate an
+    // optional cotangent so callers can pass the complete SIMSOPT output set,
+    // but deliberately do not add a state contribution.
+    (void)optional_block("iotas", nsH);
+
+    double aspect_b = 0.0;
+    if (harm_bar.contains("aspect")) {
+      auto a = harm_bar["aspect"]
+                   .cast<py::array_t<double, py::array::c_style |
+                                                 py::array::forcecast>>();
+      if (a.size() != 1)
+        throw std::runtime_error("qs harm_bar block 'aspect' has wrong size");
+      aspect_b = *a.data();
+    }
 
     // Analytic harmonics adjoint -> field cotangents (each nH).
     std::vector<double> gsqrt_bar(nH), tp_bar(nH), bsupu_bar(nH), bsupv_bar(nH),
@@ -841,6 +904,19 @@ class VmecModel {
         bsupu_b.data(), bsupv_b.data(), m.totalPressure.data(), rp.presH.data(),
         gsqrt_bar.data(), tp_bar.data(), bsupu_bar.data(), bsupv_bar.data(),
         bsubu_bar.data(), bsubv_bar.data(), &c);
+
+    // buco/bvco are weighted half-grid integrals of bsubu/bsubv. Add their
+    // cotangents directly in the same real-space layout consumed by the QS
+    // harmonic chain. This is the missing profile part of the SIMSOPT ratio
+    // objective; no post-processing finite difference is needed.
+    for (int jH = 0; jH < nsH; ++jH) {
+      for (int kl = 0; kl < vmec_->s_.nZnT; ++kl) {
+        const int l = kl % vmec_->s_.nThetaEff;
+        const int idx = jH * vmec_->s_.nZnT + kl;
+        bsubu_bar[idx] += buco_b[jH] * vmec_->s_.wInt[l];
+        bsubv_bar[idx] += bvco_b[jH] * vmec_->s_.wInt[l];
+      }
+    }
 
     const int gS = static_cast<int>(m.r1_e.size());
     Eigen::VectorXd primal = Eigen::VectorXd::Zero(20 * gS);
@@ -854,6 +930,38 @@ class VmecModel {
     Eigen::VectorXd ei = Eigen::VectorXd::Zero(n);
     Eigen::VectorXd dgeom = Eigen::VectorXd::Zero(20 * gS);
     std::vector<double> dfields(6 * nH);
+    double cross = 0.0;
+    double volume = 0.0;
+    double cross_abs = 0.0;
+    double volume_abs = 0.0;
+    std::vector<double> lcfs_r(vmec_->s_.nZnT);
+    std::vector<double> lcfs_zu(vmec_->s_.nZnT);
+    if (aspect_b != 0.0) {
+      if (m.r1_e.size() < vmec_->s_.nZnT) {
+        throw std::runtime_error(
+            "exact QS aspect derivative is undefined for missing LCFS "
+            "geometry");
+      }
+      const int lcfs_offset = static_cast<int>(m.r1_e.size()) - vmec_->s_.nZnT;
+      for (int kl = 0; kl < vmec_->s_.nZnT; ++kl) {
+        const int l = kl % vmec_->s_.nThetaEff;
+        const int idx = lcfs_offset + kl;
+        const double r = m.r1_e[idx] + m.r1_o[idx];
+        const double zu = m.zu_e[idx] + m.zu_o[idx];
+        lcfs_r[kl] = r;
+        lcfs_zu[kl] = zu;
+        const double weight = vmec_->s_.wInt[l];
+        cross += r * zu * weight;
+        volume += r * r * zu * weight;
+      }
+      cross_abs = std::abs(cross);
+      volume_abs = std::abs(volume);
+      if (cross_abs == 0.0 || volume_abs == 0.0) {
+        throw std::runtime_error(
+            "exact QS aspect derivative is undefined for zero volume or "
+            "cross-section");
+      }
+    }
     // exactQsFieldTangent block order: gsqrt, bsupu, bsupv, bsubu, bsubv, tp;
     // pair each with the matching field cotangent.
     const double* fb[6] = {gsqrt_bar.data(), bsupu_bar.data(), bsupv_bar.data(),
@@ -869,6 +977,33 @@ class VmecModel {
       for (int b = 0; b < 6; ++b) {
         const double* df = dfields.data() + b * nH;
         for (int j = 0; j < nH; ++j) g += fb[b][j] * df[j];
+      }
+
+      if (aspect_b != 0.0) {
+        const int lcfs_offset =
+            static_cast<int>(m.r1_e.size()) - vmec_->s_.nZnT;
+        double d_cross = 0.0;
+        double d_volume = 0.0;
+        for (int kl = 0; kl < vmec_->s_.nZnT; ++kl) {
+          const int l = kl % vmec_->s_.nThetaEff;
+          const int idx = lcfs_offset + kl;
+          // exactQsFieldTangent may update the model's real-space scratch;
+          // use the LCFS values cached before entering the Enzyme loop.
+          const double r = lcfs_r[kl];
+          const double zu = lcfs_zu[kl];
+          const double dr = dgeom[idx] + dgeom[gS + idx];
+          const double dzu = dgeom[6 * gS + idx] + dgeom[7 * gS + idx];
+          const double weight = vmec_->s_.wInt[l];
+          d_cross += (dr * zu + r * dzu) * weight;
+          d_volume += (2.0 * r * dr * zu + r * r * dzu) * weight;
+        }
+
+        const double d_aspect =
+            std::copysign(1.0, volume) * d_volume /
+                (2.0 * std::sqrt(2.0) * std::pow(cross_abs, 1.5)) -
+            1.5 * volume_abs * std::copysign(1.0, cross) * d_cross /
+                (2.0 * std::sqrt(2.0) * std::pow(cross_abs, 2.5));
+        g += aspect_b * d_aspect;
       }
       dj[i] = g;
       ei[i] = 0.0;
@@ -1791,6 +1926,7 @@ PYBIND11_MODULE(_vmecpp, m) {
       .def_property_readonly("fsqz1", &VmecModel::fsqz1)
       .def_property_readonly("fsql1", &VmecModel::fsql1)
       .def_property_readonly("mhd_energy", &VmecModel::mhd_energy)
+      .def_property_readonly("aspect", &VmecModel::aspect)
       .def("qs_harmonics", &VmecModel::qs_harmonics)
       .def_property("restart_reason", &VmecModel::restart_reason,
                     &VmecModel::set_restart_reason)
