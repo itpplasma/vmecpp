@@ -236,6 +236,16 @@ class IdealMhdModel {
   void exactQsFieldTangent(const double* geomP, const double* dgeom,
                            int geom_stride, double* dfields_out);
 
+  // As above, additionally expose tangents of the half-grid metric blocks
+  // (gsqrt, guu, guv, gvv). These are needed for exact constrained-current
+  // iota tangents; dmetrics_out may be null when only the six QS fields are
+  // requested.
+  void exactQsFieldAndMetricTangent(const double* geomP, const double* dgeom,
+                                    int geom_stride, double* dfields_out,
+                                    double* dmetrics_out);
+
+  int current_constraint_mode() const { return ncurr; }
+
   // Freeze/unfreeze the constraint-force multiplier tcon (see the member).
   void setFreezeConstraintMultiplier(bool freeze) {
     freeze_constraint_multiplier_ = freeze;

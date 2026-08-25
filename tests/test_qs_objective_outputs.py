@@ -100,3 +100,70 @@ def test_qs_profile_and_aspect_state_cotangent_matches_directional_fd():
         1.0, abs(fd_directional)
     )
     np.testing.assert_array_equal(np.asarray(model.get_state(), float), state)
+
+
+def test_complete_qs_output_state_tangent_matches_directional_fd():
+    """The forward tangent covers every returned QS output and aspect."""
+    indata = _vmecpp.VmecINDATA.from_file(str(SOLOVEV))
+    model = _vmecpp.VmecModel.create(indata, 11)
+    if not hasattr(model, "exact_qs_harmonics_tangent"):
+        pytest.skip("requires an Enzyme-enabled build")
+
+    model.evaluate(2, 2, False)
+    state = np.asarray(model.get_state(), float).copy()
+    outputs = model.qs_harmonics()
+    keys = (
+        "gmnc",
+        "bmnc",
+        "bsubumnc",
+        "bsubvmnc",
+        "bsupumnc",
+        "bsupvmnc",
+        "iotas",
+        "bvco",
+        "buco",
+    )
+    weights = {
+        key: np.linspace(0.2, 1.1, np.asarray(outputs[key]).size) for key in keys
+    }
+    weights["bsubvmnc"] *= -0.7
+    weights["iotas"] *= 0.0  # fixed-profile iota is an input, not a state output
+    aspect_weight = -0.35
+
+    def scalar_value():
+        current = model.qs_harmonics()
+        return float(
+            sum(
+                np.dot(weights[key], np.asarray(current[key], float).reshape(-1))
+                for key in keys
+            )
+            + aspect_weight * float(model.aspect)
+        )
+
+    direction = np.random.default_rng(582703).standard_normal(state.size)
+    direction /= np.linalg.norm(direction)
+    tangent = model.exact_qs_harmonics_tangent(np.ascontiguousarray(direction))
+    exact_directional = float(
+        sum(
+            np.dot(weights[key], np.asarray(tangent[key], float).reshape(-1))
+            for key in keys
+        )
+        + aspect_weight * float(tangent["aspect"])
+    )
+
+    eps = 1.0e-6
+    model.set_state(np.ascontiguousarray(state + eps * direction))
+    model.evaluate(2, 2, False)
+    plus = scalar_value()
+    model.set_state(np.ascontiguousarray(state - eps * direction))
+    model.evaluate(2, 2, False)
+    minus = scalar_value()
+    model.set_state(np.ascontiguousarray(state))
+    model.evaluate(2, 2, False)
+
+    fd_directional = (plus - minus) / (2.0 * eps)
+    assert abs(exact_directional - fd_directional) < 2.0e-5 * max(
+        1.0, abs(fd_directional)
+    )
+    assert set(tangent) >= set(keys) | {"aspect"}
+    np.testing.assert_array_equal(np.asarray(model.get_state(), float), state)

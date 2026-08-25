@@ -2697,6 +2697,15 @@ void IdealMhdModel::exactForceDensityTangent(const double* geomP,
 void IdealMhdModel::exactQsFieldTangent(const double* geomP,
                                         const double* dgeom, int geom_stride,
                                         double* dfields_out) {
+  exactQsFieldAndMetricTangent(geomP, dgeom, geom_stride, dfields_out,
+                               /*dmetrics_out=*/nullptr);
+}
+
+void IdealMhdModel::exactQsFieldAndMetricTangent(const double* geomP,
+                                                 const double* dgeom,
+                                                 int geom_stride,
+                                                 double* dfields_out,
+                                                 double* dmetrics_out) {
   LocalForceComposition comp = makeLocalForceComposition(geom_stride);
   const int nForce = comp.force_stride;
   const int nH = (r_.nsMaxH - r_.nsMinH) * s_.nZnT;
@@ -2720,6 +2729,13 @@ void IdealMhdModel::exactQsFieldTangent(const double* geomP,
   for (int b = 0; b < 6; ++b)
     std::copy(dwork.data() + off[b] * nH, dwork.data() + (off[b] + 1) * nH,
               dfields_out + b * nH);
+  if (dmetrics_out != nullptr) {
+    // Metric block order: gsqrt, guu, guv, gvv.
+    const int metric_off[4] = {6, 7, 8, 9};
+    for (int b = 0; b < 4; ++b)
+      std::copy(dwork.data() + metric_off[b] * nH,
+                dwork.data() + (metric_off[b] + 1) * nH, dmetrics_out + b * nH);
+  }
 }
 
 void IdealMhdModel::exactForceDensityCotangent(const double* geomP,

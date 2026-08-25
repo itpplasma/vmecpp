@@ -1013,8 +1013,9 @@ class VmecModel {
     return dj;
   }
 
-  // Forward tangent of the QS harmonics w.r.t. a state perturbation: the six
-  // (mnmax_nyq, nsH) harmonic-block tangents for a decomposed-state direction.
+  // Forward tangent of the QS output w.r.t. a state perturbation: the six
+  // (mnmax_nyq, nsH) harmonic-block tangents plus the profile and aspect
+  // outputs for a decomposed-state direction.
   // One Enzyme forward pass gives the field tangents (exactQsFieldTangent); the
   // analytic harmonics tangent projects them (|B| through total pressure). This
   // is the forward counterpart of ExactQsObjectiveStateGradient and feeds an
@@ -1030,17 +1031,42 @@ class VmecModel {
     const int nh = vmec_->s_.mnmax_nyq * nsH;
     const int gS = static_cast<int>(m.r1_e.size());
 
+    // Cache the LCFS primal geometry before packing either primal or tangent
+    // geometry: both packGeometry and exactQsFieldTangent use the model's
+    // real-space buffers as scratch.
+    if (m.r1_e.size() < vmec_->s_.nZnT) {
+      throw std::runtime_error(
+          "exact QS aspect tangent is undefined for missing LCFS geometry");
+    }
+    const int lcfs_offset = static_cast<int>(m.r1_e.size()) - vmec_->s_.nZnT;
+    std::vector<double> lcfs_r(vmec_->s_.nZnT), lcfs_zu(vmec_->s_.nZnT);
+    for (int kl = 0; kl < vmec_->s_.nZnT; ++kl) {
+      const int idx = lcfs_offset + kl;
+      lcfs_r[kl] = m.r1_e[idx] + m.r1_o[idx];
+      lcfs_zu[kl] = m.zu_e[idx] + m.zu_o[idx];
+    }
+
+    // The tangent pack below also overwrites the primal metric/field scratch
+    // arrays.  Preserve the primal blocks needed by the ncurr=1 iota quotient
+    // before constructing dgeom.
+    std::vector<double> gsqrt_p(m.gsqrt.data(), m.gsqrt.data() + nH);
+    std::vector<double> bsupu_p(m.bsupu.data(), m.bsupu.data() + nH);
+
     Eigen::VectorXd primal = Eigen::VectorXd::Zero(20 * gS);
     m.packGeometry(*vmec_->decomposed_x_[0], *vmec_->physical_x_[0],
                    primal.data(), gS, /*primal=*/true);
+
     Eigen::VectorXd dgeom = Eigen::VectorXd::Zero(20 * gS);
     vmec_->physical_x_backup_[0]->setZero();
     UnflattenActive(*vmec_->physical_x_backup_[0], vmec_->s_, v);
     m.packGeometry(*vmec_->physical_x_backup_[0], *vmec_->physical_x_[0],
                    dgeom.data(), gS, /*primal=*/false);
+
     std::vector<double> dfields(6 * nH);
+    std::vector<double> dmetrics(4 * nH);
     // block order: gsqrt, bsupu, bsupv, bsubu, bsubv, tp.
-    m.exactQsFieldTangent(primal.data(), dgeom.data(), gS, dfields.data());
+    m.exactQsFieldAndMetricTangent(primal.data(), dgeom.data(), gS,
+                                   dfields.data(), dmetrics.data());
 
     std::vector<double> gmnc_t(nh), bmnc_t(nh), bsubu_t(nh), bsubv_t(nh),
         bsupu_t(nh), bsupv_t(nh);
@@ -1053,7 +1079,11 @@ class VmecModel {
 
     auto out = py::dict();
     auto pack = [&](const char* k, std::vector<double>& a) {
-      out[k] = py::array_t<double>(static_cast<py::ssize_t>(nh), a.data());
+      // The vector is local to this call.  Allocate an owning NumPy array;
+      // returning a view of a.data() leaves Python with a dangling buffer.
+      py::array_t<double> result(static_cast<py::ssize_t>(a.size()));
+      std::copy(a.begin(), a.end(), result.mutable_data());
+      out[k] = std::move(result);
     };
     pack("gmnc", gmnc_t);
     pack("bmnc", bmnc_t);
@@ -1061,6 +1091,88 @@ class VmecModel {
     pack("bsubvmnc", bsubv_t);
     pack("bsupumnc", bsupu_t);
     pack("bsupvmnc", bsupv_t);
+    std::vector<double> buco_t(nsH, 0.0), bvco_t(nsH, 0.0);
+    for (int jH = 0; jH < nsH; ++jH) {
+      for (int kl = 0; kl < vmec_->s_.nZnT; ++kl) {
+        const int l = kl % vmec_->s_.nThetaEff;
+        const int idx = jH * vmec_->s_.nZnT + kl;
+        buco_t[jH] += dfields[3 * nH + idx] * vmec_->s_.wInt[l];
+        bvco_t[jH] += dfields[4 * nH + idx] * vmec_->s_.wInt[l];
+      }
+    }
+    auto pack_profile = [&](const char* k, const std::vector<double>& a) {
+      py::array_t<double> result(static_cast<py::ssize_t>(a.size()));
+      std::copy(a.begin(), a.end(), result.mutable_data());
+      out[k] = std::move(result);
+    };
+    pack_profile("buco", buco_t);
+    pack_profile("bvco", bvco_t);
+    // In fixed-profile mode iota is an input profile and has no state
+    // tangent. In fixed-current mode it is state dependent and is recovered
+    // from the exact tangent of the covariant-current quotient below.
+    std::vector<double> iotas_t(nsH, 0.0);
+    if (m.current_constraint_mode() == 1) {
+      const double* dgsqrt = dmetrics.data() + 0 * nH;
+      const double* dgsupu = dfields.data() + 1 * nH;
+      for (int jH = 0; jH < nsH; ++jH) {
+        const double sH = rp.sqrtSH[jH];
+        double d_chip_sum = 0.0;
+        for (int kl = 0; kl < vmec_->s_.nZnT; ++kl) {
+          const int i_in = (jH - vmec_->r_[0]->nsMinF1) * vmec_->s_.nZnT + kl;
+          const int i_out =
+              (jH + 1 - vmec_->r_[0]->nsMinF1) * vmec_->s_.nZnT + kl;
+          const int idx = jH * vmec_->s_.nZnT + kl;
+          const double gsqrt = gsqrt_p[idx];
+          const double bsupu = bsupu_p[idx];
+          // ComputeBsupContra forms bsupu from the lambda numerator divided
+          // by gsqrt and then adds chip/gsqrt. Recover the exact chip tangent
+          // from the total bsupu tangent and the packed lambda tangent.
+          const double d_lambda_num =
+              0.5 * ((dgeom[14 * gS + i_in] + dgeom[14 * gS + i_out]) +
+                     sH * (dgeom[15 * gS + i_in] + dgeom[15 * gS + i_out]));
+          const double d_total_num = dgsupu[idx] * gsqrt + bsupu * dgsqrt[idx];
+          d_chip_sum += d_total_num - d_lambda_num;
+        }
+        if (rp.phipH[jH] != 0.0)
+          iotas_t[jH] = (d_chip_sum / vmec_->s_.nZnT) / rp.phipH[jH];
+      }
+    }
+    pack_profile("iotas", iotas_t);
+    // The scalar aspect output is the same LCFS quadrature exposed by
+    // VmecModel::aspect().  Differentiate that quadrature with the geometry
+    // tangent produced by the Enzyme forward pass so callers can assemble a
+    // complete QS-output residual Jacobian without a separate finite
+    // difference of post-processing quantities.
+    double cross = 0.0;
+    double volume = 0.0;
+    double d_cross = 0.0;
+    double d_volume = 0.0;
+    for (int kl = 0; kl < vmec_->s_.nZnT; ++kl) {
+      const int l = kl % vmec_->s_.nThetaEff;
+      const int idx = lcfs_offset + kl;
+      const double r = lcfs_r[kl];
+      const double zu = lcfs_zu[kl];
+      const double dr = dgeom[idx] + dgeom[gS + idx];
+      const double dzu = dgeom[6 * gS + idx] + dgeom[7 * gS + idx];
+      const double weight = vmec_->s_.wInt[l];
+      cross += r * zu * weight;
+      volume += r * r * zu * weight;
+      d_cross += (dr * zu + r * dzu) * weight;
+      d_volume += (2.0 * r * dr * zu + r * r * dzu) * weight;
+    }
+    const double cross_abs = std::abs(cross);
+    const double volume_abs = std::abs(volume);
+    if (cross_abs == 0.0 || volume_abs == 0.0) {
+      throw std::runtime_error(
+          "exact QS aspect tangent is undefined for zero volume or "
+          "cross-section");
+    }
+    const double aspect_t =
+        std::copysign(1.0, volume) * d_volume /
+            (2.0 * std::numbers::sqrt2 * std::pow(cross_abs, 1.5)) -
+        1.5 * volume_abs * std::copysign(1.0, cross) * d_cross /
+            (2.0 * std::numbers::sqrt2 * std::pow(cross_abs, 2.5));
+    out["aspect"] = py::float_(aspect_t);
     return out;
   }
 #endif  // VMECPP_ENABLE_ENZYME
@@ -1086,7 +1198,6 @@ class VmecModel {
   int ntor() const { return vmec_->s_.ntor; }
   bool lthreed() const { return vmec_->s_.lthreed; }
   bool lasym() const { return vmec_->s_.lasym; }
-
   // Invariant force-residual traces recorded during the C++ Solve().
   std::vector<double> force_residual_r() const {
     return vmec_->fc_.force_residual_r;
