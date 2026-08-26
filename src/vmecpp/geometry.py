@@ -77,13 +77,14 @@ def make(output) -> Geometry:
     return from_cpp(_vmecpp.make_geometry(output))
 
 
-def _interpolate(values, s):
+def _radial_jet(values, s):
+    """Return value, first, and second radial derivatives of an interpolant."""
     ns = values.shape[0]
     scaled = s * (ns - 1)
     if ns >= 4:
         start = jnp.clip(jnp.floor(scaled).astype(int) - 1, 0, ns - 4)
         x = scaled - start
-        weights = jnp.asarray(
+        value_weights = jnp.asarray(
             [
                 -(x - 1) * (x - 2) * (x - 3) / 6,
                 x * (x - 2) * (x - 3) / 2,
@@ -91,55 +92,173 @@ def _interpolate(values, s):
                 x * (x - 1) * (x - 2) / 6,
             ]
         )
-        return jnp.tensordot(weights, values[start + jnp.arange(4)], axes=1)
+        first_weights = jnp.asarray(
+            [
+                -(3 * x**2 - 12 * x + 11) / 6,
+                (3 * x**2 - 10 * x + 6) / 2,
+                -(3 * x**2 - 8 * x + 3) / 2,
+                (3 * x**2 - 6 * x + 2) / 6,
+            ]
+        )
+        second_weights = jnp.asarray(
+            [
+                -(6 * x - 12) / 6,
+                (6 * x - 10) / 2,
+                -(6 * x - 8) / 2,
+                (6 * x - 6) / 6,
+            ]
+        )
+        sample = values[start + jnp.arange(4)]
+        scale = ns - 1
+        return (
+            jnp.tensordot(value_weights, sample, axes=1),
+            scale * jnp.tensordot(first_weights, sample, axes=1),
+            scale**2 * jnp.tensordot(second_weights, sample, axes=1),
+        )
     inner = jnp.clip(jnp.floor(scaled).astype(int), 0, ns - 2)
     weight = scaled - inner
-    return (1.0 - weight) * values[inner] + weight * values[inner + 1]
+    return (
+        (1.0 - weight) * values[inner] + weight * values[inner + 1],
+        (ns - 1) * (values[inner + 1] - values[inner]),
+        jnp.zeros_like(values[inner]),
+    )
+
+
+def _interpolate(values, s):
+    return _radial_jet(values, s)[0]
+
+
+def _series_jet(geometry: Geometry, coefficients, s, theta, zeta):
+    """Evaluate one product-basis Fourier series and its spatial jet."""
+    mpol = coefficients[0].shape[1]
+    ntor = coefficients[0].shape[2] - 1
+    m = jnp.arange(mpol)[:, None]
+    n = jnp.arange(ntor + 1)[None, :] * geometry.nfp
+    mtheta = m * theta
+    nzeta = n * zeta
+    poloidal_cosine = (
+        jnp.cos(mtheta),
+        -m * jnp.sin(mtheta),
+        -(m**2) * jnp.cos(mtheta),
+    )
+    poloidal_sine = (
+        jnp.sin(mtheta),
+        m * jnp.cos(mtheta),
+        -(m**2) * jnp.sin(mtheta),
+    )
+    toroidal_cosine = (
+        jnp.cos(nzeta),
+        -n * jnp.sin(nzeta),
+        -(n**2) * jnp.cos(nzeta),
+    )
+    toroidal_sine = (
+        jnp.sin(nzeta),
+        n * jnp.cos(nzeta),
+        -(n**2) * jnp.sin(nzeta),
+    )
+    jets = [_radial_jet(coefficient, s) for coefficient in coefficients]
+    value = 0.0
+    ds = 0.0
+    dss = 0.0
+    dtheta = 0.0
+    dzeta = 0.0
+    ds_dtheta = 0.0
+    ds_dzeta = 0.0
+    dtheta2 = 0.0
+    dtheta_dzeta = 0.0
+    dzeta2 = 0.0
+    for jet, p, q in (
+        (jets[0], poloidal_cosine, toroidal_cosine),
+        (jets[1], poloidal_sine, toroidal_sine),
+        (jets[2], poloidal_sine, toroidal_cosine),
+        (jets[3], poloidal_cosine, toroidal_sine),
+    ):
+        radial_value, radial_first, radial_second = jet
+        term = radial_value * p[0] * q[0]
+        value = value + jnp.sum(term)
+        ds = ds + jnp.sum(radial_first * p[0] * q[0])
+        dss = dss + jnp.sum(radial_second * p[0] * q[0])
+        dtheta = dtheta + jnp.sum(radial_value * p[1] * q[0])
+        dzeta = dzeta + jnp.sum(radial_value * p[0] * q[1])
+        ds_dtheta = ds_dtheta + jnp.sum(radial_first * p[1] * q[0])
+        ds_dzeta = ds_dzeta + jnp.sum(radial_first * p[0] * q[1])
+        dtheta2 = dtheta2 + jnp.sum(radial_value * p[2] * q[0])
+        dtheta_dzeta = dtheta_dzeta + jnp.sum(radial_value * p[1] * q[1])
+        dzeta2 = dzeta2 + jnp.sum(radial_value * p[0] * q[2])
+    return jnp.asarray(
+        [
+            value,
+            ds,
+            dtheta,
+            dzeta,
+            dss,
+            ds_dtheta,
+            ds_dzeta,
+            dtheta2,
+            dtheta_dzeta,
+            dzeta2,
+        ]
+    )
 
 
 def _values(geometry: Geometry, coordinates: jax.Array) -> jax.Array:
     s, theta, zeta = coordinates
-    mpol = geometry.r_cc.shape[1]
-    ntor = geometry.r_cc.shape[2] - 1
-    m = jnp.arange(mpol)[:, None]
-    n = jnp.arange(ntor + 1)[None, :] * geometry.nfp
-    cos_m = jnp.cos(m * theta)
-    sin_m = jnp.sin(m * theta)
-    cos_n = jnp.cos(n * zeta)
-    sin_n = jnp.sin(n * zeta)
-
-    def series(cc, ss, sc, cs):
-        coefficients = (
-            _interpolate(cc, s) * cos_m * cos_n
-            + _interpolate(ss, s) * sin_m * sin_n
-            + _interpolate(sc, s) * sin_m * cos_n
-            + _interpolate(cs, s) * cos_m * sin_n
-        )
-        return jnp.sum(coefficients)
-
-    return jnp.asarray(
+    series_coefficients = (
+        (geometry.r_cc, geometry.r_ss, geometry.r_sc, geometry.r_cs),
+        (geometry.z_cc, geometry.z_ss, geometry.z_sc, geometry.z_cs),
+        (
+            geometry.lambda_cc,
+            geometry.lambda_ss,
+            geometry.lambda_sc,
+            geometry.lambda_cs,
+        ),
+    )
+    series = [
+        _series_jet(geometry, coefficients, s, theta, zeta)
+        for coefficients in series_coefficients
+    ]
+    toroidal = _radial_jet(geometry.toroidal_flux, s)
+    poloidal = _radial_jet(geometry.poloidal_flux, s)
+    return jnp.stack(
         [
-            series(geometry.r_cc, geometry.r_ss, geometry.r_sc, geometry.r_cs),
-            series(geometry.z_cc, geometry.z_ss, geometry.z_sc, geometry.z_cs),
-            series(
-                geometry.lambda_cc,
-                geometry.lambda_ss,
-                geometry.lambda_sc,
-                geometry.lambda_cs,
+            *series,
+            jnp.asarray(
+                [
+                    toroidal[0],
+                    toroidal[1],
+                    0.0,
+                    0.0,
+                    toroidal[2],
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                ]
             ),
-            _interpolate(geometry.toroidal_flux, s),
-            _interpolate(geometry.poloidal_flux, s),
+            jnp.asarray(
+                [
+                    poloidal[0],
+                    poloidal[1],
+                    0.0,
+                    0.0,
+                    poloidal[2],
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                ]
+            ),
         ]
     )
 
 
 def evaluate(geometry: Geometry, coordinates: jax.Array) -> jax.Array:
-    """Return shape ``(5, 4)``: values and derivatives in ``s, theta, zeta``.
+    """Return shape ``(5, 10)``: values and first/second derivatives.
 
-    Rows are ``R``, ``Z``, ``lambda``, toroidal flux, and poloidal flux. Since
-    this function uses only JAX operations, JAX supplies VJPs for the complete
-    geometry pytree and for the evaluation coordinates.
+    Rows are ``R``, ``Z``, ``lambda``, toroidal flux, and poloidal flux. The
+    columns follow :class:`vmecpp.GeometryJet`; all formulas are explicit so
+    spatial derivatives do not invoke nested automatic differentiation.
     """
-    values = _values(geometry, coordinates)
-    derivatives = jax.jacfwd(_values, argnums=1)(geometry, coordinates)
-    return jnp.concatenate((values[:, None], derivatives), axis=1)
+    return _values(geometry, coordinates)
