@@ -6,6 +6,8 @@ import vmecpp
 from vmecpp import geometry
 from vmecpp.cpp import _vmecpp  # type: ignore
 
+jax.config.update("jax_enable_x64", True)
+
 
 def test_jax_geometry_matches_cpp_evaluator() -> None:
     indata = vmecpp.VmecInput.from_file("examples/data/solovev.json")
@@ -33,7 +35,7 @@ def test_jax_geometry_has_state_and_coordinate_vjps() -> None:
     output = _vmecpp.run(indata._to_cpp_vmecindata(), verbose=_vmecpp.OutputMode.SILENT)
     jax_geometry = geometry.make(output)
     coordinates = jnp.asarray([0.43, 0.31, 0.0])
-    seed = jnp.arange(20.0).reshape(5, 4) / 20.0
+    seed = jnp.arange(50.0).reshape(5, 10) / 50.0
 
     _, pullback = jax.vjp(geometry.evaluate, jax_geometry, coordinates)
     geometry_bar, coordinate_bar = pullback(seed)
