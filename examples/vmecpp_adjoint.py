@@ -130,6 +130,47 @@ def _interior_operators(model, x, interior, exact=False):
     )
 
 
+def _safeguarded_interior_solve(model, x_template, interior, residual, tol, max_newton):
+    """Solve the interior force balance with Newton-GMRES and backtracking."""
+    xi = x_template[interior].copy()
+    force = np.zeros(interior.size)
+    for _ in range(max_newton):
+        force = residual(xi)
+        norm0 = np.linalg.norm(force)
+        if np.max(np.abs(force)) <= tol:
+            x_template[interior] = xi
+            return x_template
+        x_template[interior] = xi
+        model.set_state(np.ascontiguousarray(x_template))
+        model.evaluate(2, 2, True)
+        hessian, preconditioner = _interior_operators(model, x_template, interior)
+        step, info = gmres(
+            hessian,
+            -force,
+            M=preconditioner,
+            rtol=1e-4,
+            maxiter=300,
+        )
+        if info != 0:
+            error_message = f"Interior Krylov solve failed with info={info}"
+            raise RuntimeError(error_message)
+        for backtrack in range(30):
+            trial = xi + 2.0**-backtrack * step
+            if np.linalg.norm(residual(trial)) < norm0:
+                xi = trial
+                break
+        else:
+            error_message = (
+                "Interior solve failed to reduce residual; "
+                f"max|F|={np.max(np.abs(force)):.3e}"
+            )
+            raise RuntimeError(error_message)
+    error_message = (
+        f"Interior solve failed: maximum iterations; max|F|={np.max(np.abs(force)):.3e}"
+    )
+    raise RuntimeError(error_message)
+
+
 def solve_interior(model, x0, interior, boundary, x_boundary, tol=1e-10, max_newton=80):
     """Converge the interior to force balance with the boundary held fixed.
 
