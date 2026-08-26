@@ -1,0 +1,62 @@
+cc_library(
+    name = "geometry",
+    srcs = ["geometry.cc"],
+    hdrs = ["geometry.h"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "vmec_geometry",
+    srcs = ["vmec_geometry.cc"],
+    hdrs = ["vmec_geometry.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":geometry",
+        "//vmecpp/common/vmec_indata:vmec_indata",
+        "//vmecpp/vmec/output_quantities:output_quantities",
+    ],
+)
+
+cc_library(
+    name = "geometry_c_api",
+    srcs = ["geometry_c_api.cc"],
+    hdrs = ["geometry_c_api.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":geometry",
+        ":vmec_geometry",
+        "//vmecpp/common/vmec_indata:vmec_indata",
+        "//vmecpp/vmec/vmec:vmec",
+    ],
+)
+
+cc_test(
+    name = "geometry_test",
+    srcs = ["geometry_test.cc"],
+    deps = [
+        ":geometry",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "vmec_geometry_test",
+    srcs = ["vmec_geometry_test.cc"],
+    deps = [
+        ":geometry",
+        ":vmec_geometry",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "geometry_c_api_test",
+    srcs = ["geometry_c_api_test.cc"],
+    data = ["//vmecpp/test_data:solovev"],
+    deps = [
+        ":geometry_c_api",
+        "//vmecpp/common/vmec_indata:vmec_indata",
+        "@googletest//:gtest_main",
+    ],
+    size = "medium",
+)
