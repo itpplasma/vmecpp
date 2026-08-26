@@ -80,6 +80,18 @@ def make(output) -> Geometry:
 def _interpolate(values, s):
     ns = values.shape[0]
     scaled = s * (ns - 1)
+    if ns >= 4:
+        start = jnp.clip(jnp.floor(scaled).astype(int) - 1, 0, ns - 4)
+        x = scaled - start
+        weights = jnp.asarray(
+            [
+                -(x - 1) * (x - 2) * (x - 3) / 6,
+                x * (x - 2) * (x - 3) / 2,
+                -x * (x - 1) * (x - 3) / 2,
+                x * (x - 1) * (x - 2) / 6,
+            ]
+        )
+        return jnp.tensordot(weights, values[start + jnp.arange(4)], axes=1)
     inner = jnp.clip(jnp.floor(scaled).astype(int), 0, ns - 2)
     weight = scaled - inner
     return (1.0 - weight) * values[inner] + weight * values[inner + 1]
