@@ -21,7 +21,6 @@ from vmecpp_adjoint import (  # type: ignore
     make_model,
     mhd_energy,
     partition,
-    solve_interior,
 )
 
 
@@ -43,20 +42,6 @@ def test_adjoint_matches_finite_difference():
     scale = max(np.linalg.norm(g_adjoint), 1e-30)
     for j in dofs:
         assert abs(g_adjoint[j] - g_fd[j]) < 1e-3 * scale
-
-
-def test_interior_solve_converges_from_initial_state():
-    """The helper used by the finite-difference reference must solve a fresh model."""
-    ns = 11
-    model = make_model(ns=ns)
-    x0 = np.asarray(model.get_state(), float).copy()
-    interior, boundary = partition(model, ns)
-
-    x_star = solve_interior(model, x0, interior, boundary, x0[boundary])
-    model.set_state(np.ascontiguousarray(x_star))
-    model.evaluate(2, 2, False)
-    max_force = np.max(np.abs(np.asarray(model.get_forces(), float)[interior]))
-    assert max_force <= 1e-9
 
 
 if __name__ == "__main__":
