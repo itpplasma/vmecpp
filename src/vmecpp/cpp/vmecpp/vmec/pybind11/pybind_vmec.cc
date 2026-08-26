@@ -1436,8 +1436,9 @@ PYBIND11_MODULE(_vmecpp, m) {
       .def_readonly("coefficients", &vmecpp::Geometry::coefficients)
       .def("evaluate", &vmecpp::EvaluateGeometry, py::arg("s"),
            py::arg("theta"), py::arg("zeta"));
-  m.def("make_geometry", [](const vmecpp::OutputQuantities &output) {
-    return vmecpp::MakeGeometry(output.indata, output.vmec_internal_results);
+  m.def("make_geometry", [](const vmecpp::OutputQuantities& output) {
+    return vmecpp::MakeGeometry(output.indata, output.vmec_internal_results,
+                                vmecpp::GeometryCoefficientState::kPhysical);
   });
 
   py::class_<vmecpp::HotRestartState>(m, "HotRestartState")
