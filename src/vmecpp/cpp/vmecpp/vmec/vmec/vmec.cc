@@ -621,7 +621,12 @@ void Vmec::SetupVacuumSolvers() {
   // rather than being serialized to one.
   // omp_set_nested is deprecated but still needed by older libgomp runtimes.
   omp_set_nested(1);
-  omp_set_max_active_levels(2);
+  // BIEST (through SCTL) runs its own OpenMP loops inside the solver thread of
+  // the vacuum team, which needs a third active level to not be serialized.
+  const bool uses_biest = indata_.free_boundary_method ==
+                              FreeBoundaryMethod::BIEST ||
+                          fb_shadow_method_ == FreeBoundaryMethod::BIEST;
+  omp_set_max_active_levels(uses_biest ? 3 : 2);
 #endif  // _OPENMP
 
   // The tangential partitioning covers the grid only if every vacuum thread

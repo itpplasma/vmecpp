@@ -71,6 +71,11 @@ class Biest : public FreeBoundaryBase {
       bool at_checkpoint_iteration = false) override;
 
  private:
+  // toroidal points per field period of the BIEST surface grid: nZeta, or
+  // kAxisymmetricNzeta for an axisymmetric boundary (nZeta < 4)
+  static constexpr int kAxisymmetricNzeta = 16;
+  int nzeta_biest_;
+
   int accuracy_digits_;
 
   // shared across threads; see constructor docs for sizes

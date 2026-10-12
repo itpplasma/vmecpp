@@ -4,7 +4,9 @@
 // SPDX-License-Identifier: MIT
 #include "vmecpp/free_boundary/biest/biest.h"
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -29,11 +31,22 @@ Biest::Biest(const Sizes* s, const TangentialPartitioning* tp,
       b_plasma_share_(b_plasma_share) {
   CHECK_GE(accuracy_digits_, 1) << "BIEST accuracy_digits must be >= 1";
   CHECK_LE(accuracy_digits_, 14) << "BIEST accuracy_digits must be <= 14";
-  // BIEST needs an actual 3D toroidal discretization; axisymmetric runs
-  // (nzeta == 1) must use NESTOR.
-  CHECK_GE(s_.nZeta, 4)
-      << "BIEST requires nzeta >= 4; use free_boundary_method = NESTOR "
-         "for axisymmetric configurations";
+  // BIEST needs a toroidal discretization of the surface. VMEC's nZeta < 4
+  // only occurs for ntor = 0 (Sizes enforces nzeta >= 2 * ntor + 4 otherwise),
+  // i.e. for an axisymmetric boundary, which is lifted to a toroidal grid of
+  // kAxisymmetricNzeta points per field period (override for convergence
+  // studies with VMECPP_BIEST_AXISYM_NZETA); see update().
+  if (s_.nZeta < 4) {
+    CHECK_EQ(s_.ntor, 0);
+    nzeta_biest_ = kAxisymmetricNzeta;
+    if (const char* env = std::getenv("VMECPP_BIEST_AXISYM_NZETA");
+        env != nullptr) {
+      nzeta_biest_ = std::atoi(env);
+    }
+    CHECK_GE(nzeta_biest_, 4) << "VMECPP_BIEST_AXISYM_NZETA must be >= 4";
+  } else {
+    nzeta_biest_ = s_.nZeta;
+  }
   CHECK_EQ(static_cast<int>(coil_b_r_share_.size()), s_.nZnT);
   CHECK_EQ(static_cast<int>(coil_b_p_share_.size()), s_.nZnT);
   CHECK_EQ(static_cast<int>(coil_b_z_share_.size()), s_.nZnT);
@@ -153,27 +166,33 @@ absl::StatusOr<bool> Biest::update(
 
     // Surface coordinates and Cartesian coil field in BIEST layout:
     // index (d * Nt + t) * Np + p with t = zeta index, p = theta index,
-    // covering one field period.
-    const int Nt = nZeta;
+    // covering one field period. For an axisymmetric boundary (nZeta < 4) the
+    // single VMEC toroidal slice at phi = 0 is rotated onto nzeta_biest_
+    // toroidal points; the coil field is axisymmetric as well.
+    const int Nt = nzeta_biest_;
     const int Np = nThetaEven;
-    std::vector<double> X(3 * num_surf);
-    std::vector<double> B_coil(3 * num_surf);
-    for (int k = 0; k < nZeta; ++k) {
-      const double cos_phi = sg_.cos_phi[k];
-      const double sin_phi = sg_.sin_phi[k];
+    const bool lifted = (nZeta < 4);
+    const int num_surf_biest = Nt * Np;
+    std::vector<double> X(3 * num_surf_biest);
+    std::vector<double> B_coil(3 * num_surf_biest);
+    for (int k = 0; k < Nt; ++k) {
+      const double phi = lifted ? 2.0 * M_PI * k / (s_.nfp * Nt) : 0.0;
+      const double cos_phi = lifted ? std::cos(phi) : sg_.cos_phi[k];
+      const double sin_phi = lifted ? std::sin(phi) : sg_.sin_phi[k];
       for (int l = 0; l < nThetaEven; ++l) {
-        const int idx_vmec = l * nZeta + k;
+        const int idx_vmec = l * nZeta + (lifted ? 0 : k);
         const int idx_biest = k * Np + l;
 
-        X[0 * num_surf + idx_biest] = sg_.rcosuv[idx_vmec];
-        X[1 * num_surf + idx_biest] = sg_.rsinuv[idx_vmec];
-        X[2 * num_surf + idx_biest] = sg_.z1b[idx_vmec];
+        const double r = sg_.r1b[idx_vmec];
+        X[0 * num_surf_biest + idx_biest] = r * cos_phi;
+        X[1 * num_surf_biest + idx_biest] = r * sin_phi;
+        X[2 * num_surf_biest + idx_biest] = sg_.z1b[idx_vmec];
 
         const double br = full_br[idx_vmec];
         const double bp = full_bp[idx_vmec];
-        B_coil[0 * num_surf + idx_biest] = br * cos_phi - bp * sin_phi;
-        B_coil[1 * num_surf + idx_biest] = br * sin_phi + bp * cos_phi;
-        B_coil[2 * num_surf + idx_biest] = full_bz[idx_vmec];
+        B_coil[0 * num_surf_biest + idx_biest] = br * cos_phi - bp * sin_phi;
+        B_coil[1 * num_surf_biest + idx_biest] = br * sin_phi + bp * cos_phi;
+        B_coil[2 * num_surf_biest + idx_biest] = full_bz[idx_vmec];
       }  // l
     }  // k
 
@@ -212,15 +231,25 @@ absl::StatusOr<bool> Biest::update(
                 << ms(t2 - t1) << " ms\n";
     }
 
-    for (int i = 0; i < 3 * num_surf; ++i) {
-      b_plasma_share_[i] = b_plasma[i];
+    // Hand over the field on VMEC's toroidal grid (for the lifted
+    // axisymmetric grid, the phi = 0 slice).
+    for (int d = 0; d < 3; ++d) {
+      for (int k = 0; k < nZeta; ++k) {
+        for (int l = 0; l < nThetaEven; ++l) {
+          b_plasma_share_[d * num_surf + k * nThetaEven + l] =
+              b_plasma[d * num_surf_biest + k * Np + l];
+        }
+      }
     }
   }  // solver thread (tp_.ztMin == 0)
 #ifdef _OPENMP
 #pragma omp barrier
 #endif  // _OPENMP
 
-  // Each thread fills its tangential partition of the outputs.
+  // Each thread fills its tangential partition of the outputs. The surface
+  // derivatives rub/rvb/zub/zvb are full-range (offset 0) for lasym and
+  // thread-local otherwise (see SurfaceGeometry); r1b is always full-range.
+  const int deriv_offset = s_.lasym ? 0 : tp_.ztMin;
   const int num_surf = nZeta * nThetaEven;
   double local_bSubUVac = 0.0;
   double local_bSubVVac = 0.0;
@@ -244,9 +273,9 @@ absl::StatusOr<bool> Biest::update(
 
     // covariant components of the total vacuum field
     const double bSubU =
-        full_br * sg_.rub[kl - tp_.ztMin] + full_bz * sg_.zub[kl - tp_.ztMin];
-    const double bSubV = full_br * sg_.rvb[kl - tp_.ztMin] +
-                         full_bz * sg_.zvb[kl - tp_.ztMin] +
+        full_br * sg_.rub[kl - deriv_offset] + full_bz * sg_.zub[kl - deriv_offset];
+    const double bSubV = full_br * sg_.rvb[kl - deriv_offset] +
+                         full_bz * sg_.zvb[kl - deriv_offset] +
                          full_bp * sg_.r1b[kl];
 
     local_bSubUVac += bSubU * s_.wInt[l];

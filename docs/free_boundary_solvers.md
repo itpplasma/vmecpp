@@ -49,13 +49,22 @@ DELBSQ (vacuum/plasma pressure mismatch at the LCFS) than NESTOR.
 
 Requirements and limitations:
 
-- Requires `nzeta >= 4` (a true 3D toroidal discretization); use NESTOR for
-  axisymmetric runs.
+- BIEST needs a toroidal discretization of the surface. For an axisymmetric
+  boundary (`ntor = 0`, hence `nzeta < 4`) the single toroidal slice is lifted
+  to 16 toroidal points per field period (`VMECPP_BIEST_AXISYM_NZETA`
+  overrides; the circulation of a net toroidal current on an ITER-shaped
+  boundary is reproduced to 2e-4 at 16 points).
 - Stellarator-symmetric (`lasym = false`) and non-symmetric boundaries are
   supported.
-- System dependencies: Intel MKL's FFTW3 interface and LAPACKE
-  (Ubuntu: `libmkl-dev`, `liblapacke-dev`). FFTW itself is GPL and cannot
-  be linked into the MIT-licensed VMEC++.
+- System dependency: Intel MKL with its FFTW3 interface (Ubuntu:
+  `libmkl-dev`; PyPI `mkl` + `mkl-include`, point `MKLROOT` at the
+  environment prefix for the CMake build). MKL also supplies the two LAPACK
+  routines SCTL calls. FFTW itself is GPL and cannot be linked into the
+  MIT-licensed VMEC++.
+- BIEST runs OpenMP loops inside the vacuum team's solver thread, so VMEC++
+  allows a third active OpenMP level when BIEST is selected. Pinning
+  (`OMP_PROC_BIND=spread/close`) puts those nested threads on the solver
+  thread's core; use `OMP_PROC_BIND=false` (5x faster on 8 threads).
 
 ### Update strategy (important for convergence)
 
