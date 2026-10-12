@@ -176,12 +176,6 @@ include_directories(${eigen_SOURCE_DIR})
 FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(nlohmann_json)
 
-# Pin the reference (netlib) BLAS/LAPACK: with MKL installed, CMake would
-# otherwise select MKL with libiomp5, which clashes with the libgomp OpenMP
-# runtime used by VMEC++.
-set(BLA_VENDOR Generic)
-find_package(LAPACK REQUIRED)
-
 
 FetchContent_Declare(
   abseil-cpp
@@ -247,15 +241,23 @@ FetchContent_MakeAvailable(biest sctl)
 # include path.
 include_directories(${sctl_SOURCE_DIR}/include ${biest_SOURCE_DIR}/include)
 
-# Intel MKL's FFTW3 interface (Ubuntu: libmkl-dev) and LAPACKE (liblapacke-dev)
+# Intel MKL's FFTW3 interface (Ubuntu: libmkl-dev; PyPI: mkl + mkl-include,
+# point MKLROOT at the environment prefix, whose libraries only carry versioned
+# sonames). MKL also provides the two LAPACK routines SCTL calls (?gesvd, whose
+# declarations ship in SCTL's own sctl/lapack.h), so no system LAPACK/LAPACKE
+# is needed.
+set(_mkl_lib_paths $ENV{MKLROOT}/lib/intel64 $ENV{MKLROOT}/lib)
 find_path(MKL_FFTW3_INCLUDE_DIR fftw3.h
   PATHS /usr/include/mkl/fftw $ENV{MKLROOT}/include/fftw
 )
 # Explicit GNU-threading link chain: mkl_rt's runtime layer detection fails
 # under libgomp-based processes.
-find_library(MKL_GF_LIBRARY mkl_gf_lp64 PATHS $ENV{MKLROOT}/lib/intel64)
-find_library(MKL_GNU_THREAD_LIBRARY mkl_gnu_thread PATHS $ENV{MKLROOT}/lib/intel64)
-find_library(MKL_CORE_LIBRARY mkl_core PATHS $ENV{MKLROOT}/lib/intel64)
+find_library(MKL_GF_LIBRARY NAMES mkl_gf_lp64 libmkl_gf_lp64.so.3 libmkl_gf_lp64.so.2
+  PATHS ${_mkl_lib_paths})
+find_library(MKL_GNU_THREAD_LIBRARY NAMES mkl_gnu_thread libmkl_gnu_thread.so.3 libmkl_gnu_thread.so.2
+  PATHS ${_mkl_lib_paths})
+find_library(MKL_CORE_LIBRARY NAMES mkl_core libmkl_core.so.3 libmkl_core.so.2
+  PATHS ${_mkl_lib_paths})
 set(MKL_RT_LIBRARY ${MKL_GF_LIBRARY} ${MKL_GNU_THREAD_LIBRARY} ${MKL_CORE_LIBRARY})
 if(NOT MKL_FFTW3_INCLUDE_DIR OR NOT MKL_GF_LIBRARY OR NOT MKL_GNU_THREAD_LIBRARY OR NOT MKL_CORE_LIBRARY)
   message(FATAL_ERROR "Intel MKL with its FFTW3 interface is required for the "
@@ -293,7 +295,7 @@ function(vmecpp_add_core target)
   target_link_libraries(${target} PUBLIC vmecpp_hdf5_netcdf)
   target_link_libraries(${target} PUBLIC nlohmann_json::nlohmann_json)
   # for the BIEST free-boundary solver (SCTL)
-  target_link_libraries(${target} PUBLIC LAPACK::LAPACK lapacke ${MKL_RT_LIBRARY})
+  target_link_libraries(${target} PUBLIC ${MKL_RT_LIBRARY})
   target_link_libraries(${target} PUBLIC absl::algorithm absl::base
     absl::synchronization absl::strings absl::str_format absl::log
     absl::log_initialize absl::log_globals
