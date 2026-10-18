@@ -16,6 +16,12 @@ cmake(
         "NETCDF_ENABLE_DAP4": "OFF",
         "NETCDF_ENABLE_NCZARR": "OFF",
         "NETCDF_ENABLE_NCZARR_ZIP": "OFF",
+        # Match CMake's static build: optional filter discovery can shadow
+        # the pinned HDF5 headers with system headers.
+        "NETCDF_ENABLE_FILTER_SZIP": "OFF",
+        "NETCDF_ENABLE_FILTER_BZ2": "OFF",
+        "NETCDF_ENABLE_FILTER_BLOSC": "OFF",
+        "NETCDF_ENABLE_FILTER_ZSTD": "OFF",
     },
     copts = [
       "-fPIC",
