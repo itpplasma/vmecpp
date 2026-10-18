@@ -115,6 +115,12 @@ ExternalProject_Add(netcdf_native
     -DNETCDF_ENABLE_DAP4=OFF
     -DNETCDF_ENABLE_NCZARR=OFF
     -DNETCDF_ENABLE_NCZARR_ZIP=OFF
+    # Optional filter discovery adds system include directories before the
+    # pinned HDF5 headers. Plugins are disabled in this static build.
+    -DNETCDF_ENABLE_FILTER_SZIP=OFF
+    -DNETCDF_ENABLE_FILTER_BZ2=OFF
+    -DNETCDF_ENABLE_FILTER_BLOSC=OFF
+    -DNETCDF_ENABLE_FILTER_ZSTD=OFF
     -DNETCDF_ENABLE_TESTS=OFF
     -DNETCDF_BUILD_UTILITIES=OFF
   BUILD_BYPRODUCTS
