@@ -21,6 +21,7 @@
 #include "vmecpp/common/makegrid_lib/makegrid_lib.h"
 #include "vmecpp/common/util/util.h"
 #include "vmecpp/common/vmec_indata/vmec_indata.h"
+#include "vmecpp/vmec/boozer/boozer.h"
 #include "vmecpp/vmec/geometry/geometry.h"
 #include "vmecpp/vmec/geometry/vmec_geometry.h"
 #include "vmecpp/vmec/output_quantities/output_quantities.h"
@@ -1687,6 +1688,72 @@ PYBIND11_MODULE(_vmecpp, m) {
     return vmecpp::MakeGeometry(output.indata, output.vmec_internal_results,
                                 vmecpp::GeometryCoefficientState::kPhysical);
   });
+
+  // Boozer transform of the wout spectra with its tangent and adjoint; see
+  // vmecpp/vmec/boozer/boozer.h. Computed only on request.
+  py::class_<vmecpp::BoozerInputSpectra>(m, "BoozerInputSpectra")
+      .def(py::init<>())
+      .def_readwrite("rmnc", &vmecpp::BoozerInputSpectra::rmnc)
+      .def_readwrite("zmns", &vmecpp::BoozerInputSpectra::zmns)
+      .def_readwrite("lmns", &vmecpp::BoozerInputSpectra::lmns)
+      .def_readwrite("bmnc", &vmecpp::BoozerInputSpectra::bmnc)
+      .def_readwrite("bsubumnc", &vmecpp::BoozerInputSpectra::bsubumnc)
+      .def_readwrite("bsubvmnc", &vmecpp::BoozerInputSpectra::bsubvmnc)
+      .def_readwrite("iotas", &vmecpp::BoozerInputSpectra::iotas);
+  py::class_<vmecpp::BoozerOutputSpectra>(m, "BoozerOutputSpectra")
+      .def(py::init<>())
+      .def_readwrite("bmnc_b", &vmecpp::BoozerOutputSpectra::bmnc_b)
+      .def_readwrite("rmnc_b", &vmecpp::BoozerOutputSpectra::rmnc_b)
+      .def_readwrite("zmns_b", &vmecpp::BoozerOutputSpectra::zmns_b)
+      .def_readwrite("numns_b", &vmecpp::BoozerOutputSpectra::numns_b)
+      .def_readwrite("gmnc_b", &vmecpp::BoozerOutputSpectra::gmnc_b)
+      .def_readwrite("iota_b", &vmecpp::BoozerOutputSpectra::iota_b)
+      .def_readwrite("boozer_g", &vmecpp::BoozerOutputSpectra::boozer_g)
+      .def_readwrite("boozer_i", &vmecpp::BoozerOutputSpectra::boozer_i);
+  py::class_<vmecpp::BoozerTransform>(m, "BoozerTransform")
+      .def(py::init([](int nfp, int ns, const std::vector<int> &xm,
+                       const std::vector<int> &xn,
+                       const std::vector<int> &xm_nyq,
+                       const std::vector<int> &xn_nyq,
+                       const std::vector<int> &surfaces, int mboz, int nboz) {
+             auto t = vmecpp::BoozerTransform::Create(
+                 nfp, ns, xm, xn, xm_nyq, xn_nyq, surfaces, mboz, nboz);
+             return GetValueOrThrow(t);
+           }),
+           "nfp"_a, "ns"_a, "xm"_a, "xn"_a, "xm_nyq"_a, "xn_nyq"_a,
+           "surfaces"_a, "mboz"_a, "nboz"_a)
+      .def(
+          "forward",
+          [](const vmecpp::BoozerTransform &t,
+             const vmecpp::BoozerInputSpectra &input) {
+            auto out = t.Forward(input);
+            return GetValueOrThrow(out);
+          },
+          "input"_a, py::call_guard<py::gil_scoped_release>())
+      .def(
+          "jvp",
+          [](const vmecpp::BoozerTransform &t,
+             const vmecpp::BoozerInputSpectra &input,
+             const vmecpp::BoozerInputSpectra &tangent) {
+            auto out = t.Jvp(input, tangent);
+            return GetValueOrThrow(out);
+          },
+          "input"_a, "tangent"_a, py::call_guard<py::gil_scoped_release>())
+      .def(
+          "vjp",
+          [](const vmecpp::BoozerTransform &t,
+             const vmecpp::BoozerInputSpectra &input,
+             const vmecpp::BoozerOutputSpectra &cotangent) {
+            auto out = t.Vjp(input, cotangent);
+            return GetValueOrThrow(out);
+          },
+          "input"_a, "cotangent"_a, py::call_guard<py::gil_scoped_release>())
+      .def_property_readonly("xm_b", &vmecpp::BoozerTransform::xm_b)
+      .def_property_readonly("xn_b", &vmecpp::BoozerTransform::xn_b)
+      .def_property_readonly("surfaces", &vmecpp::BoozerTransform::surfaces)
+      .def_property_readonly("s_b", &vmecpp::BoozerTransform::s_b)
+      .def_property_readonly("ntheta", &vmecpp::BoozerTransform::ntheta)
+      .def_property_readonly("nzeta", &vmecpp::BoozerTransform::nzeta);
 
   py::class_<vmecpp::HotRestartState>(m, "HotRestartState")
       .def(py::init(&MakeHotRestartState), "wout"_a, "indata"_a)

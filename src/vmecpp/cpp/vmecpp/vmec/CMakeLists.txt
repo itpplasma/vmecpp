@@ -1,4 +1,5 @@
 add_subdirectory(boundaries)
+add_subdirectory(boozer)
 add_subdirectory(fourier_coefficients)
 add_subdirectory(fourier_forces)
 add_subdirectory(fourier_geometry)
