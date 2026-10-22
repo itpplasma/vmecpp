@@ -202,7 +202,6 @@ Vmec::Vmec(const VmecINDATA& indata, std::optional<int> max_threads,
     // mnpd2 = 2 * mnpd (analog of mnpd2 in the Fortran vacmod / scalpot).
     int mnpd_dim = s_.lasym ? 2 * mnpd : mnpd;
     matrixShare.setZero(mnpd_dim * mnpd_dim);
-    iPiv.setZero(mnpd_dim);
     bvecShare.setZero(mnpd_dim);
 
     h_.vacuum_magnetic_pressure.setZero(s_.nZnT);
@@ -470,6 +469,9 @@ void Vmec::SetupVacuumSolvers() {
   omp_set_max_active_levels(2);
 #endif  // _OPENMP
 
+  vacuum_reduce_slots_.setZero(static_cast<Eigen::Index>(vac_num_threads_) *
+                               matrixShare.size());
+
   fb_vac_.resize(vac_num_threads_);
   tp_vac_.resize(vac_num_threads_);
 
@@ -485,10 +487,12 @@ void Vmec::SetupVacuumSolvers() {
           std::span<double>(bvecShare.data(), bvecShare.size()),
           std::span<double>(h_.vacuum_magnetic_pressure.data(),
                             h_.vacuum_magnetic_pressure.size()),
-          std::span<int>(iPiv.data(), iPiv.size()),
+          &lu_decomposition,
           std::span<double>(h_.vacuum_b_r.data(), h_.vacuum_b_r.size()),
           std::span<double>(h_.vacuum_b_phi.data(), h_.vacuum_b_phi.size()),
-          std::span<double>(h_.vacuum_b_z.data(), h_.vacuum_b_z.size()));
+          std::span<double>(h_.vacuum_b_z.data(), h_.vacuum_b_z.size()),
+          std::span<double>(vacuum_reduce_slots_.data(),
+                            vacuum_reduce_slots_.size()));
     } else if (indata_.free_boundary_method == FreeBoundaryMethod::ONLY_COILS) {
       fb_vac_[vac_thread_id] = std::make_unique<OnlyCoils>(
           &s_, tp_vac_[vac_thread_id].get(), &mgrid_,
@@ -496,7 +500,9 @@ void Vmec::SetupVacuumSolvers() {
                             h_.vacuum_magnetic_pressure.size()),
           std::span<double>(h_.vacuum_b_r.data(), h_.vacuum_b_r.size()),
           std::span<double>(h_.vacuum_b_phi.data(), h_.vacuum_b_phi.size()),
-          std::span<double>(h_.vacuum_b_z.data(), h_.vacuum_b_z.size()));
+          std::span<double>(h_.vacuum_b_z.data(), h_.vacuum_b_z.size()),
+          std::span<double>(vacuum_reduce_slots_.data(),
+                            vacuum_reduce_slots_.size()));
     } else {
       LOG(FATAL) << absl::StrCat("free boundary method '",
                                  ToString(indata_.free_boundary_method),

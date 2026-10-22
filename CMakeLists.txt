@@ -56,12 +56,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(eigen)
 include_directories(${eigen_SOURCE_DIR})
+# The only dense linear solve in this project (LaplaceSolver::DecomposeMatrix/
+# SolveForPotential) uses Eigen::PartialPivLU, which is pure C++ with no
+# external LAPACK/BLAS dependency as long as EIGEN_USE_LAPACKE/EIGEN_USE_BLAS/
+# EIGEN_USE_MKL are never defined. Do not define those macros without
+# reintroducing an explicit LAPACK/BLAS dependency here.
 
 FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(nlohmann_json)
-
-find_package(LAPACK REQUIRED)
-
 
 FetchContent_Declare(
   abseil-cpp
@@ -114,7 +116,6 @@ add_library(vmecpp_core STATIC ${vmecpp_sources})
 target_link_libraries(vmecpp_core PRIVATE ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARIES})
 target_link_libraries(vmecpp_core PRIVATE ${netCDF_LIBRARIES})
 target_link_libraries(vmecpp_core PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(vmecpp_core PRIVATE LAPACK::LAPACK)
 
 # FFTX (SPIRAL-generated batched IPRDFT/PRDFT) for the toroidal FFT hot path.
 # The codelets are vendored under src/vmecpp/cpp/third_party/fftx_codelets/;
