@@ -39,6 +39,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: proximafusion/vmecpp-validation
+          # Match this solver's VMEC 8.52 chipf and half-grid bsubsmns outputs.
+          # Later validation revisions assume upstream's newer output conventions.
+          ref: 4017e53095c09e2ead20c6bb64c12796583520c5
           path: vmecpp-validation
           lfs: true
 
