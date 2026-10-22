@@ -7,7 +7,7 @@ name: V&V against reference VMEC
 # - On every push to main: a short run (a handful of configs, a few minutes)
 #   so regressions are caught immediately.
 # - On release and on manual request: the full run (all ~219 configurations,
-#   ~8h) -- too expensive to run on every push.
+#   ~8h serially), split across eight shards with a three-hour budget each.
 on:
   workflow_dispatch:
   release:
@@ -21,13 +21,39 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 jobs:
-  validation:
-    name: Run VMEC++ validation
+  full-validation-result:
+    name: Full V&V result
+    if: always() && (github.event_name == 'release' || github.event_name == 'workflow_dispatch')
+    needs: validation
     runs-on: ubuntu-22.04
-    # The full parameter scan runs ~219 configurations, each computing a reference
-    # wout with Fortran VMEC2000 in Docker plus one with VMEC++: budget generously.
-    # The short run finishes in minutes and won't come close to this limit.
-    timeout-minutes: 360
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: vnv-*-*
+          path: validation-coverage
+      - name: Verify every configuration was validated exactly once
+        run: python .github/scripts/validation_shards.py check validation-coverage 8
+      - name: Require every shard to pass
+        if: always()
+        env:
+          SHARD_RESULT: ${{ needs.validation.result }}
+        run: test "$SHARD_RESULT" = success
+
+  validation:
+    name: ${{ github.event_name == 'push' && 'Run VMEC++ validation' || format('Full validation shard {0}', matrix.shard) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(github.event_name == 'push' && '["short"]' || '[0,1,2,3,4,5,6,7]') }}
+    runs-on: ubuntu-22.04
+    # Eight round-robin shards target <=3h each instead of ~8h serially.
+    # Keep the short push run's existing budget.
+    timeout-minutes: ${{ github.event_name == 'push' && 360 || 180 }}
     steps:
       - name: Check out VMEC++
         uses: actions/checkout@v4
@@ -63,6 +89,20 @@ jobs:
           grep -v '^vmecpp@' requirements.txt > requirements.no-vmecpp.txt
           python -m pip install -r requirements.no-vmecpp.txt
 
+      - name: Prepare full validation shard
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        working-directory: vmecpp-validation
+        run: python ../vmecpp/.github/scripts/validation_shards.py prepare ${{ matrix.shard }} 8
+
+      - name: Upload shard manifest before validation
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vnv-manifest-${{ matrix.shard }}
+          path: vmecpp-validation/manifest.json
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Install VMEC++ from this commit
         run: python -m pip install ./vmecpp "numpy<2.1"
 
@@ -74,13 +114,22 @@ jobs:
       - name: Run full validation
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         working-directory: vmecpp-validation
-        run: python validate_vmec.py
+        run: python ../vmecpp/.github/scripts/validation_shards.py run ${{ matrix.shard }} 8
+
+      - name: Upload shard check summary
+        if: always() && (github.event_name == 'release' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-artifact@v4
+        with:
+          name: vnv-summary-${{ matrix.shard }}
+          path: vmecpp-validation/vnvresults_*/all_vnv_checks.json
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Upload V&V results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: vnvresults
+          name: ${{ github.event_name == 'push' && 'vnvresults' || format('vnvresults-{0}', matrix.shard) }}
           path: vmecpp-validation/vnvresults_*/
           retention-days: 30
 
@@ -102,7 +151,7 @@ jobs:
             build-essential cmake libnetcdf-dev liblapack-dev liblapacke-dev libopenmpi-dev \
             libomp-dev libeigen3-dev nlohmann-json3-dev libhdf5-dev
       - name: Install package
-        run: python -m pip install -v .[test]
+        run: python -m pip install -v ".[test]"
       - name: Run slow QUASR free-boundary tests
         run: python -m pytest -m slow tests/test_free_boundary_quasr.py -v -ra
       - name: Upload QUASR free-boundary artifacts
