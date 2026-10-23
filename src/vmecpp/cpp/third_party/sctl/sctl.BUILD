@@ -5,8 +5,9 @@
 # FFT provider, SCTL's fallback FFT builds dense DFT matrices and runs out
 # of memory at realistic resolutions. The FFTW3 API is provided by Intel
 # MKL's FFTW interface (@mkl_fftw) -- FFTW itself is GPL and cannot be
-# linked into the MIT-licensed VMEC++. LAPACKE comes from the BSD netlib
-# packages (liblapacke-dev). SCTL_HAVE_BLAS is not set because
+# linked into the MIT-licensed VMEC++. Its required Fortran LAPACK symbols
+# are supplied by the same MKL dependency, as in the CMake build.
+# SCTL_HAVE_BLAS is not set because
 # cblas.h/cblas_f77.h are not commonly packaged together; SCTL's internal
 # GEMM fallback is used instead.
 cc_library(
@@ -18,10 +19,6 @@ cc_library(
         "SCTL_QUAD_T=__float128",
         "SCTL_HAVE_LAPACK",
         "SCTL_HAVE_FFTW",
-    ],
-    linkopts = [
-        "-llapacke",
-        "-llapack",
     ],
     visibility = ["//visibility:public"],
     deps = ["@mkl_fftw//:mkl_fftw"],
