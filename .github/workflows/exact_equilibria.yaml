@@ -7,15 +7,18 @@ name: V&V against exact equilibria
 # formulas with the functions of landreman/analytic_3d_equilibria at the commit
 # REFERENCE_COMMIT of the script names.
 #
-# - On every pull request and push to main: the quick suite, up to ns = 100, which
+# - On merge-queue validation, explicit full-ci requests and default-branch pushes: the quick suite, up to ns = 100, which
 #   fails when one of its checks on the member "sheared" fails.
 # - On every push to main, on release and on manual request: the full suite, up to
 #   ns = 1000, one job per member of the families, which reports the same checks.
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  merge_group:
   push:
     branches:
       - main
+      - production
   release:
     types: [published]
   workflow_dispatch:
@@ -33,7 +36,8 @@ env:
 jobs:
   quick:
     name: Exact equilibria up to ns = 100
-    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    if: >-
+      github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.actor != 'github-merge-queue[bot]') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'full-ci'))
     runs-on: ubuntu-22.04
     timeout-minutes: 120
     permissions:
@@ -79,7 +83,8 @@ jobs:
 
   full:
     name: Exact equilibria up to ns = 1000
-    if: github.event_name != 'pull_request'
+    if: >-
+      github.event_name == 'release' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.actor != 'github-merge-queue[bot]')
     runs-on: ubuntu-22.04
     timeout-minutes: 360
     permissions:

@@ -2,11 +2,17 @@ name: Enzyme AD smoke test
 
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
   push:
     branches:
       - main
-
-# Cancel currently running job if a new one comes along for the same branch or tag.
+      - production
+  merge_group:
+  workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: ${{ github.ref_name != 'main' }}
@@ -80,7 +86,7 @@ jobs:
 
       # Entries are immutable: a new key per main commit refreshes the cache, GitHub evicts old ones.
       - name: Save bazel cache
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         uses: actions/cache/save@v4
         with:
           path: "~/.cache/bazel"
@@ -110,3 +116,5 @@ jobs:
             cat exact_hvp_benchmark.txt
             echo '```'
           } >> "${GITHUB_STEP_SUMMARY}"
+    if: >-
+      github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.actor != 'github-merge-queue[bot]') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'full-ci'))
