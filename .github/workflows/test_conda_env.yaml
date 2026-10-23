@@ -36,7 +36,10 @@ jobs:
           python-version: "3.10"
       - name: Create conda env
         run: |
-          conda env create --yes --quiet --file environment.yml
+          # This portable environment has no MKL SDK; exercise NESTOR and
+          # the explicit unsupported-feature contract. Linux native lanes
+          # install MKL and retain BIEST coverage.
+          CMAKE_ARGS=-DVMECPP_ENABLE_BIEST=OFF conda env create --yes --quiet --file environment.yml
       - name: Test conda env
         run: |
           . "/opt/conda/etc/profile.d/conda.sh"
