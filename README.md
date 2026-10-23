@@ -6,6 +6,11 @@
 
 # VMEC++
 
+This fork is integrated on [itpplasma/vmecpp's production branch](https://github.com/itpplasma/vmecpp/tree/production),
+with [krystophny/vmecpp](https://github.com/krystophny/vmecpp/tree/production) mirroring the same source.
+It includes the BIEST free-boundary API and callback final-state repair.
+See the [free-boundary solver guide](docs/free_boundary_solvers.md) for BIEST SDK requirements and NESTOR-only builds.
+
 <!--
 [![PyPI - Version](https://img.shields.io/pypi/v/vmecpp.svg)](https://pypi.org/project/vmecpp)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/vmecpp.svg)](https://pypi.org/project/vmecpp)
