@@ -1,3 +1,7 @@
+if(VMECPP_ENABLE_BIEST)
+  add_subdirectory(biest)
+endif()
+add_subdirectory(dual_solver)
 add_subdirectory(external_magnetic_field)
 add_subdirectory(free_boundary_base)
 add_subdirectory(laplace_solver)
