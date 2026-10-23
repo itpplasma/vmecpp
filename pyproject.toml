@@ -115,6 +115,12 @@ build-frontend = "build[uv]" # More modern package manager than pip, with faster
 test-requires = "pytest"
 test-command = "pytest {package}/tests/test_simsopt_compat.py {package}/tests/test_free_boundary.py"
 
+# Portable binary wheels preserve NESTOR without bundling an external MKL
+# SDK. Source/production builds enable BIEST with their declared MKL SDK;
+# choosing it from an SDK-free wheel returns the explicit feature error.
+[tool.cibuildwheel.config-settings]
+"cmake.define.VMECPP_ENABLE_BIEST" = "OFF"
+
 [tool.cibuildwheel.linux]
 before-build = "yum install -y zlib-devel epel-release && yum install -y ccache"
 

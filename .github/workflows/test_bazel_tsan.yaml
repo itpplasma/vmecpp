@@ -46,6 +46,12 @@ jobs:
           IMAGE=ghcr.io/${{ github.repository_owner }}/vmecpp-tsan:latest
           docker pull "${IMAGE,,}"
           docker tag "${IMAGE,,}" proximafusion/tsan
+      - name: Add the BIEST SDK to the existing TSAN image
+        run: |
+          docker run --name vmecpp-tsan-sdk --user 0 proximafusion/tsan \
+            bash -c "apt-get update && apt-get install -y libmkl-full-dev"
+          docker commit vmecpp-tsan-sdk proximafusion/tsan
+          docker rm vmecpp-tsan-sdk
       - name: Restore bazel cache
         uses: actions/cache/restore@v4
         with:
