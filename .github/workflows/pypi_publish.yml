@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
 
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+  merge_group:
 
   release:
     types: [published]
@@ -16,6 +19,8 @@ env:
 
 jobs:
   main:
+    if: >-
+      github.event_name == 'release' || github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'full-ci'))
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -70,6 +75,8 @@ jobs:
           path: ./wheelhouse/*.whl
 
   make-sdist:
+    if: >-
+      github.event_name == 'release' || github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'full-ci'))
     name: Make SDist
     runs-on: ubuntu-24.04
     steps:
@@ -88,6 +95,8 @@ jobs:
         path: ./wheelhouse/*.tar.gz
 
   test-on-different-distros:
+    if: >-
+      github.event_name == 'release' || github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'full-ci'))
     name: Test Linux distros
     needs: main
     strategy:

@@ -2,9 +2,13 @@ name: C++ core tests
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
   push:
     branches:
       - main
+      - production
+  merge_group:
+  workflow_dispatch:
 
 # Cancel currently running job if a new one comes along for the same branch or tag.
 # From https://stackoverflow.com/a/72408109.
@@ -42,8 +46,11 @@ jobs:
           bazel test --config=${{ matrix.config }} --jobs=1 --test_output=errors -- //...
       # Entries are immutable: a new key per main commit refreshes the cache, GitHub evicts old ones.
       - name: Save bazel cache
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         uses: actions/cache/save@v4
         with:
           path: "~/.cache/bazel"
           key: bazel-${{ matrix.config }}-${{ github.sha }}
+
+    if: >-
+      github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.actor != 'github-merge-queue[bot]') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'full-ci'))
