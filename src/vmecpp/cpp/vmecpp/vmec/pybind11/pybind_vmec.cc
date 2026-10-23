@@ -936,6 +936,11 @@ class VmecModel {
 //     (PyInit_example)
 PYBIND11_MODULE(_vmecpp, m) {
   m.doc() = "pybind11 VMEC++ plugin";
+#ifdef VMECPP_DISABLE_BIEST
+  m.attr("biest_available") = false;
+#else
+  m.attr("biest_available") = true;
+#endif
 
   vmecpp::InitializeUserLogging();
 

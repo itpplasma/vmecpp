@@ -15,3 +15,11 @@ calls, as in the free-boundary VMEC iteration.
 The FFT provider is Intel MKL's FFTW3 interface (see
 `//third_party/mkl`); FFTW itself is GPL and cannot be linked into the
 MIT-licensed VMEC++.
+
+CMake builds enable BIEST by default on Linux x86-64 and disable it on other
+platforms, including Apple and Linux ARM, where the pinned MKL SDK is unavailable. Set `VMECPP_ENABLE_BIEST=ON` and `MKLROOT`
+explicitly to select an installed MKL SDK. With BIEST disabled, NESTOR remains
+available and choosing BIEST, including as a diagnostic shadow solver, returns
+an explicit unsupported-feature error. The native extension exposes the
+build feature `biest_available`; no alternative solver is selected
+silently. Bazel's current Linux build includes BIEST.

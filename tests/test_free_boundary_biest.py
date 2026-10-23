@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 import vmecpp
+from vmecpp.cpp import _vmecpp  # type: ignore
 
 REPO_ROOT = Path(__file__).parent.parent
 TEST_DATA_DIR = REPO_ROOT / "src" / "vmecpp" / "cpp" / "vmecpp" / "test_data"
@@ -31,6 +32,10 @@ def _run_cth_like(method: str) -> vmecpp.VmecWOut:
 
 @pytest.mark.slow
 def test_cth_like_free_boundary_biest_matches_nestor():
+    if not _vmecpp.biest_available:
+        with pytest.raises(RuntimeError, match="BIEST is unavailable in this build"):
+            _run_cth_like("biest")
+        return
     nestor = _run_cth_like("nestor")
     biest = _run_cth_like("biest")
     assert biest.volume == pytest.approx(nestor.volume, rel=1e-3)
@@ -44,6 +49,11 @@ def test_axisymmetric_free_boundary_biest_matches_nestor():
     vmec_input.mgrid_file = str(TEST_DATA_DIR / "mgrid_solovev.nc")
     assert vmec_input.ntor == 0
 
+    if not _vmecpp.biest_available:
+        vmec_input.free_boundary_method = vmecpp.FreeBoundaryMethod.BIEST
+        with pytest.raises(RuntimeError, match="BIEST is unavailable in this build"):
+            vmecpp.run(vmec_input, verbose=False)
+        return
     vmec_input.free_boundary_method = vmecpp.FreeBoundaryMethod.NESTOR
     nestor = vmecpp.run(vmec_input, verbose=False).wout
     vmec_input.free_boundary_method = vmecpp.FreeBoundaryMethod.BIEST

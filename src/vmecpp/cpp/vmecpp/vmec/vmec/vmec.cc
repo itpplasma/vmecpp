@@ -35,7 +35,9 @@
 #include "vmecpp/common/makegrid_lib/makegrid_lib.h"
 #include "vmecpp/common/util/util.h"
 #include "vmecpp/common/vmec_indata/vmec_indata.h"
+#ifndef VMECPP_DISABLE_BIEST
 #include "vmecpp/free_boundary/biest/biest.h"
+#endif
 #include "vmecpp/free_boundary/dual_solver/dual_solver.h"
 #include "vmecpp/free_boundary/nestor/nestor.h"
 #include "vmecpp/free_boundary/only_coils/only_coils.h"
@@ -307,6 +309,16 @@ absl::StatusOr<bool> Vmec::run(const VmecCheckpoint& checkpoint,
                                const int maximum_multi_grid_step,
                                std::optional<HotRestartState> initial_state,
                                const int checkpoint_multi_grid_step) {
+#ifdef VMECPP_DISABLE_BIEST
+  if (indata_.lfreeb &&
+      (indata_.free_boundary_method == FreeBoundaryMethod::BIEST ||
+       fb_shadow_method_ == FreeBoundaryMethod::BIEST)) {
+    return absl::UnimplementedError(
+        "BIEST is unavailable in this build; configure with "
+        "VMECPP_ENABLE_BIEST=ON "
+        "and an Intel MKL SDK to enable it.");
+  }
+#endif
   if (maximum_multi_grid_step < 1) {
     return absl::InvalidArgumentError(
         absl::StrFormat("maximum_multi_grid_step must be at least 1, but is %d",
@@ -695,6 +707,7 @@ void Vmec::SetupVacuumSolvers() {
             &vacuum_s_, tp_vac_[vac_thread_id].get(), &mgrid_, b_sq_vac,
             vac_b_r, vac_b_phi, vac_b_z, reduce_slots);
       }
+#ifndef VMECPP_DISABLE_BIEST
       if (method == FreeBoundaryMethod::BIEST) {
         return std::make_unique<Biest>(
             &vacuum_s_, tp_vac_[vac_thread_id].get(), &mgrid_,
@@ -706,6 +719,7 @@ void Vmec::SetupVacuumSolvers() {
                               biestBPlasmaShare.size()),
             b_sq_vac, vac_b_r, vac_b_phi, vac_b_z);
       }
+#endif
       LOG(FATAL) << absl::StrCat("free boundary method '", ToString(method),
                                  "' not implemented yet");
       return nullptr;

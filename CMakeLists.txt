@@ -224,8 +224,17 @@ include_directories(${abseil-cpp_SOURCE_DIR})
 # specified relative to `${PROJECT_SOURCE_DIR}/src/vmecpp/cpp`.
 include_directories(${PROJECT_SOURCE_DIR}/src/vmecpp/cpp)
 
+# The pinned GNU-threaded MKL SDK supports Linux x86-64. Preserve the
+# existing NESTOR build on other platforms, including Apple and Linux ARM.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$")
+  set(_biest_default ON)
+else()
+  set(_biest_default OFF)
+endif()
+option(VMECPP_ENABLE_BIEST "Build the MKL-backed BIEST free-boundary solver" ${_biest_default})
+if(VMECPP_ENABLE_BIEST)
 # BIEST and SCTL (fetched, pinned; see src/vmecpp/cpp/third_party/biest/README.md)
-# for the BIEST free-boundary solver. SCTL needs an FFT provider and LAPACKE;
+# for the BIEST free-boundary solver. SCTL needs an FFT provider and LAPACK;
 # without an FFT its fallback builds dense DFT matrices and runs out of memory.
 # The FFTW3 API is provided by Intel MKL's FFTW interface -- FFTW itself is
 # GPL and cannot be linked into the MIT-licensed VMEC++.
@@ -278,6 +287,10 @@ add_compile_definitions(
   SCTL_HAVE_LAPACK
   SCTL_HAVE_FFTW
 )
+
+else()
+  add_compile_definitions(VMECPP_DISABLE_BIEST=1)
+endif()
 
 # Assemble the VMEC++ source tree.
 # Start out with ABSCAB sources - no need for a separate library for ABSCAB.
