@@ -23,3 +23,9 @@ available and choosing BIEST, including as a diagnostic shadow solver, returns
 an explicit unsupported-feature error. The native extension exposes the
 build feature `biest_available`; no alternative solver is selected
 silently. Bazel's current Linux build includes BIEST.
+
+Portable binary wheels and the SDK-free conda CI environment explicitly build
+with BIEST disabled and retain NESTOR. Linux native CI installs the MKL SDK
+and exercises the BIEST-enabled source. The production stage must record its
+actual `biest_available` value and SDK identities; selecting BIEST in a build
+without that feature returns an error instead of changing solvers.
