@@ -5,15 +5,20 @@ name: "Copilot Setup Steps"
 on:
     workflow_dispatch:
     push:
+        branches: [main]
         paths:
             - .github/workflows/copilot-setup-steps.yml
     pull_request:
+        types: [opened, synchronize, reopened, labeled]
         paths:
             - .github/workflows/copilot-setup-steps.yml
+    merge_group:
 
 jobs:
     # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
     copilot-setup-steps:
+        if: >-
+          github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.actor != 'github-merge-queue[bot]') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'full-ci'))
         runs-on: ubuntu-latest
 
         permissions:
@@ -47,3 +52,7 @@ jobs:
                   pip install pre-commit
                   pre-commit install
                   pip install -e .[test]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || format('{0}-{1}', github.ref, github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}

@@ -2,11 +2,16 @@ name: Enzyme AD smoke test
 
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
   push:
     branches:
       - main
-
-# Cancel currently running job if a new one comes along for the same branch or tag.
+  merge_group:
+  workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: ${{ github.ref_name != 'main' }}
@@ -75,3 +80,5 @@ jobs:
             --copt="-fplugin=${ENZYME_PLUGIN}" \
             --test_output=all \
             //vmecpp/common/enzyme:enzyme_smoke_test
+    if: >-
+      github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.actor != 'github-merge-queue[bot]') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'full-ci'))

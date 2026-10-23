@@ -2,9 +2,12 @@ name: C++ core tests
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
   push:
     branches:
       - main
+  merge_group:
+  workflow_dispatch:
 
 # Cancel currently running job if a new one comes along for the same branch or tag.
 # From https://stackoverflow.com/a/72408109.
@@ -39,3 +42,6 @@ jobs:
         run: |
           cd src/vmecpp/cpp
           bazel test --config=${{ matrix.config }} --jobs=1 --test_output=errors -- //...
+
+    if: >-
+      github.event_name == 'merge_group' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.actor != 'github-merge-queue[bot]') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'full-ci'))
