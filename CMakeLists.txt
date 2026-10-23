@@ -176,6 +176,7 @@ include_directories(${eigen_SOURCE_DIR})
 FetchContent_Declare(nlohmann_json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(nlohmann_json)
 
+
 FetchContent_Declare(
   abseil-cpp
   GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git
@@ -217,6 +218,74 @@ include_directories(${abseil-cpp_SOURCE_DIR})
 # specified relative to `${PROJECT_SOURCE_DIR}/src/vmecpp/cpp`.
 include_directories(${PROJECT_SOURCE_DIR}/src/vmecpp/cpp)
 
+# The pinned GNU-threaded MKL SDK supports Linux x86-64. Preserve the
+# existing NESTOR build on other platforms, including Apple and Linux ARM.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$")
+  set(_biest_default ON)
+else()
+  set(_biest_default OFF)
+endif()
+option(VMECPP_ENABLE_BIEST "Build the MKL-backed BIEST free-boundary solver" ${_biest_default})
+if(VMECPP_ENABLE_BIEST)
+# BIEST and SCTL (fetched, pinned; see src/vmecpp/cpp/third_party/biest/README.md)
+# for the BIEST free-boundary solver. SCTL needs an FFT provider and LAPACK;
+# without an FFT its fallback builds dense DFT matrices and runs out of memory.
+# The FFTW3 API is provided by Intel MKL's FFTW interface -- FFTW itself is
+# GPL and cannot be linked into the MIT-licensed VMEC++.
+FetchContent_Declare(
+  biest
+  URL https://github.com/dmalhotra/BIEST/archive/97329a2e76799aed158266dedf28e3cfa7323df4.tar.gz
+  URL_HASH SHA256=4cd84deb60ba26b9a97bf4ee231faed9c2debca60dbc99b1c4b11cc0ed034987
+  # --forward || true: the patch is already applied on re-configures
+  PATCH_COMMAND patch -p1 --forward -i ${CMAKE_CURRENT_SOURCE_DIR}/src/vmecpp/cpp/third_party/biest/warm_start.patch || true
+)
+FetchContent_Declare(
+  sctl
+  URL https://github.com/dmalhotra/SCTL/archive/af59e54adaf0e3bd25643df2d32967bd05f370fa.tar.gz
+  URL_HASH SHA256=5c6337010f3bfd4aeb0dbd81d0af479d6aa9f8abcfbddb771f6ba123f79f13bd
+  PATCH_COMMAND patch -p1 --forward -i ${CMAKE_CURRENT_SOURCE_DIR}/src/vmecpp/cpp/third_party/sctl/cxx20.patch || true
+)
+FetchContent_MakeAvailable(biest sctl)
+# BIEST's archive embeds a stale copy of SCTL; put the real SCTL first on the
+# include path.
+include_directories(${sctl_SOURCE_DIR}/include ${biest_SOURCE_DIR}/include)
+
+# Intel MKL's FFTW3 interface (Ubuntu: libmkl-dev; PyPI: mkl + mkl-include,
+# point MKLROOT at the environment prefix, whose libraries only carry versioned
+# sonames). MKL also provides the two LAPACK routines SCTL calls (?gesvd, whose
+# declarations ship in SCTL's own sctl/lapack.h), so no system LAPACK/LAPACKE
+# is needed.
+set(_mkl_lib_paths $ENV{MKLROOT}/lib/intel64 $ENV{MKLROOT}/lib)
+find_path(MKL_FFTW3_INCLUDE_DIR fftw3.h
+  PATHS /usr/include/mkl/fftw $ENV{MKLROOT}/include/fftw
+)
+# Explicit GNU-threading link chain: mkl_rt's runtime layer detection fails
+# under libgomp-based processes.
+find_library(MKL_GF_LIBRARY NAMES mkl_gf_lp64 libmkl_gf_lp64.so.3 libmkl_gf_lp64.so.2
+  PATHS ${_mkl_lib_paths})
+find_library(MKL_GNU_THREAD_LIBRARY NAMES mkl_gnu_thread libmkl_gnu_thread.so.3 libmkl_gnu_thread.so.2
+  PATHS ${_mkl_lib_paths})
+find_library(MKL_CORE_LIBRARY NAMES mkl_core libmkl_core.so.3 libmkl_core.so.2
+  PATHS ${_mkl_lib_paths})
+set(MKL_RT_LIBRARY ${MKL_GF_LIBRARY} ${MKL_GNU_THREAD_LIBRARY} ${MKL_CORE_LIBRARY})
+if(NOT MKL_FFTW3_INCLUDE_DIR OR NOT MKL_GF_LIBRARY OR NOT MKL_GNU_THREAD_LIBRARY OR NOT MKL_CORE_LIBRARY)
+  message(FATAL_ERROR "Intel MKL with its FFTW3 interface is required for the "
+          "BIEST/Vac2 free-boundary solvers (Ubuntu: apt install libmkl-dev). "
+          "FFTW itself is GPL and cannot be linked into the MIT-licensed VMEC++.")
+endif()
+include_directories(${MKL_FFTW3_INCLUDE_DIR})
+
+add_compile_definitions(
+  SCTL_GLOBAL_MEM_BUFF=0
+  SCTL_QUAD_T=__float128
+  SCTL_HAVE_LAPACK
+  SCTL_HAVE_FFTW
+)
+
+else()
+  add_compile_definitions(VMECPP_DISABLE_BIEST=1)
+endif()
+
 # Assemble the VMEC++ source tree.
 # Start out with ABSCAB sources - no need for a separate library for ABSCAB.
 set(vmecpp_sources ${abscab_sources})
@@ -238,6 +307,8 @@ function(vmecpp_add_core target)
 
   target_link_libraries(${target} PUBLIC vmecpp_hdf5_netcdf)
   target_link_libraries(${target} PUBLIC nlohmann_json::nlohmann_json)
+  # for the BIEST free-boundary solver (SCTL)
+  target_link_libraries(${target} PUBLIC ${MKL_RT_LIBRARY})
   target_link_libraries(${target} PUBLIC absl::algorithm absl::base
     absl::synchronization absl::strings absl::str_format absl::log
     absl::log_initialize absl::log_globals

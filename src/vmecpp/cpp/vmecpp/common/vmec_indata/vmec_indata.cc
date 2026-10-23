@@ -325,6 +325,7 @@ VmecINDATA::VmecINDATA() {
   nvacskip = 1;
   signgs = -1;
   free_boundary_method = FreeBoundaryMethod::NESTOR;
+  biest_accuracy_digits = 8;
 
   // tweaking parameters
   nstep = 10;
@@ -457,6 +458,7 @@ absl::Status VmecINDATA::WriteTo(H5::H5File& file) const {
   WriteH5Dataset(mgrid_file, "/indata/mgrid_file", file);
   WriteH5Dataset(nvacskip, "/indata/nvacskip", file);
   WriteH5Dataset(signgs, "/indata/signgs", file);
+  WriteH5Dataset(biest_accuracy_digits, "/indata/biest_accuracy_digits", file);
 
   // special treatment for enums
   WriteH5Dataset(ToString(free_boundary_method), "/indata/free_boundary_method",
@@ -555,6 +557,15 @@ absl::Status VmecINDATA::LoadInto(VmecINDATA& m_indata, H5::H5File& from_file) {
   ReadH5Dataset(m_indata.nvacskip, "/indata/nvacskip", from_file);
   if (from_file.nameExists("/indata/signgs")) {
     ReadH5Dataset(m_indata.signgs, "/indata/signgs", from_file);
+  }
+
+  // Legacy way of checking for dataset existence
+  if (H5Lexists(from_file.getId(), "/indata/biest_accuracy_digits", 0) == 1) {
+    ReadH5Dataset(m_indata.biest_accuracy_digits,
+                  "/indata/biest_accuracy_digits", from_file);
+  } else {
+    // fall back to default value
+    m_indata.biest_accuracy_digits = 8;
   }
 
   // special treatment for enums
@@ -1083,6 +1094,14 @@ absl::StatusOr<VmecINDATA> VmecINDATA::FromJson(
     }
   }
 
+  auto maybe_biest_accuracy_digits = JsonReadInt(j, "biest_accuracy_digits");
+  if (!maybe_biest_accuracy_digits.ok()) {
+    return maybe_biest_accuracy_digits.status();
+  }
+  if (maybe_biest_accuracy_digits->has_value()) {
+    vmec_indata.biest_accuracy_digits = maybe_biest_accuracy_digits->value();
+  }
+
   // -----------------------------------------------
 
   auto maybe_nstep = JsonReadInt(j, "nstep");
@@ -1500,6 +1519,7 @@ absl::StatusOr<std::string> VmecINDATA::ToJson() const {
   output["nvacskip"] = nvacskip;
   output["signgs"] = signgs;
   output["free_boundary_method"] = ToString(free_boundary_method);
+  output["biest_accuracy_digits"] = biest_accuracy_digits;
 
   // Tweaking Parameters
   output["nstep"] = nstep;
@@ -1830,16 +1850,13 @@ absl::Status IsConsistent(const VmecINDATA& vmec_indata,
           vmec_indata.nvacskip));
     }
 
-    // free_boundary_method
-    // For the current state of the code, we only accept NESTOR,
-    // but in the future [TODO(jons)] also all other (implemented) enum values
-    // are valid.
-    if (vmec_indata.free_boundary_method != FreeBoundaryMethod::NESTOR &&
-        vmec_indata.free_boundary_method != FreeBoundaryMethod::ONLY_COILS) {
-      return absl::InvalidArgumentError(
-          absl::StrFormat("input variable 'free_boundary_method' must be "
-                          "'nestor' or 'only_coils', but is %s\n",
-                          ToString(vmec_indata.free_boundary_method)));
+    // biest_accuracy_digits
+    if (vmec_indata.biest_accuracy_digits < 1 ||
+        vmec_indata.biest_accuracy_digits > 14) {
+      return absl::InvalidArgumentError(absl::StrFormat(
+          "input variable biest_accuracy_digits needs to be in [1, 14], "
+          "but is %d\n",
+          vmec_indata.biest_accuracy_digits));
     }
 
     // 'only_coils' takes the field from the coils alone, so the plasma must

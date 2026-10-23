@@ -936,6 +936,11 @@ class VmecModel {
 //     (PyInit_example)
 PYBIND11_MODULE(_vmecpp, m) {
   m.doc() = "pybind11 VMEC++ plugin";
+#ifdef VMECPP_DISABLE_BIEST
+  m.attr("biest_available") = false;
+#else
+  m.attr("biest_available") = true;
+#endif
 
   vmecpp::InitializeUserLogging();
 
@@ -1036,6 +1041,8 @@ PYBIND11_MODULE(_vmecpp, m) {
   pyindata.def_readwrite("nvacskip", &VmecINDATA::nvacskip)
       .def_readwrite("signgs", &VmecINDATA::signgs)
       .def_readwrite("free_boundary_method", &VmecINDATA::free_boundary_method)
+      .def_readwrite("biest_accuracy_digits",
+                     &VmecINDATA::biest_accuracy_digits)
 
       // tweaking parameters
       .def_readwrite("nstep", &VmecINDATA::nstep);
