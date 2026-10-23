@@ -1,0 +1,15 @@
+diff -ur a/include/biest/vacuum-field.hpp b/include/biest/vacuum-field.hpp
+--- a/include/biest/vacuum-field.hpp	2023-03-02 08:22:14.000000000 +0000
++++ b/include/biest/vacuum-field.hpp	2026-07-11 17:16:24.764752763 +0000
+@@ -90,0 +91,4 @@
++
++    // previous sigma solution, used to warm-start the iterative solve in
++    // ComputeBplasma (local modification relative to upstream BIEST)
++    mutable sctl::Vector<Real> sigma_prev_;
+diff -ur a/include/biest/vacuum-field.txx b/include/biest/vacuum-field.txx
+--- a/include/biest/vacuum-field.txx	2023-03-02 08:22:14.000000000 +0000
++++ b/include/biest/vacuum-field.txx	2026-07-11 17:16:24.790752717 +0000
+@@ -139,0 +140,1 @@
++      if (sigma_prev_.Dim() == Nt_*Np_) sigma = sigma_prev_; // warm start from the previous solution
+@@ -141,0 +143,1 @@
++      sigma_prev_ = sigma;
